@@ -5,7 +5,7 @@
   </a>
   <h3 align="center">matcha</h3>
   <p align="center">
-    A lightweight, cross-platform to-do list app.
+      A lightweight, cross-platform note-taking and to-do list app.
   </p>
 </div>
 
