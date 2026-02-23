@@ -561,7 +561,9 @@ function App() {
 	const [accountOpen, setAccountOpen] = useState(false);
 	const [settingsOpen, setSettingsOpen] = useState(false);
 	const [theme, setTheme] = useState<"dark" | "matcha" | "light">(
-		() => (localStorage.getItem("matcha_theme") as "dark" | "matcha" | "light") || "dark",
+		() =>
+			(localStorage.getItem("matcha_theme") as "dark" | "matcha" | "light") ||
+			"dark",
 	);
 	const [sortNotesBy, setSortNotesBy] = useState<SortNotesBy>(
 		() =>
@@ -632,7 +634,9 @@ function App() {
 	const [showTodoList, setShowTodoList] = useState(false);
 	const [searchQuery, setSearchQuery] = useState("");
 	const searchInputRef = useRef<HTMLInputElement>(null);
-	const [sharedNoteCreator, setSharedNoteCreator] = useState<string | null>(null);
+	const [sharedNoteCreator, setSharedNoteCreator] = useState<string | null>(
+		null,
+	);
 	const isResizing = useRef(false);
 	const startX = useRef(0);
 	const startWidth = useRef(0);
@@ -828,7 +832,11 @@ function App() {
 	}, [accountOpen, user, notes]);
 
 	useEffect(() => {
-		if (activeFolder !== "Shared List" || !selectedId || !activeSupabase.current) {
+		if (
+			activeFolder !== "Shared List" ||
+			!selectedId ||
+			!activeSupabase.current
+		) {
 			setSharedNoteCreator(null);
 			return;
 		}
@@ -1255,9 +1263,10 @@ function App() {
 		setNotes((prev) => {
 			const remaining = prev.filter((n) => n.id !== id);
 			if (selectedId === id) {
-				const inFolder = remaining.filter(
-					(n) =>
-						activeFolder === "Recently Deleted" ? n.deleted : n.list === activeFolder,
+				const inFolder = remaining.filter((n) =>
+					activeFolder === "Recently Deleted"
+						? n.deleted
+						: n.list === activeFolder,
 				);
 				setSelectedId(inFolder[0]?.id ?? null);
 				setSelectedNoteIds(inFolder[0] ? [inFolder[0].id] : []);
@@ -1639,14 +1648,14 @@ function App() {
 							</span>
 						</div>
 					</div>
-				<button
-					className="new-note-fab"
-					onClick={createNote}
-					title="New Note"
-					disabled={selectedNoteIsEmpty || isRecentlyDeleted}
-				>
-					<FontAwesomeIcon icon={faPenToSquare} />
-				</button>
+					<button
+						className="new-note-fab"
+						onClick={createNote}
+						title="New Note"
+						disabled={selectedNoteIsEmpty || isRecentlyDeleted}
+					>
+						<FontAwesomeIcon icon={faPenToSquare} />
+					</button>
 				</div>
 
 				<div className="sidebar-search-wrap">
@@ -1851,7 +1860,10 @@ function App() {
 									className={`folder-dropdown-item${activeFolder === "Recently Deleted" ? " active" : ""}`}
 									onClick={() => {
 										setActiveFolder("Recently Deleted");
-										localStorage.setItem("matcha_activeList", "Recently Deleted");
+										localStorage.setItem(
+											"matcha_activeList",
+											"Recently Deleted",
+										);
 										setFolderDropdownOpen(false);
 									}}
 								>
@@ -1901,10 +1913,7 @@ function App() {
 			{/* ── Main panel ── */}
 			<main className="main" onMouseDown={() => setSidebarFocused(false)}>
 				{showTodoList ? (
-					<TodoList
-						supabaseClient={activeSupabase.current}
-						userId={user?.id}
-					/>
+					<TodoList supabaseClient={activeSupabase.current} userId={user?.id} autoSortChecked={autoSortChecked} />
 				) : selectedNote ? (
 					<NoteEditor
 						key={selectedNote.id}
@@ -1916,9 +1925,7 @@ function App() {
 								: () => softDeleteNote(selectedNote.id)
 						}
 						onRestore={
-							isRecentlyDeleted
-								? () => restoreNote(selectedNote.id)
-								: undefined
+							isRecentlyDeleted ? () => restoreNote(selectedNote.id) : undefined
 						}
 						onContentChange={
 							isRecentlyDeleted
@@ -1929,10 +1936,16 @@ function App() {
 						}
 						newNoteStartWith={newNoteStartWith}
 						autoSortChecked={autoSortChecked}
-						autoFocus={isRecentlyDeleted ? false : shouldAutoFocusEditor.current}
+						autoFocus={
+							isRecentlyDeleted ? false : shouldAutoFocusEditor.current
+						}
 						supabaseClient={activeSupabase.current}
 						userId={user?.id}
-						creatorName={activeFolder === "Shared List" ? sharedNoteCreator ?? undefined : undefined}
+						creatorName={
+							activeFolder === "Shared List"
+								? (sharedNoteCreator ?? undefined)
+								: undefined
+						}
 						readOnly={isRecentlyDeleted}
 					/>
 				) : (
@@ -2624,7 +2637,11 @@ function App() {
 												</div>
 											</div>
 											<span className="settings-theme-card-label">
-												{t === "dark" ? "Dark" : t === "matcha" ? "Matcha" : "Light"}
+												{t === "dark"
+													? "Dark"
+													: t === "matcha"
+														? "Matcha"
+														: "Light"}
 											</span>
 											<div
 												className={`settings-theme-indicator${theme === t ? " settings-theme-indicator-active" : ""}`}
@@ -2860,7 +2877,9 @@ function App() {
 			)}
 			{toastMessage && (
 				<div className="toast-container">
-					<div className={`toast${toastIsError ? " toast-error" : ""}`}>{toastMessage}</div>
+					<div className={`toast${toastIsError ? " toast-error" : ""}`}>
+						{toastMessage}
+					</div>
 				</div>
 			)}
 		</div>

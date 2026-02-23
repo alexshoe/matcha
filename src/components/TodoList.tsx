@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, type DragEvent } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronDown, faChevronLeft, faChevronRight, faPlus, faXmark } from "@fortawesome/free-solid-svg-icons";
+import { faChevronDown, faChevronLeft, faChevronRight, faPlus, faXmark, faGripVertical } from "@fortawesome/free-solid-svg-icons";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 interface TodoGoal {
@@ -18,6 +18,7 @@ interface TodoTask {
 interface TodoListProps {
 	supabaseClient: SupabaseClient | null;
 	userId: string | undefined;
+	autoSortChecked?: boolean;
 }
 
 function genId(): string {
@@ -55,7 +56,7 @@ function parseJson<T>(raw: string | null | undefined, fallback: T): T {
 	}
 }
 
-export function TodoList({ supabaseClient, userId }: TodoListProps) {
+export function TodoList({ supabaseClient, userId, autoSortChecked = true }: TodoListProps) {
 	const [goals, setGoals] = useState<TodoGoal[]>(() =>
 		parseJson(localStorage.getItem("matcha_todo_goals"), []),
 	);
@@ -143,6 +144,90 @@ export function TodoList({ supabaseClient, userId }: TodoListProps) {
 		return () => ro.disconnect();
 	}, []);
 
+	const dragItem = useRef<{ day: string; id: string; index: number } | null>(null);
+	const dropTarget = useRef<{ day: string; index: number } | null>(null);
+	const activeIndicatorEl = useRef<HTMLElement | null>(null);
+
+	function clearIndicator() {
+		if (activeIndicatorEl.current) {
+			activeIndicatorEl.current.classList.remove("todo-drop-before", "todo-drop-after");
+			activeIndicatorEl.current = null;
+		}
+		dropTarget.current = null;
+	}
+
+	function setIndicator(el: HTMLElement, position: "before" | "after", day: string, index: number) {
+		if (activeIndicatorEl.current === el && el.classList.contains(`todo-drop-${position}`)) return;
+		clearIndicator();
+		el.classList.add(`todo-drop-${position}`);
+		activeIndicatorEl.current = el;
+		dropTarget.current = { day, index };
+	}
+
+	function handleDragStart(e: DragEvent, day: string, id: string, index: number) {
+		dragItem.current = { day, id, index };
+		e.dataTransfer.effectAllowed = "move";
+		e.dataTransfer.setData("text/plain", id);
+		requestAnimationFrame(() => {
+			(e.target as HTMLElement).closest?.(".todo-check-item")?.classList.add("todo-dragging");
+		});
+	}
+
+	function handleDragEnd(e: DragEvent) {
+		(e.currentTarget as HTMLElement).classList.remove("todo-dragging");
+		clearIndicator();
+		dragItem.current = null;
+	}
+
+	function handleItemDragOver(e: DragEvent, day: string, index: number) {
+		e.preventDefault();
+		e.stopPropagation();
+		e.dataTransfer.dropEffect = "move";
+		const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+		const midY = rect.top + rect.height / 2;
+		if (e.clientY < midY) {
+			setIndicator(e.currentTarget as HTMLElement, "before", day, index);
+		} else {
+			setIndicator(e.currentTarget as HTMLElement, "after", day, index + 1);
+		}
+	}
+
+	function handleContainerDragOver(e: DragEvent, day: string, taskCount: number) {
+		e.preventDefault();
+		e.dataTransfer.dropEffect = "move";
+		if (taskCount === 0) {
+			dropTarget.current = { day, index: 0 };
+		}
+	}
+
+	function handleDrop(e: DragEvent) {
+		e.preventDefault();
+		e.stopPropagation();
+		const source = dragItem.current;
+		const target = dropTarget.current;
+		clearIndicator();
+		if (!source || !target) { dragItem.current = null; return; }
+
+		setTasks((prev) => {
+			const next = { ...prev };
+			const sourceList = [...(next[source.day] || [])];
+			const taskIdx = sourceList.findIndex((t) => t.id === source.id);
+			if (taskIdx === -1) return prev;
+
+			const [moved] = sourceList.splice(taskIdx, 1);
+			next[source.day] = sourceList;
+
+			const destList = source.day === target.day ? [...next[target.day]] : [...(next[target.day] || [])];
+			const adjustedIndex = source.day === target.day && taskIdx < target.index ? target.index - 1 : target.index;
+			destList.splice(Math.min(adjustedIndex, destList.length), 0, moved);
+			next[target.day] = destList;
+
+			return next;
+		});
+
+		dragItem.current = null;
+	}
+
 	const today = new Date();
 	today.setHours(0, 0, 0, 0);
 
@@ -163,9 +248,11 @@ export function TodoList({ supabaseClient, userId }: TodoListProps) {
 	}
 
 	function toggleGoal(id: string) {
-		setGoals((prev) =>
-			prev.map((g) => (g.id === id ? { ...g, checked: !g.checked } : g)),
-		);
+		setGoals((prev) => {
+			const toggled = prev.map((g) => (g.id === id ? { ...g, checked: !g.checked } : g));
+			if (!autoSortChecked) return toggled;
+			return [...toggled].sort((a, b) => Number(a.checked) - Number(b.checked));
+		});
 	}
 
 	function removeGoal(id: string) {
@@ -183,12 +270,17 @@ export function TodoList({ supabaseClient, userId }: TodoListProps) {
 	}
 
 	function toggleTask(day: string, id: string) {
-		setTasks((prev) => ({
-			...prev,
-			[day]: (prev[day] || []).map((t) =>
+		setTasks((prev) => {
+			const toggled = (prev[day] || []).map((t) =>
 				t.id === id ? { ...t, checked: !t.checked } : t,
-			),
-		}));
+			);
+			return {
+				...prev,
+				[day]: autoSortChecked
+					? [...toggled].sort((a, b) => Number(a.checked) - Number(b.checked))
+					: toggled,
+			};
+		});
 	}
 
 	function removeTask(day: string, id: string) {
@@ -397,12 +489,25 @@ export function TodoList({ supabaseClient, userId }: TodoListProps) {
 								</span>
 							</div>
 						)}
-						<div className="todo-day-tasks">
-							{dayTasks.map((task) => (
+					<div
+						className="todo-day-tasks"
+						onDragOver={(e) => handleContainerDragOver(e, key, dayTasks.length)}
+						onDragLeave={() => { if (dropTarget.current?.day === key) clearIndicator(); }}
+						onDrop={handleDrop}
+					>
+						{dayTasks.map((task, taskIdx) => (
 								<div
 									key={task.id}
 									className={`todo-check-item${task.checked ? " checked" : ""}`}
+									draggable
+									onDragStart={(e) => handleDragStart(e, key, task.id, taskIdx)}
+									onDragEnd={handleDragEnd}
+									onDragOver={(e) => handleItemDragOver(e, key, taskIdx)}
+									onDrop={handleDrop}
 								>
+									<span className="todo-drag-handle" aria-hidden="true">
+										<FontAwesomeIcon icon={faGripVertical} />
+									</span>
 									<label className="todo-check-toggle">
 										<input
 											type="checkbox"
@@ -445,8 +550,8 @@ export function TodoList({ supabaseClient, userId }: TodoListProps) {
 										<FontAwesomeIcon icon={faXmark} />
 									</button>
 								</div>
-							))}
-						</div>
+						))}
+					</div>
 						<div className="todo-add-row">
 							<input
 								className="todo-add-input"

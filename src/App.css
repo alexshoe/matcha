@@ -17,7 +17,7 @@
   --scrollbar: #484f42;
   --text: #ffffff;
   --text-dim: #7a8070;
-  --accent: #769569;
+  --accent: #7aab66;
   --accent-subtle: rgba(141, 184, 122, 0.15);
   --item-hover: rgba(255, 255, 255, 0.05);
   --on-accent: #ffffff;
@@ -3167,20 +3167,20 @@ body,
 
 /* Dark theme preview */
 .stp-dark {
-  background: #1a1e19;
+  background: #2a2e2a;
 }
 
 .stp-dark .stp-sidebar-area {
-  background: #1f231e;
+  background: #171717;
   border-right: 1px solid #2f3529;
 }
 
 .stp-dark .stp-item {
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .stp-dark .stp-item-active {
-  background: rgba(141, 184, 122, 0.3);
+  background: #79ab6680;
 }
 
 .stp-dark .stp-title-line {
@@ -3193,12 +3193,12 @@ body,
 
 /* Light theme preview */
 .stp-light {
-  background: #fafaf8;
+  background: #ebebf0;
 }
 
 .stp-light .stp-sidebar-area {
-  background: #f0f0ee;
-  border-right: 1px solid #e0e0dc;
+  background: #fafafa;
+  border-right: 1px solid #d5d3cd;
 }
 
 .stp-light .stp-item {
@@ -3206,7 +3206,7 @@ body,
 }
 
 .stp-light .stp-item-active {
-  background: rgba(141, 184, 122, 0.28);
+  background: #587c4c80;
 }
 
 .stp-light .stp-title-line {
@@ -3219,7 +3219,7 @@ body,
 
 /* Matcha theme preview */
 .stp-matcha {
-  background: #e5e8d4;
+  background: #eceee0;
 }
 
 .stp-matcha .stp-sidebar-area {
@@ -3232,7 +3232,7 @@ body,
 }
 
 .stp-matcha .stp-item-active {
-  background: rgba(95, 138, 74, 0.35);
+  background: #587c4580;
 }
 
 .stp-matcha .stp-title-line {
@@ -3936,6 +3936,65 @@ body,
   opacity: 1 !important;
   background: var(--danger-subtle);
   color: var(--danger);
+}
+
+/* ── Drag handle ── */
+
+.todo-drag-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  flex-shrink: 0;
+  color: var(--text-dim);
+  font-size: 10px;
+  cursor: grab;
+  opacity: 0;
+  transition: opacity 0.12s;
+  margin-left: -4px;
+}
+
+.todo-check-item:hover .todo-drag-handle {
+  opacity: 0.45;
+}
+
+.todo-drag-handle:hover {
+  opacity: 0.8 !important;
+}
+
+.todo-drag-handle:active {
+  cursor: grabbing;
+}
+
+/* ── Dragging state ── */
+
+.todo-check-item[draggable="true"] {
+  position: relative;
+}
+
+.todo-check-item.todo-dragging {
+  opacity: 0.25;
+}
+
+.todo-check-item.todo-drop-before::before,
+.todo-check-item.todo-drop-after::after {
+  content: "";
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  height: 2px;
+  background: var(--accent);
+  border-radius: 1px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.todo-check-item.todo-drop-before::before {
+  top: -2px;
+}
+
+.todo-check-item.todo-drop-after::after {
+  bottom: -2px;
 }
 
 /* ── Add row (input + button) ── */

@@ -164,17 +164,64 @@ const TabIndent = Extension.create({
         if (editor.can().sinkListItem("listItem")) {
           return editor.commands.sinkListItem("listItem");
         }
+        const { state } = editor;
+        const { $from } = state.selection;
+        let itemDepth = -1;
+        let itemTypeName = "";
+        for (let d = $from.depth; d > 0; d--) {
+          const name = $from.node(d).type.name;
+          if (name === "taskItem" || name === "listItem") {
+            itemDepth = d;
+            itemTypeName = name;
+            break;
+          }
+        }
+        if (itemDepth > 0) {
+          const itemPos = $from.before(itemDepth);
+          const schema = state.schema;
+          const emptyPara = schema.nodes.paragraph.create();
+          const attrs = itemTypeName === "taskItem" ? { checked: false } : null;
+          const emptyItem = schema.nodes[itemTypeName].create(attrs, emptyPara);
+          editor.view.dispatch(state.tr.insert(itemPos, emptyItem));
+          editor.commands.sinkListItem(itemTypeName as "taskItem" | "listItem");
+          return true;
+        }
         return editor.commands.insertContent("\t");
       },
       "Shift-Tab": ({ editor }) => {
         if (editor.isActive("table")) {
           return editor.commands.goToPreviousCell();
         }
+        let lifted = false;
         if (editor.can().liftListItem("taskItem")) {
-          return editor.commands.liftListItem("taskItem");
+          lifted = editor.commands.liftListItem("taskItem");
+        } else if (editor.can().liftListItem("listItem")) {
+          lifted = editor.commands.liftListItem("listItem");
         }
-        if (editor.can().liftListItem("listItem")) {
-          return editor.commands.liftListItem("listItem");
+        if (lifted) {
+          const { state } = editor;
+          const { $from } = state.selection;
+          for (let d = $from.depth; d > 0; d--) {
+            const name = $from.node(d).type.name;
+            if (name === "taskItem" || name === "listItem") {
+              const idx = $from.index(d - 1);
+              if (idx > 0) {
+                const prevItem = $from.node(d - 1).child(idx - 1);
+                if (
+                  prevItem.childCount === 1 &&
+                  prevItem.firstChild?.type.name === "paragraph" &&
+                  prevItem.firstChild.textContent === ""
+                ) {
+                  const prevPos = $from.before(d) - prevItem.nodeSize;
+                  editor.view.dispatch(
+                    state.tr.delete(prevPos, prevPos + prevItem.nodeSize),
+                  );
+                }
+              }
+              break;
+            }
+          }
+          return true;
         }
         return true;
       },
