@@ -21,22 +21,32 @@ export const supabase =
     ? createClient(supabaseUrl, supabaseAnonKey)
     : null;
 
+const clientCache = new Map<boolean, SupabaseClient>();
+
 /**
- * Create a Supabase client configured for the given remember-me preference.
+ * Create (or return a cached) Supabase client for the given remember-me preference.
  *   rememberMe = true  → session stored in localStorage (survives app restarts)
  *   rememberMe = false → in-memory only (session cleared when app closes)
  */
 export function makeSupabaseClient(rememberMe: boolean): SupabaseClient | null {
   if (!supabaseUrl || !supabaseAnonKey) return null;
-  if (rememberMe) return createClient(supabaseUrl, supabaseAnonKey);
-  return createClient(supabaseUrl, supabaseAnonKey, {
-    auth: {
-      persistSession: false,
-      storage: {
-        getItem: (_key: string) => null,
-        setItem: (_key: string, _value: string) => {},
-        removeItem: (_key: string) => {},
-      },
-    },
-  });
+
+  const cached = clientCache.get(rememberMe);
+  if (cached) return cached;
+
+  const client = rememberMe
+    ? createClient(supabaseUrl, supabaseAnonKey)
+    : createClient(supabaseUrl, supabaseAnonKey, {
+        auth: {
+          persistSession: false,
+          storage: {
+            getItem: (_key: string) => null,
+            setItem: (_key: string, _value: string) => {},
+            removeItem: (_key: string) => {},
+          },
+        },
+      });
+
+  clientCache.set(rememberMe, client);
+  return client;
 }

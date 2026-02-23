@@ -1,0 +1,136 @@
+/* ─── Table ──────────────────────────────────────────────── */
+
+.ProseMirror .tableWrapper {
+  overflow-x: auto;
+  margin: 10px 0;
+}
+
+.ProseMirror table {
+  border-collapse: collapse;
+  width: 100%;
+  table-layout: fixed;
+}
+
+.ProseMirror th,
+.ProseMirror td {
+  border: 1px solid var(--table-border);
+  padding: 8px 10px;
+  font-size: 13px;
+  line-height: 1.5;
+  vertical-align: top;
+  min-width: 80px;
+  position: relative;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.ProseMirror th {
+  background: var(--surface);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.ProseMirror td {
+  font-weight: 400;
+}
+
+.ProseMirror th > p,
+.ProseMirror td > p {
+  margin-bottom: 0;
+}
+
+/* Cell selection */
+.ProseMirror .selectedCell::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--accent-subtle);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Column resize handle */
+.ProseMirror .column-resize-handle {
+  position: absolute;
+  right: -2px;
+  top: 0;
+  bottom: -2px;
+  width: 4px;
+  background: var(--accent);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.ProseMirror.resize-cursor {
+  cursor: col-resize;
+}
+
+/* ─── Table floating toolbar ────────────────────────────── */
+
+.table-toolbar {
+  position: absolute;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 6px;
+  background: rgba(28, 28, 30, 0.96);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.5),
+    0 1px 4px rgba(0, 0, 0, 0.3);
+  width: fit-content;
+  flex-wrap: wrap;
+  pointer-events: auto;
+}
+
+.table-toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.table-toolbar-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 8px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 11px;
+  font-family: inherit;
+  white-space: nowrap;
+  transition:
+    background 0.1s,
+    color 0.1s;
+}
+
+.table-toolbar-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text);
+}
+
+.table-toolbar-btn-danger:hover {
+  background: var(--danger-subtle);
+  color: var(--danger);
+}
+
+.table-toolbar-label {
+  font-size: 11px;
+  line-height: 1;
+}
+
+.table-toolbar-divider {
+  width: 1px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 0 2px;
+  flex-shrink: 0;
+}
+

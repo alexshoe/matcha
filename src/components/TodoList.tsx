@@ -17,7 +17,7 @@ interface TodoTask {
 
 interface TodoListProps {
 	supabaseClient: SupabaseClient | null;
-	userId: string | undefined;
+	userId: string;
 	autoSortChecked?: boolean;
 }
 
@@ -243,7 +243,13 @@ export function TodoList({ supabaseClient, userId, autoSortChecked = true }: Tod
 	function addGoal() {
 		const text = goalInput.trim();
 		if (!text) return;
-		setGoals((prev) => [...prev, { id: genId(), text, checked: false }]);
+		const newGoal = { id: genId(), text, checked: false };
+		setGoals((prev) => {
+			if (!autoSortChecked) return [...prev, newGoal];
+			const firstChecked = prev.findIndex((g) => g.checked);
+			if (firstChecked === -1) return [...prev, newGoal];
+			return [...prev.slice(0, firstChecked), newGoal, ...prev.slice(firstChecked)];
+		});
 		setGoalInput("");
 	}
 
@@ -262,10 +268,18 @@ export function TodoList({ supabaseClient, userId, autoSortChecked = true }: Tod
 	function addTask(day: string) {
 		const text = (taskInputs[day] || "").trim();
 		if (!text) return;
-		setTasks((prev) => ({
-			...prev,
-			[day]: [...(prev[day] || []), { id: genId(), text, checked: false }],
-		}));
+		const newTask = { id: genId(), text, checked: false };
+		setTasks((prev) => {
+			const list = prev[day] || [];
+			if (!autoSortChecked) return { ...prev, [day]: [...list, newTask] };
+			const firstChecked = list.findIndex((t) => t.checked);
+			return {
+				...prev,
+				[day]: firstChecked === -1
+					? [...list, newTask]
+					: [...list.slice(0, firstChecked), newTask, ...list.slice(firstChecked)],
+			};
+		});
 		setTaskInputs((prev) => ({ ...prev, [day]: "" }));
 	}
 

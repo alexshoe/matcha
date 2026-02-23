@@ -1,0 +1,119 @@
+/* ─── Pinned section divider & label ─────────────────────── */
+
+.note-list-section-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  padding: 6px 10px 6px;
+  flex-shrink: 0;
+  cursor: pointer;
+  user-select: none;
+  border-radius: 4px;
+}
+
+.note-list-section-label:hover {
+  color: var(--text);
+}
+
+.note-list-section-label svg {
+  font-size: 10px;
+  opacity: 0.7;
+}
+
+.section-chevron {
+  transition: transform 0.22s ease;
+}
+
+.section-chevron.collapsed {
+  transform: rotate(-90deg);
+}
+
+.pinned-accordion {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.25s ease;
+}
+
+.pinned-accordion.expanded {
+  grid-template-rows: 1fr;
+}
+
+.pinned-accordion-inner {
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.pinned-accordion.expanded .pinned-accordion-inner {
+  opacity: 1;
+}
+
+.note-list-divider {
+  height: 1.5px;
+  background: #3b4431;
+  margin: 4px -6px;
+  flex-shrink: 0;
+}
+
+/* ─── Context Menu ───────────────────────────────────────── */
+
+.context-menu {
+  position: fixed;
+  z-index: 9999;
+  min-width: 160px;
+  padding: 4px;
+  list-style: none;
+  background: rgba(30, 34, 29, 0.96);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.4),
+    0 10px 24px -4px rgba(0, 0, 0, 0.5);
+  user-select: none;
+}
+
+.context-menu-item {
+  display: flex;
+  align-items: center;
+  padding: 7px 11px;
+  border-radius: 7px;
+  font-size: 13px;
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.context-menu-item:hover {
+  background: var(--surface);
+}
+
+.context-menu-item-disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.context-menu-item-disabled:hover {
+  background: transparent;
+}
+
+.context-menu-item-danger {
+  color: var(--danger);
+}
+
+.context-menu-item-danger:hover {
+  background: var(--danger-subtle);
+}
+
+.context-menu-separator {
+  height: 1px;
+  background: var(--border);
+  margin: 3px 4px;
+}
+

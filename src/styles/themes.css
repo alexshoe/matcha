@@ -1,0 +1,465 @@
+/* ═══════════════════════════════════════════════════════════
+   Matcha theme  —  tea-steeped reader view
+   ═══════════════════════════════════════════════════════════ */
+
+:root[data-theme="matcha"] {
+  --bg: #e5e8d4;
+  --sidebar-bg: #dbe0c6;
+  --main-bg: #eceee0;
+  --surface: #e8ebd6;
+  --border: #c3c8ad;
+  --scrollbar: #adb395;
+  --text: #363d2c;
+  --text-dim: #7a836a;
+  --accent: #5f8a4a;
+  --accent-subtle: rgba(95, 138, 74, 0.2);
+  --item-hover: rgba(60, 80, 40, 0.06);
+  --on-accent: #ffffff;
+  --danger: #c44040;
+  --danger-subtle: rgba(196, 64, 64, 0.08);
+  --table-border: #c3c8ad;
+}
+
+/* ── Matcha: popovers & dropdowns ─────────── */
+
+[data-theme="matcha"] .folder-dropdown,
+[data-theme="matcha"] .style-dropdown,
+[data-theme="matcha"] .attach-dropdown,
+[data-theme="matcha"] .context-menu,
+[data-theme="matcha"] .table-toolbar {
+  background: rgba(236, 238, 224, 0.96);
+  border-color: rgba(60, 80, 40, 0.12);
+  box-shadow:
+    0 8px 32px rgba(50, 60, 30, 0.1),
+    0 2px 8px rgba(50, 60, 30, 0.06);
+}
+
+[data-theme="matcha"] .folder-dropdown-item:hover,
+[data-theme="matcha"] .style-inline-btn:hover,
+[data-theme="matcha"] .style-option:hover,
+[data-theme="matcha"] .attach-option:hover,
+[data-theme="matcha"] .table-toolbar-btn:hover {
+  background: rgba(60, 80, 40, 0.08);
+}
+
+[data-theme="matcha"] .table-toolbar-divider {
+  background: rgba(60, 80, 40, 0.1);
+}
+
+[data-theme="matcha"] .style-dropdown-divider {
+  background: rgba(60, 80, 40, 0.1);
+}
+
+/* ── Matcha: file attachment ─────────────── */
+
+[data-theme="matcha"] .file-attachment-block {
+  background: rgba(60, 80, 40, 0.05);
+  border-color: rgba(60, 80, 40, 0.12);
+}
+
+[data-theme="matcha"] .file-attachment-block:hover {
+  background: rgba(60, 80, 40, 0.08);
+  border-color: rgba(60, 80, 40, 0.18);
+}
+
+[data-theme="matcha"] .file-attachment-download:hover {
+  background: rgba(60, 80, 40, 0.08);
+}
+
+/* ── Matcha: tooltips ──────────────────────── */
+
+[data-theme="matcha"] .toolbar-btn[data-tooltip]::before {
+  border-bottom-color: rgba(236, 238, 224, 0.97);
+}
+
+[data-theme="matcha"] .toolbar-btn[data-tooltip]::after {
+  background: rgba(236, 238, 224, 0.97);
+  border-color: rgba(60, 80, 40, 0.12);
+  box-shadow:
+    0 4px 6px -1px rgba(50, 60, 30, 0.08),
+    0 10px 24px -4px rgba(50, 60, 30, 0.12);
+}
+
+/* ── Matcha: modal cards ───────────────────── */
+
+[data-theme="matcha"] .about-card-wrap .about-card {
+  background: rgba(236, 238, 224, 0.97);
+  border-color: rgba(60, 80, 40, 0.12);
+  box-shadow:
+    0 24px 60px rgba(50, 60, 30, 0.12),
+    0 4px 16px rgba(50, 60, 30, 0.08);
+}
+
+[data-theme="matcha"] .bug-report-panel,
+[data-theme="matcha"] .view-bugs-panel,
+[data-theme="matcha"] .account-card-wrap .account-card,
+[data-theme="matcha"] .settings-card,
+[data-theme="matcha"] .manage-lists-card,
+[data-theme="matcha"] .avatar-picker-panel {
+  border-color: rgba(60, 80, 40, 0.12);
+  box-shadow:
+    0 24px 60px rgba(50, 60, 30, 0.12),
+    0 4px 16px rgba(50, 60, 30, 0.08);
+}
+
+/* ── Matcha: dividers & misc ───────────────── */
+
+[data-theme="matcha"] .note-list-divider {
+  background: var(--border);
+}
+
+[data-theme="matcha"] .avatar-picker-option:hover {
+  border-color: rgba(60, 80, 40, 0.15);
+}
+
+/* ── Matcha: focus rings ───────────────────── */
+
+[data-theme="matcha"] .sidebar-avatar:hover {
+  box-shadow: 0 0 0 3px rgba(95, 138, 74, 0.28);
+}
+
+[data-theme="matcha"] .sidebar-search-wrap:focus-within {
+  box-shadow: 0 0 0 3px rgba(95, 138, 74, 0.22);
+}
+
+[data-theme="matcha"] .toolbar-search:focus {
+  box-shadow: 0 0 0 3px rgba(95, 138, 74, 0.22);
+}
+
+[data-theme="matcha"] .auth-input:focus {
+  box-shadow: 0 0 0 3px rgba(95, 138, 74, 0.22);
+}
+
+[data-theme="matcha"] .bug-report-input:focus,
+[data-theme="matcha"] .bug-report-textarea:focus {
+  box-shadow: 0 0 0 3px rgba(95, 138, 74, 0.22);
+}
+
+[data-theme="matcha"] .account-avatar-large:hover {
+  box-shadow: 0 0 0 4px rgba(95, 138, 74, 0.24);
+}
+
+[data-theme="matcha"] .avatar-picker-option.selected {
+  box-shadow: 0 0 0 3px rgba(95, 138, 74, 0.28);
+}
+
+[data-theme="matcha"] .todo-add-input:focus {
+  box-shadow: 0 0 0 3px rgba(95, 138, 74, 0.22);
+}
+
+[data-theme="matcha"] .todo-day-card.today {
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+/* ── Matcha: caps-lock indicator ───────────── */
+
+[data-theme="matcha"] .account-password-input::-webkit-caps-lock-indicator {
+  filter: opacity(0.45);
+}
+
+/* ── Matcha: auth animations ───────────────── */
+
+[data-theme="matcha"] .auth-check-circle {
+  box-shadow: 0 0 0 0 rgba(95, 138, 74, 0.4);
+}
+
+/* ── Matcha: selected note text on accent bg ─ */
+
+[data-theme="matcha"]
+  .note-list.sidebar-focused
+  .note-item.active
+  .note-item-date,
+[data-theme="matcha"]
+  .note-list.sidebar-focused
+  .note-item.active
+  .note-item-preview,
+[data-theme="matcha"]
+  .note-list.sidebar-focused
+  .note-item.selected
+  .note-item-date,
+[data-theme="matcha"]
+  .note-list.sidebar-focused
+  .note-item.selected
+  .note-item-preview {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+/* ── Matcha: toasts ──────────────────────── */
+
+[data-theme="matcha"] .toast {
+  background: rgba(236, 238, 224, 0.94);
+  color: #363d2c;
+  box-shadow: 0 4px 24px rgba(50, 60, 30, 0.15);
+}
+
+[data-theme="matcha"] .toast-error {
+  background: rgba(196, 64, 64, 0.92);
+  color: #fff;
+}
+
+/* ── Matcha: modal overlays ──────────────── */
+
+[data-theme="matcha"] .about-overlay,
+[data-theme="matcha"] .account-overlay,
+[data-theme="matcha"] .settings-overlay,
+[data-theme="matcha"] .manage-lists-overlay {
+  background: rgba(54, 61, 44, 0.18);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Light theme
+   ═══════════════════════════════════════════════════════════ */
+
+:root[data-theme="light"] {
+  --bg: #f7f6f3;
+  --sidebar-bg: #fafafa;
+  --main-bg: #ebebf0;
+  --surface: #fafafa;
+  --border: #d5d3cd;
+  --scrollbar: #c0beb7;
+  --text: #2a2e25;
+  --text-dim: #707081;
+  --accent: #69915b;
+  --accent-subtle: rgba(95, 154, 74, 0.338);
+  --item-hover: rgba(0, 0, 0, 0.04);
+  --on-accent: #ffffff;
+  --danger: #d14040;
+  --danger-subtle: rgba(209, 64, 64, 0.08);
+  --table-border: #d5d3cd;
+}
+
+/* ── Light: popovers & dropdowns ─────────── */
+
+[data-theme="light"] .folder-dropdown,
+[data-theme="light"] .style-dropdown,
+[data-theme="light"] .attach-dropdown,
+[data-theme="light"] .context-menu,
+[data-theme="light"] .table-toolbar {
+  background: rgba(255, 255, 255, 0.94);
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.08),
+    0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .folder-dropdown-item:hover,
+[data-theme="light"] .style-inline-btn:hover,
+[data-theme="light"] .style-option:hover,
+[data-theme="light"] .attach-option:hover,
+[data-theme="light"] .table-toolbar-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="light"] .table-toolbar-divider {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .style-dropdown-divider {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+/* ── Light: file attachment ─────────────── */
+
+[data-theme="light"] .file-attachment-block {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] .file-attachment-block:hover {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="light"] .file-attachment-download:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+/* ── Light: tooltips ──────────────────────── */
+
+[data-theme="light"] .toolbar-btn[data-tooltip]::before {
+  border-bottom-color: rgba(255, 255, 255, 0.97);
+}
+
+[data-theme="light"] .toolbar-btn[data-tooltip]::after {
+  background: rgba(255, 255, 255, 0.97);
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.06),
+    0 10px 24px -4px rgba(0, 0, 0, 0.1);
+}
+
+/* ── Light: modal cards ───────────────────── */
+
+[data-theme="light"] .about-card-wrap .about-card {
+  background: rgba(255, 255, 255, 0.97);
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.1),
+    0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .bug-report-panel,
+[data-theme="light"] .view-bugs-panel,
+[data-theme="light"] .account-card-wrap .account-card,
+[data-theme="light"] .settings-card,
+[data-theme="light"] .manage-lists-card,
+[data-theme="light"] .avatar-picker-panel {
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.1),
+    0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+/* ── Light: dividers & misc ───────────────── */
+
+[data-theme="light"] .note-list-divider {
+  background: var(--border);
+}
+
+[data-theme="light"] .avatar-picker-option:hover {
+  border-color: rgba(0, 0, 0, 0.12);
+}
+
+/* ── Light: focus rings ───────────────────── */
+
+[data-theme="light"] .sidebar-avatar:hover {
+  box-shadow: 0 0 0 3px rgba(95, 154, 74, 0.25);
+}
+
+[data-theme="light"] .sidebar-search-wrap:focus-within {
+  box-shadow: 0 0 0 3px rgba(95, 154, 74, 0.18);
+}
+
+[data-theme="light"] .toolbar-search:focus {
+  box-shadow: 0 0 0 3px rgba(95, 154, 74, 0.18);
+}
+
+[data-theme="light"] .auth-input:focus {
+  box-shadow: 0 0 0 3px rgba(95, 154, 74, 0.18);
+}
+
+[data-theme="light"] .bug-report-input:focus,
+[data-theme="light"] .bug-report-textarea:focus {
+  box-shadow: 0 0 0 3px rgba(95, 154, 74, 0.18);
+}
+
+[data-theme="light"] .account-avatar-large:hover {
+  box-shadow: 0 0 0 4px rgba(95, 154, 74, 0.2);
+}
+
+[data-theme="light"] .avatar-picker-option.selected {
+  box-shadow: 0 0 0 3px rgba(95, 154, 74, 0.25);
+}
+
+[data-theme="light"] .todo-add-input:focus {
+  box-shadow: 0 0 0 3px rgba(95, 154, 74, 0.18);
+}
+
+[data-theme="light"] .todo-day-card.today {
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+/* ── Light: caps-lock indicator ───────────── */
+
+[data-theme="light"] .account-password-input::-webkit-caps-lock-indicator {
+  filter: opacity(0.45);
+}
+
+/* ── Light: auth animations ───────────────── */
+
+[data-theme="light"] .auth-check-circle {
+  box-shadow: 0 0 0 0 rgba(95, 154, 74, 0.4);
+}
+
+/* ── Light: selected note text on accent bg ─ */
+
+[data-theme="light"]
+  .note-list.sidebar-focused
+  .note-item.active
+  .note-item-date,
+[data-theme="light"]
+  .note-list.sidebar-focused
+  .note-item.active
+  .note-item-preview,
+[data-theme="light"]
+  .note-list.sidebar-focused
+  .note-item.selected
+  .note-item-date,
+[data-theme="light"]
+  .note-list.sidebar-focused
+  .note-item.selected
+  .note-item-preview {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+/* ── Toast ── */
+
+.toast-container {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10000;
+  pointer-events: none;
+}
+
+.toast {
+  background: rgba(0, 0, 0, 0.82);
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
+  animation:
+    toast-in 0.32s ease-out,
+    toast-out 0.35s 3.1s ease-in forwards;
+  white-space: nowrap;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes toast-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(8px) scale(0.97);
+  }
+}
+
+.toast-error {
+  background: rgba(180, 40, 40, 0.88);
+}
+
+[data-theme="light"] .toast {
+  background: rgba(255, 255, 255, 0.92);
+  color: #1a1a1a;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+}
+
+[data-theme="light"] .toast-error {
+  background: rgba(200, 50, 50, 0.92);
+  color: #fff;
+}
+
+/* ── Light: modal overlays get subtle scrim ── */
+
+[data-theme="light"] .about-overlay,
+[data-theme="light"] .account-overlay,
+[data-theme="light"] .settings-overlay,
+[data-theme="light"] .manage-lists-overlay {
+  background: rgba(0, 0, 0, 0.15);
+}

@@ -1,0 +1,549 @@
+/* ─── Sidebar To-do List button ──────────────────────────── */
+
+.sidebar-todo-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: calc(100% - 12px);
+  margin: 0 6px 2px;
+  padding: 8px 10px;
+  background: transparent;
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--accent);
+  transition: background 0.1s;
+  flex-shrink: 0;
+}
+
+.sidebar-todo-btn:hover {
+  background: var(--item-hover);
+}
+
+.sidebar-todo-btn.active {
+  background: var(--accent-subtle);
+}
+
+.sidebar-todo-btn-icon {
+  font-size: 14px;
+  color: var(--accent);
+}
+
+.sidebar-todo-btn.active .sidebar-todo-btn-icon {
+  color: var(--accent);
+}
+
+/* ─── Todo List View ─────────────────────────────────────── */
+
+.todo-view {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 32px 40px 40px;
+  overflow: hidden;
+  gap: 24px;
+}
+
+
+.todo-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.5px;
+  flex-shrink: 0;
+}
+
+/* ── Long-term Goals section ─────────── */
+
+.todo-goals-section {
+  background: var(--sidebar-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.todo-goals-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: background 0.1s;
+}
+
+.todo-goals-header:hover {
+  background: var(--item-hover);
+}
+
+.todo-goals-label {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.todo-goals-chevron {
+  font-size: 12px;
+  color: var(--text-dim);
+  transition: transform 0.22s ease;
+}
+
+.todo-goals-chevron.collapsed {
+  transform: rotate(-90deg);
+}
+
+.todo-goals-body {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.25s ease;
+}
+
+.todo-goals-body.expanded {
+  padding-top: 5px;
+  grid-template-rows: 1fr;
+}
+
+.todo-goals-inner {
+  overflow: hidden;
+  padding: 0 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.todo-goals-body.expanded .todo-goals-inner {
+  max-height: min(40vh, 320px);
+  overflow-y: auto;
+}
+
+.todo-goals-body.expanded .todo-goals-inner::-webkit-scrollbar {
+  width: 4px;
+}
+.todo-goals-body.expanded .todo-goals-inner::-webkit-scrollbar-track {
+  background: transparent;
+}
+.todo-goals-body.expanded .todo-goals-inner::-webkit-scrollbar-thumb {
+  background: var(--scrollbar);
+  border-radius: 4px;
+}
+
+/* ── Checkbox items (shared goals + tasks) ── */
+
+.todo-check-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 2px 0;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.todo-check-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  flex: 1;
+  min-width: 0;
+  padding: 2px 0;
+}
+
+.todo-check-toggle {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.todo-check-item input[type="checkbox"] {
+  display: none;
+}
+
+.todo-check-circle {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--scrollbar);
+  flex-shrink: 0;
+  position: relative;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
+}
+
+.todo-check-label:hover .todo-check-circle {
+  border-color: var(--accent);
+}
+
+.todo-check-item.checked .todo-check-circle {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.todo-check-item.checked .todo-check-circle::after {
+  content: "";
+  position: absolute;
+  top: 4px;
+  left: 3px;
+  width: 9px;
+  height: 5px;
+  border: 2px solid var(--on-accent);
+  border-top: none;
+  border-right: none;
+  transform: rotate(-48deg);
+}
+
+.todo-check-text {
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.4;
+  flex: 1;
+  min-width: 0;
+  cursor: text;
+  padding: 1px 0;
+  border-radius: 4px;
+}
+
+.todo-check-item.checked .todo-check-text {
+  color: var(--text-dim);
+  text-decoration: line-through;
+  text-decoration-color: var(--scrollbar);
+}
+
+.todo-edit-input {
+  flex: 1;
+  font-size: 14px;
+  color: var(--text);
+  background: var(--sidebar);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  padding: 1px 5px;
+  outline: none;
+  font-family: inherit;
+  line-height: 1.4;
+  min-width: 0;
+  margin: -1px 0;
+}
+
+/* ── Remove (X) button ── */
+
+.todo-remove-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 10px;
+  flex-shrink: 0;
+  opacity: 0;
+  transition:
+    opacity 0.12s,
+    background 0.12s,
+    color 0.12s;
+}
+
+.todo-check-item:hover .todo-remove-btn {
+  opacity: 0.6;
+}
+
+.todo-remove-btn:hover {
+  opacity: 1 !important;
+  background: var(--danger-subtle);
+  color: var(--danger);
+}
+
+/* ── Drag handle ── */
+
+.todo-drag-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  flex-shrink: 0;
+  color: var(--text-dim);
+  font-size: 10px;
+  cursor: grab;
+  opacity: 0;
+  transition: opacity 0.12s;
+  margin-left: -4px;
+}
+
+.todo-check-item:hover .todo-drag-handle {
+  opacity: 0.45;
+}
+
+.todo-drag-handle:hover {
+  opacity: 0.8 !important;
+}
+
+.todo-drag-handle:active {
+  cursor: grabbing;
+}
+
+/* ── Dragging state ── */
+
+.todo-check-item[draggable="true"] {
+  position: relative;
+}
+
+.todo-check-item.todo-dragging {
+  opacity: 0.25;
+}
+
+.todo-check-item.todo-drop-before::before,
+.todo-check-item.todo-drop-after::after {
+  content: "";
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  height: 2px;
+  background: var(--accent);
+  border-radius: 1px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.todo-check-item.todo-drop-before::before {
+  top: -2px;
+}
+
+.todo-check-item.todo-drop-after::after {
+  bottom: -2px;
+}
+
+/* ── Add row (input + button) ── */
+
+.todo-add-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.todo-add-input {
+  flex: 1;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 13px;
+  padding: 8px 12px;
+  outline: none;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.todo-add-input::placeholder {
+  color: var(--text-dim);
+  opacity: 0.6;
+}
+
+.todo-add-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(141, 184, 122, 0.18);
+}
+
+.todo-add-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--on-accent);
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  flex-shrink: 0;
+  transition:
+    opacity 0.15s,
+    transform 0.1s;
+}
+
+.todo-add-btn:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+.todo-add-btn:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.todo-add-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+/* ── Day navigation (compact mode) ───── */
+
+.todo-day-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.todo-day-nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--sidebar-bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 14px;
+  flex-shrink: 0;
+  transition:
+    background 0.12s,
+    border-color 0.12s,
+    color 0.12s;
+}
+
+.todo-day-nav-btn:hover:not(:disabled) {
+  background: var(--accent-subtle);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.todo-day-nav-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.todo-day-nav-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.todo-day-nav-date {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-dim);
+}
+
+/* ── 3-day cards section ─────────────── */
+
+.todo-days-section {
+  display: flex;
+  gap: 16px;
+  flex: 1;
+  min-height: 0;
+  overflow-x: auto;
+  padding: 2px;
+  margin: -2px;
+}
+
+.todo-days-section::-webkit-scrollbar {
+  height: 4px;
+}
+.todo-days-section::-webkit-scrollbar-track {
+  background: transparent;
+}
+.todo-days-section::-webkit-scrollbar-thumb {
+  background: var(--scrollbar);
+  border-radius: 4px;
+}
+
+.todo-days-section.compact {
+  flex-direction: column;
+  min-height: 0;
+  overflow-x: hidden;
+}
+
+.todo-day-card {
+  flex: 1;
+  min-width: 220px;
+  min-height: 0;
+  background: var(--sidebar-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  overflow: hidden;
+}
+
+.todo-day-card.today {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.todo-day-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  flex-shrink: 0;
+}
+
+.todo-day-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.todo-day-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.todo-day-name.today {
+  color: var(--accent);
+}
+
+.todo-day-relative {
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.todo-day-count {
+  font-size: 12px;
+  color: var(--text-dim);
+  font-weight: 500;
+}
+
+.todo-day-tasks {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.todo-day-tasks::-webkit-scrollbar {
+  width: 4px;
+}
+.todo-day-tasks::-webkit-scrollbar-track {
+  background: transparent;
+}
+.todo-day-tasks::-webkit-scrollbar-thumb {
+  background: var(--scrollbar);
+  border-radius: 4px;
+}
+

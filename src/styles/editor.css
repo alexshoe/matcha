@@ -1,0 +1,455 @@
+/* ─── Main panel ─────────────────────────────────────────── */
+
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--main-bg);
+  overflow: hidden;
+}
+
+/* ─── Empty state ────────────────────────────────────────── */
+
+.empty-state {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.empty-state-text {
+  font-size: 14px;
+  color: var(--text-dim);
+}
+
+/* ─── Editor wrap ────────────────────────────────────────── */
+
+.editor-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ─── Toolbar ────────────────────────────────────────────── */
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  background: var(--main-bg);
+}
+
+/* ── Aa style picker dropdown ────────────────────────────── */
+
+.style-dropdown-wrap {
+  position: relative;
+}
+
+.aa-label {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+.style-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  background: rgba(28, 28, 30, 0.96);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.6),
+    0 2px 8px rgba(0, 0, 0, 0.3);
+  padding: 4px;
+  min-width: 200px;
+  z-index: 200;
+}
+
+/* ── Inline formatting row (B I U S) ── */
+
+.style-inline-row {
+  display: flex;
+  align-items: center;
+  padding: 4px 4px 2px;
+  gap: 2px;
+}
+
+.style-inline-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  height: 36px;
+  background: transparent;
+  border: none;
+  border-radius: 7px;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 17px;
+  font-family: inherit;
+  transition:
+    background 0.1s,
+    color 0.1s;
+}
+
+.style-inline-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.style-inline-btn.active {
+  background: var(--accent-subtle);
+  color: var(--accent);
+}
+
+.style-inline-bold {
+  font-weight: 800;
+}
+
+.style-inline-italic {
+  font-style: italic;
+  font-weight: 500;
+}
+
+.style-inline-underline {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  font-weight: 500;
+}
+
+.style-inline-strike {
+  text-decoration: line-through;
+  font-weight: 500;
+}
+
+.style-dropdown-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 3px 6px;
+}
+
+/* ── Block style options ── */
+
+.style-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 7px 10px;
+  background: transparent;
+  border: none;
+  border-radius: 7px;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: background 0.1s;
+}
+
+.style-option:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.style-check {
+  width: 14px;
+  flex-shrink: 0;
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.style-label {
+  color: var(--text);
+}
+
+.style-prefix {
+  margin-right: 6px;
+  opacity: 0.5;
+}
+
+.style-label-heading1 {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  line-height: 1;
+}
+
+.style-label-heading2 {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.style-label-heading3 {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.style-label-paragraph {
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.style-label-monostyled {
+  font-family: "SF Mono", "Fira Code", monospace;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.style-label-bulletList,
+.style-label-orderedList {
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.style-label-blockquote {
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.style-label-blockquote::before {
+  content: "";
+  display: inline-block;
+  width: 3px;
+  height: 16px;
+  background: var(--text-dim);
+  border-radius: 1.5px;
+  flex-shrink: 0;
+}
+
+/* ── Attachment dropdown ─────────────────────────────────── */
+
+.attach-dropdown-wrap {
+  position: relative;
+}
+
+.attach-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  background: rgba(28, 28, 30, 0.96);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.6),
+    0 2px 8px rgba(0, 0, 0, 0.3);
+  padding: 4px;
+  min-width: 210px;
+  z-index: 200;
+}
+
+.attach-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 7px 10px;
+  background: transparent;
+  border: none;
+  border-radius: 7px;
+  cursor: pointer;
+  text-align: left;
+  color: var(--text);
+  font-size: 13px;
+  transition: background 0.1s;
+}
+
+.attach-option:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.attach-option-icon {
+  width: 16px;
+  flex-shrink: 0;
+  font-size: 14px;
+  color: var(--text-dim);
+}
+
+.toolbar-divider {
+  width: 1px;
+  height: 24px;
+  background: var(--border);
+  margin: 0 5px;
+  flex-shrink: 0;
+}
+
+.toolbar-spacer {
+  flex: 1;
+}
+
+.toolbar-center-group {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 3px;
+}
+
+.toolbar-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 15px;
+  transition:
+    background 0.12s,
+    color 0.12s;
+  flex-shrink: 0;
+}
+
+/* ─── Toolbar Tooltips ───────────────────────────────────── */
+
+.toolbar-btn[data-tooltip]::before,
+.toolbar-btn[data-tooltip]::after {
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+  z-index: 300;
+}
+
+.toolbar-btn[data-tooltip]::before {
+  content: "";
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-bottom-color: rgba(30, 34, 29, 0.97);
+}
+
+.toolbar-btn[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: calc(100% + 14px);
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: var(--text);
+  background: rgba(30, 34, 29, 0.97);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 7px;
+  padding: 5px 10px;
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.4),
+    0 10px 24px -4px rgba(0, 0, 0, 0.5);
+}
+
+.toolbar-btn[data-tooltip]:hover::before,
+.toolbar-btn[data-tooltip]:hover::after {
+  opacity: 1;
+}
+
+/* Right-edge buttons: anchor tooltip to the right */
+.toolbar-btn[data-tooltip][data-tooltip-pos="right"]::before {
+  left: auto;
+  right: 0;
+  transform: none;
+}
+
+.toolbar-btn[data-tooltip][data-tooltip-pos="right"]::after {
+  left: auto;
+  right: 0;
+  transform: none;
+}
+
+.toolbar-btn:hover {
+  background: var(--surface);
+  color: var(--text);
+}
+
+.toolbar-btn.active {
+  background: var(--accent-subtle);
+  color: var(--accent);
+}
+
+.toolbar-btn-danger {
+  color: var(--text-dim);
+}
+
+.toolbar-btn-danger:hover {
+  background: var(--danger-subtle);
+  color: var(--danger);
+}
+
+/* ── Toolbar search ──────────────────────────────────────── */
+
+.toolbar-search {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 13px;
+  height: 30px;
+  outline: none;
+  padding: 0 10px;
+  width: 180px;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.toolbar-search::placeholder {
+  color: var(--text-dim);
+  opacity: 0.6;
+}
+
+.toolbar-search:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(141, 184, 122, 0.18);
+}
+
+/* ─── Editor timestamp ───────────────────────────────────── */
+
+.editor-timestamp {
+  flex-shrink: 0;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-dim);
+  padding: 10px 40px 0;
+  pointer-events: none;
+  user-select: none;
+}
+
+.editor-created-by {
+  flex-shrink: 0;
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-dim);
+  opacity: 0.7;
+  padding: 2px 40px 0;
+  pointer-events: none;
+  user-select: none;
+}
+

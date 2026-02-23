@@ -4,19 +4,21 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFilePdf, faDownload } from "@fortawesome/free-solid-svg-icons";
 import { save } from "@tauri-apps/plugin-dialog";
 import { writeFile } from "@tauri-apps/plugin-fs";
-
-function formatFileSize(bytes: number | null): string {
-  if (!bytes) return "";
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
+import { formatBytes } from "../utils/format";
 
 export function FileAttachmentView({ node, selected }: NodeViewProps) {
   const { src, fileName, fileSize } = node.attrs;
 
   const handleClick = () => {
-    if (src) window.open(src, "_blank");
+    if (!src) return;
+    try {
+      const url = new URL(src);
+      if (url.protocol === "https:" || url.protocol === "http:") {
+        window.open(src, "_blank");
+      }
+    } catch {
+      // invalid URL — do nothing
+    }
   };
 
   const handleDownload = async (e: React.MouseEvent) => {
@@ -52,7 +54,7 @@ export function FileAttachmentView({ node, selected }: NodeViewProps) {
         <div className="file-attachment-info">
           <span className="file-attachment-name">{fileName}</span>
           {fileSize && (
-            <span className="file-attachment-size">{formatFileSize(fileSize)}</span>
+            <span className="file-attachment-size">{fileSize ? formatBytes(fileSize) : ""}</span>
           )}
         </div>
         <button
