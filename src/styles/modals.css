@@ -873,6 +873,11 @@
   opacity: 0.6;
 }
 
+/* Hide browser's native password reveal so only our custom toggle shows */
+.account-password-input::-ms-reveal {
+  display: none;
+}
+
 .account-password-input::-webkit-caps-lock-indicator {
   filter: invert(1) opacity(0.45);
 }

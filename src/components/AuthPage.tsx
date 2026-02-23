@@ -352,7 +352,7 @@ export function AuthPage({
 										}
 										disabled={busy}
 									>
-										{showResetPassword ? (
+										{!showResetPassword ? (
 											<svg
 												viewBox="0 0 20 20"
 												fill="none"
@@ -415,7 +415,7 @@ export function AuthPage({
 										}
 										disabled={busy}
 									>
-										{showResetConfirm ? (
+										{!showResetConfirm ? (
 											<svg
 												viewBox="0 0 20 20"
 												fill="none"
@@ -493,7 +493,7 @@ export function AuthPage({
 									}
 									disabled={busy}
 								>
-									{showPassword ? (
+									{!showPassword ? (
 										<svg
 											viewBox="0 0 20 20"
 											fill="none"

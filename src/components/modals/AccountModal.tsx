@@ -159,7 +159,7 @@ export function AccountModal({
 			aria-label={show ? "Hide password" : "Reveal password"}
 			disabled={disabled}
 		>
-			{show ? (
+			{!show ? (
 				<svg
 					viewBox="0 0 20 20"
 					fill="none"
