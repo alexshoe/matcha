@@ -12,7 +12,6 @@ import { TodoList } from "./components/TodoList";
 import { AuthPage } from "./components/AuthPage";
 import { Sidebar } from "./components/Sidebar";
 import { SettingsModal } from "./components/modals/SettingsModal";
-import { ManageListsModal } from "./components/modals/ManageListsModal";
 import { AboutModal } from "./components/modals/AboutModal";
 import { AccountModal } from "./components/modals/AccountModal";
 import { ShareNoteModal } from "./components/modals/ShareNoteModal";
@@ -85,7 +84,6 @@ function App() {
 	const [aboutOpen, setAboutOpen] = useState(false);
 	const [accountOpen, setAccountOpen] = useState(false);
 	const [settingsOpen, setSettingsOpen] = useState(false);
-	const [manageListsOpen, setManageListsOpen] = useState(false);
 
 	// ── Settings ──
 	const [theme, setTheme] = useState<"dark" | "matcha" | "light">(
@@ -113,16 +111,7 @@ function App() {
 	const [userRole, setUserRole] = useState<string>("User");
 	const [storageUsedLabel, setStorageUsedLabel] = useState("–");
 
-	// ── Folder / list state ──
-	const [noteLists, setNoteLists] = useState<string[]>(() => {
-		const saved = localStorage.getItem("matcha_noteLists");
-		if (!saved) return ["My Notes"];
-		try {
-			return JSON.parse(saved);
-		} catch {
-			return ["My Notes"];
-		}
-	});
+	// ── Folder state ──
 	const [activeFolder, setActiveFolder] = useState<string>(
 		() => localStorage.getItem("matcha_activeList") || "My Notes",
 	);
@@ -200,16 +189,15 @@ function App() {
 	useEffect(() => {
 		const onKey = (e: KeyboardEvent) => {
 			if (e.key !== "Escape") return;
-			if (manageListsOpen) setManageListsOpen(false);
-			else if (aboutOpen) setAboutOpen(false);
+			if (aboutOpen) setAboutOpen(false);
 			else if (accountOpen) setAccountOpen(false);
 			else if (settingsOpen) setSettingsOpen(false);
 		};
-		if (aboutOpen || accountOpen || settingsOpen || manageListsOpen) {
+		if (aboutOpen || accountOpen || settingsOpen) {
 			window.addEventListener("keydown", onKey);
 			return () => window.removeEventListener("keydown", onKey);
 		}
-	}, [aboutOpen, accountOpen, settingsOpen, manageListsOpen]);
+	}, [aboutOpen, accountOpen, settingsOpen]);
 
 	useEffect(() => {
 		function handleCmdF(e: KeyboardEvent) {
@@ -409,12 +397,14 @@ function App() {
 	useEffect(() => {
 		invoke<Note[]>("get_notes")
 			.then((loaded) => {
-				const sorted = [...loaded].sort((a, b) => b.updated_at - a.updated_at);
-				setNotes(sorted);
+			const sorted = [...loaded].sort((a, b) => b.updated_at - a.updated_at);
+			setNotes(sorted);
+
+				const folder = localStorage.getItem("matcha_activeList") || activeFolder;
 				const inList =
-					activeFolder === "Recently Deleted"
+					folder === "Recently Deleted"
 						? sorted.filter((n) => n.deleted)
-						: sorted.filter((n) => n.list === activeFolder && !n.deleted);
+						: sorted.filter((n) => n.list === folder && !n.deleted);
 				if (inList.length > 0) {
 					setSelectedId(inList[0].id);
 					setSelectedNoteIds([inList[0].id]);
@@ -452,63 +442,71 @@ function App() {
 		}
 	}, []);
 
+	const performCloudSync = useCallback(async () => {
+		const db = activeSupabase.current;
+		if (!db || !user) return;
+
+		const { data, error } = await db
+			.from("notes")
+			.select("*")
+			.eq("user_id", user.id);
+
+		if (error || !data) return;
+
+		const cloudNotes: Note[] = data.map((n: Record<string, unknown>) => ({
+			id: n.id as string,
+			content: (n.content as string) || "",
+			created_at: n.created_at as number,
+			updated_at: n.updated_at as number,
+			pinned: (n.pinned as boolean) ?? false,
+			list: (n.list as string) || "My Notes",
+			deleted: (n.deleted as boolean) ?? false,
+			deleted_at: (n.deleted_at as number | null) ?? null,
+		}));
+
+		setNotes((prev) => {
+			const localMap = new Map(prev.map((n) => [n.id, n]));
+			const cloudMap = new Map(cloudNotes.map((n) => [n.id, n]));
+
+			const merged = new Map(localMap);
+			for (const [id, cloudNote] of cloudMap) {
+				const local = localMap.get(id);
+				if (!local || cloudNote.updated_at > local.updated_at) {
+					merged.set(id, cloudNote);
+				}
+			}
+
+			for (const [id, local] of localMap) {
+				if (!cloudMap.has(id)) {
+					db.from("notes")
+						.upsert({
+							id: local.id,
+							user_id: user.id,
+							content: local.content,
+							list: local.list,
+							pinned: local.pinned,
+							created_at: local.created_at,
+							updated_at: local.updated_at,
+						})
+						.then(({ error: e }) => {
+							if (e) console.warn("Supabase push error:", e.message);
+						});
+				}
+			}
+
+			const sorted = [...merged.values()].sort(
+				(a, b) => b.updated_at - a.updated_at,
+			);
+			invoke("set_notes", { notes: sorted });
+			return sorted;
+		});
+	}, [user]);
+
 	useEffect(() => {
 		if (!user || loading || cloudSyncAttempted.current) return;
 		cloudSyncAttempted.current = true;
-
-		if (notes.length > 0) return;
-
-		const db = activeSupabase.current;
-		if (!db) return;
-
-		db.from("notes")
-			.select("*")
-			.eq("user_id", user.id)
-			.then(({ data, error }) => {
-				if (error || !data || data.length === 0) return;
-
-				const cloudNotes: Note[] = data.map((n: Record<string, unknown>) => ({
-					id: n.id as string,
-					content: (n.content as string) || "",
-					created_at: n.created_at as number,
-					updated_at: n.updated_at as number,
-					pinned: (n.pinned as boolean) ?? false,
-					list: (n.list as string) || "My Notes",
-					deleted: (n.deleted as boolean) ?? false,
-					deleted_at: (n.deleted_at as number | null) ?? null,
-				}));
-
-				invoke("set_notes", { notes: cloudNotes });
-
-				const sorted = [...cloudNotes].sort(
-					(a, b) => b.updated_at - a.updated_at,
-				);
-				setNotes(sorted);
-
-				const listsFromCloud = [
-					...new Set(
-						cloudNotes.filter((n) => !n.deleted).map((n) => n.list),
-					),
-				];
-				if (listsFromCloud.length > 0) {
-					setNoteLists(listsFromCloud);
-					localStorage.setItem(
-						"matcha_noteLists",
-						JSON.stringify(listsFromCloud),
-					);
-					setActiveFolder(listsFromCloud[0]);
-					localStorage.setItem("matcha_activeList", listsFromCloud[0]);
-
-					const firstListNotes = sorted.filter(
-						(n) => n.list === listsFromCloud[0] && !n.deleted,
-					);
-					if (firstListNotes.length > 0) {
-						setSelectedId(firstListNotes[0].id);
-						setSelectedNoteIds([firstListNotes[0].id]);
-					}
-				}
-			});
-	}, [user, loading, notes.length]);
+		performCloudSync();
+	}, [user, loading, performCloudSync]);
 
 	useLayoutEffect(() => {
 		const container = noteListRef.current;
@@ -547,75 +545,6 @@ function App() {
 
 		prevNoteRects.current = newRects;
 	}, [notes, sortNotesBy]);
-
-	// ── List management ──
-
-	function persistLists(lists: string[]) {
-		setNoteLists(lists);
-		localStorage.setItem("matcha_noteLists", JSON.stringify(lists));
-	}
-
-	function addList(name: string) {
-		const trimmed = name.trim();
-		if (!trimmed || noteLists.includes(trimmed)) return;
-		persistLists([...noteLists, trimmed]);
-	}
-
-	async function removeList(idx: number) {
-		if (noteLists.length <= 1) return;
-		const removed = noteLists[idx];
-		const next = noteLists.filter((_, i) => i !== idx);
-		const target = next[0];
-		persistLists(next);
-
-		await invoke("update_note_list", { oldList: removed, newList: target });
-		setNotes((prev) =>
-			prev.map((n) => (n.list === removed ? { ...n, list: target } : n)),
-		);
-
-		const db = activeSupabase.current;
-		if (db && user) {
-			await db
-				.from("notes")
-				.update({ list: target })
-				.eq("user_id", user.id)
-				.eq("list", removed);
-		}
-
-		if (activeFolder === removed) {
-			setActiveFolder(target);
-			localStorage.setItem("matcha_activeList", target);
-		}
-	}
-
-	async function finishRenameList(idx: number, newName: string) {
-		const trimmed = newName.trim();
-		if (!trimmed || trimmed === noteLists[idx]) return;
-		if (noteLists.includes(trimmed)) return;
-		const oldName = noteLists[idx];
-		const wasActive = activeFolder === oldName;
-		const next = noteLists.map((n, i) => (i === idx ? trimmed : n));
-		persistLists(next);
-
-		await invoke("update_note_list", { oldList: oldName, newList: trimmed });
-		setNotes((prev) =>
-			prev.map((n) => (n.list === oldName ? { ...n, list: trimmed } : n)),
-		);
-
-		const db = activeSupabase.current;
-		if (db && user) {
-			await db
-				.from("notes")
-				.update({ list: trimmed })
-				.eq("user_id", user.id)
-				.eq("list", oldName);
-		}
-
-		if (wasActive) {
-			setActiveFolder(trimmed);
-			localStorage.setItem("matcha_activeList", trimmed);
-		}
-	}
 
 	// ── Toast helper ──
 
@@ -1099,7 +1028,6 @@ function App() {
 				pinnedExpanded={pinnedExpanded}
 				searchQuery={searchQuery}
 				activeFolder={activeFolder}
-				noteLists={noteLists}
 				isRecentlyDeleted={isRecentlyDeleted}
 				isSharedFolder={isSharedFolder}
 				sharedNotesMap={sharedNotesMap}
@@ -1123,7 +1051,6 @@ function App() {
 				onOpenAccount={() => setAccountOpen(true)}
 				onOpenAbout={() => setAboutOpen(true)}
 				onOpenSettings={() => setSettingsOpen(true)}
-				onOpenManageLists={() => setManageListsOpen(true)}
 				renamingId={renamingId}
 				renameValue={renameValue}
 				onSetRenamingId={setRenamingId}
@@ -1215,6 +1142,7 @@ function App() {
 					supabaseClient={activeSupabase.current}
 					onDisplayNameSaved={setDisplayName}
 					onAvatarSaved={setAvatarNum}
+					onManualSync={performCloudSync}
 					onSignOut={async () => {
 						if (activeSupabase.current) {
 							await activeSupabase.current.auth.signOut();
@@ -1239,17 +1167,6 @@ function App() {
 					autoSortChecked={autoSortChecked}
 					setAutoSortChecked={setAutoSortChecked}
 					onClose={() => setSettingsOpen(false)}
-				/>
-			)}
-
-			{manageListsOpen && (
-				<ManageListsModal
-					noteLists={noteLists}
-					activeFolder={activeFolder}
-					onAddList={addList}
-					onRemoveList={removeList}
-					onRenameList={finishRenameList}
-					onClose={() => setManageListsOpen(false)}
 				/>
 			)}
 

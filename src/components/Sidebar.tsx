@@ -5,7 +5,6 @@ import {
 	faChevronDown,
 	faGear,
 	faCircleQuestion,
-	faPencil,
 	faFolder,
 	faCheck,
 	faMagnifyingGlass,
@@ -36,7 +35,6 @@ interface SidebarProps {
 	pinnedExpanded: boolean;
 	searchQuery: string;
 	activeFolder: string;
-	noteLists: string[];
 	isRecentlyDeleted: boolean;
 	isSharedFolder: boolean;
 	sharedNotesMap: Map<string, SharedNoteEntry>;
@@ -58,7 +56,6 @@ interface SidebarProps {
 	onOpenAccount: () => void;
 	onOpenAbout: () => void;
 	onOpenSettings: () => void;
-	onOpenManageLists: () => void;
 	renamingId: string | null;
 	renameValue: string;
 	onSetRenamingId: (id: string | null) => void;
@@ -97,7 +94,6 @@ export function Sidebar({
 	pinnedExpanded,
 	searchQuery,
 	activeFolder,
-	noteLists,
 	isRecentlyDeleted,
 	isSharedFolder,
 	sharedNotesMap,
@@ -117,7 +113,6 @@ export function Sidebar({
 	onOpenAccount,
 	onOpenAbout,
 	onOpenSettings,
-	onOpenManageLists,
 	renamingId,
 	renameValue,
 	onSetRenamingId,
@@ -427,72 +422,28 @@ export function Sidebar({
 							className={`folder-chevron${folderDropdownOpen ? " open" : ""}`}
 						/>
 					</button>
-					{folderDropdownOpen && (
-						<div className="folder-dropdown">
-							{noteLists.map((name) => (
-								<button
-									key={name}
-									className={`folder-dropdown-item${activeFolder === name ? " active" : ""}`}
-									onClick={() => {
-										onSetActiveFolder(name);
-										localStorage.setItem("matcha_activeList", name);
-										setFolderDropdownOpen(false);
-									}}
-								>
-									<span className="folder-dropdown-check-col">
-										{activeFolder === name && (
-											<FontAwesomeIcon icon={faCheck} />
-										)}
-									</span>
-									<span className="folder-dropdown-name">{name}</span>
-								</button>
-							))}
-							<div className="folder-dropdown-separator" />
+				{folderDropdownOpen && (
+					<div className="folder-dropdown">
+						{(["My Notes", "Shared Notes", "Recently Deleted"] as const).map((name) => (
 							<button
-								className={`folder-dropdown-item${activeFolder === "Shared Notes" ? " active" : ""}`}
+								key={name}
+								className={`folder-dropdown-item${activeFolder === name ? " active" : ""}`}
 								onClick={() => {
-									onSetActiveFolder("Shared Notes");
-									localStorage.setItem("matcha_activeList", "Shared Notes");
+									onSetActiveFolder(name);
+									localStorage.setItem("matcha_activeList", name);
 									setFolderDropdownOpen(false);
 								}}
 							>
 								<span className="folder-dropdown-check-col">
-									{activeFolder === "Shared Notes" && (
+									{activeFolder === name && (
 										<FontAwesomeIcon icon={faCheck} />
 									)}
 								</span>
-								<span className="folder-dropdown-name">Shared Notes</span>
+								<span className="folder-dropdown-name">{name}</span>
 							</button>
-							<button
-								className={`folder-dropdown-item${activeFolder === "Recently Deleted" ? " active" : ""}`}
-								onClick={() => {
-									onSetActiveFolder("Recently Deleted");
-									localStorage.setItem("matcha_activeList", "Recently Deleted");
-									setFolderDropdownOpen(false);
-								}}
-							>
-								<span className="folder-dropdown-check-col">
-									{activeFolder === "Recently Deleted" && (
-										<FontAwesomeIcon icon={faCheck} />
-									)}
-								</span>
-								<span className="folder-dropdown-name">Recently Deleted</span>
-							</button>
-							<div className="folder-dropdown-separator" />
-							<button
-								className="folder-dropdown-item"
-								onClick={() => {
-									setFolderDropdownOpen(false);
-									onOpenManageLists();
-								}}
-							>
-								<span className="folder-dropdown-check-col">
-									<FontAwesomeIcon icon={faPencil} />
-								</span>
-								<span className="folder-dropdown-name">Manage Lists…</span>
-							</button>
-						</div>
-					)}
+						))}
+					</div>
+				)}
 				</div>
 				<div className="sidebar-footer-actions">
 					<button

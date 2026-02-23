@@ -25,6 +25,7 @@ interface AccountModalProps {
 	supabaseClient: SupabaseClient | null;
 	onDisplayNameSaved: (name: string) => void;
 	onAvatarSaved: (num: number) => void;
+	onManualSync: () => Promise<void>;
 	onSignOut: () => void;
 	onClose: () => void;
 }
@@ -37,6 +38,7 @@ export function AccountModal({
 	supabaseClient,
 	onDisplayNameSaved,
 	onAvatarSaved,
+	onManualSync,
 	onSignOut,
 	onClose,
 }: AccountModalProps) {
@@ -52,6 +54,8 @@ export function AccountModal({
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 	const [avatarPickerOpen, setAvatarPickerOpen] = useState(false);
 	const [pendingAvatarNum, setPendingAvatarNum] = useState<number | null>(null);
+	const [syncing, setSyncing] = useState(false);
+	const [syncDone, setSyncDone] = useState(false);
 
 	useEffect(() => {
 		if (editingDisplayName && displayNameInputRef.current) {
@@ -415,6 +419,49 @@ export function AccountModal({
 						<div className="account-row">
 							<span className="account-row-label">Storage used</span>
 							<span className="account-row-value">{storageUsedLabel}</span>
+						</div>
+						<div className="account-row account-row-end">
+							<button
+								className="account-sync-btn"
+								disabled={syncing}
+								onClick={async () => {
+									setSyncing(true);
+									setSyncDone(false);
+									try {
+										await onManualSync();
+										setSyncDone(true);
+										setTimeout(() => setSyncDone(false), 2000);
+									} finally {
+										setSyncing(false);
+									}
+								}}
+							>
+								{syncing ? (
+									<>
+										<svg className="account-sync-spinner" viewBox="0 0 16 16" width="13" height="13">
+											<circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="2" fill="none" strokeDasharray="28" strokeDashoffset="8" strokeLinecap="round" />
+										</svg>
+										Syncing…
+									</>
+								) : syncDone ? (
+									<>
+										<svg viewBox="0 0 16 16" width="13" height="13" fill="none">
+											<path d="M3 8.5l3.5 3.5 6.5-7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+										</svg>
+										Synced
+									</>
+								) : (
+									<>
+										<svg viewBox="0 0 16 16" width="13" height="13" fill="none">
+											<path d="M2.5 8a5.5 5.5 0 0 1 9.3-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+											<path d="M13.5 8a5.5 5.5 0 0 1-9.3 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+											<path d="M11 2.5l1 1.7 1.7-.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+											<path d="M5 13.5l-1-1.7-1.7.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+										</svg>
+										Sync now
+									</>
+								)}
+							</button>
 						</div>
 						<div className="account-divider" />
 						<div className="account-signout-row">

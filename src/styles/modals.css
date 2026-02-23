@@ -561,6 +561,39 @@
   text-decoration: underline;
 }
 
+.account-sync-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 12px;
+  font-family: inherit;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 5px 12px;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.account-sync-btn:hover:not(:disabled) {
+  color: var(--text);
+  border-color: var(--text-dim);
+}
+
+.account-sync-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.account-sync-spinner {
+  animation: account-spin 0.8s linear infinite;
+}
+
+@keyframes account-spin {
+  to { transform: rotate(360deg); }
+}
+
 .account-signout-row {
   display: flex;
   justify-content: center;

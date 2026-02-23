@@ -331,12 +331,13 @@
 }
 
 /* Hide selection highlight on list structure (gaps, bullets, numbers) */
-.ProseMirror ul::selection,
+/* .ProseMirror ul::selection,
 .ProseMirror ol::selection,
 .ProseMirror li::selection,
 .ProseMirror ul[data-type="taskList"] > li > div::selection {
   background: transparent;
-}
+} */
+/* TODO: Hide extraneous selection highlight on MacOS but show proper selection on Windows */
 
 /* Strike completed task text */
 .ProseMirror ul[data-type="taskList"] > li[data-checked="true"] > div {
