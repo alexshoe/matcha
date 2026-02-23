@@ -156,6 +156,13 @@ fn delete_note(state: tauri::State<AppState>, id: String) -> Result<(), String> 
     save_notes(&state.file_path, &notes)
 }
 
+#[tauri::command]
+fn set_notes(state: tauri::State<AppState>, notes: Vec<Note>) -> Result<(), String> {
+    let mut local = state.notes.lock().map_err(|e| e.to_string())?;
+    *local = notes;
+    save_notes(&state.file_path, &local)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -182,6 +189,7 @@ pub fn run() {
             soft_delete_note,
             restore_note,
             delete_note,
+            set_notes,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

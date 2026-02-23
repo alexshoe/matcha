@@ -55,6 +55,7 @@ function App() {
 		null,
 	);
 	const recentlyCleanedUpIds = useRef(new Set<string>());
+	const cloudSyncAttempted = useRef(false);
 
 	// ── Sidebar / UI state ──
 	const [sidebarWidth, setSidebarWidth] = useState(240);
@@ -441,6 +442,7 @@ function App() {
 					activeSupabase.current = null;
 					setUser(null);
 					setIsAuthenticated(false);
+					cloudSyncAttempted.current = false;
 				} else if (session?.user) {
 					setUser(session.user);
 				}
@@ -449,6 +451,64 @@ function App() {
 			return () => subscription.unsubscribe();
 		}
 	}, []);
+
+	useEffect(() => {
+		if (!user || loading || cloudSyncAttempted.current) return;
+		cloudSyncAttempted.current = true;
+
+		if (notes.length > 0) return;
+
+		const db = activeSupabase.current;
+		if (!db) return;
+
+		db.from("notes")
+			.select("*")
+			.eq("user_id", user.id)
+			.then(({ data, error }) => {
+				if (error || !data || data.length === 0) return;
+
+				const cloudNotes: Note[] = data.map((n: Record<string, unknown>) => ({
+					id: n.id as string,
+					content: (n.content as string) || "",
+					created_at: n.created_at as number,
+					updated_at: n.updated_at as number,
+					pinned: (n.pinned as boolean) ?? false,
+					list: (n.list as string) || "My Notes",
+					deleted: (n.deleted as boolean) ?? false,
+					deleted_at: (n.deleted_at as number | null) ?? null,
+				}));
+
+				invoke("set_notes", { notes: cloudNotes });
+
+				const sorted = [...cloudNotes].sort(
+					(a, b) => b.updated_at - a.updated_at,
+				);
+				setNotes(sorted);
+
+				const listsFromCloud = [
+					...new Set(
+						cloudNotes.filter((n) => !n.deleted).map((n) => n.list),
+					),
+				];
+				if (listsFromCloud.length > 0) {
+					setNoteLists(listsFromCloud);
+					localStorage.setItem(
+						"matcha_noteLists",
+						JSON.stringify(listsFromCloud),
+					);
+					setActiveFolder(listsFromCloud[0]);
+					localStorage.setItem("matcha_activeList", listsFromCloud[0]);
+
+					const firstListNotes = sorted.filter(
+						(n) => n.list === listsFromCloud[0] && !n.deleted,
+					);
+					if (firstListNotes.length > 0) {
+						setSelectedId(firstListNotes[0].id);
+						setSelectedNoteIds([firstListNotes[0].id]);
+					}
+				}
+			});
+	}, [user, loading, notes.length]);
 
 	useLayoutEffect(() => {
 		const container = noteListRef.current;
