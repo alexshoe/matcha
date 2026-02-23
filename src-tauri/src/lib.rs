@@ -16,6 +16,9 @@ pub struct Note {
     pub pinned: bool,
     #[serde(default = "default_list")]
     pub list: String,
+    #[serde(default)]
+    pub deleted: bool,
+    pub deleted_at: Option<u64>,
 }
 
 fn default_list() -> String {
@@ -63,6 +66,8 @@ fn create_note(state: tauri::State<AppState>, list: String) -> Result<Note, Stri
         updated_at: now,
         pinned: false,
         list,
+        deleted: false,
+        deleted_at: None,
     };
     notes.push(note.clone());
     save_notes(&state.file_path, &notes)?;
@@ -116,6 +121,35 @@ fn pin_note(state: tauri::State<AppState>, id: String, pinned: bool) -> Result<N
 }
 
 #[tauri::command]
+fn soft_delete_note(state: tauri::State<AppState>, id: String) -> Result<Note, String> {
+    let mut notes = state.notes.lock().map_err(|e| e.to_string())?;
+    let note = notes
+        .iter_mut()
+        .find(|n| n.id == id)
+        .ok_or_else(|| format!("Note {} not found", id))?;
+    note.deleted = true;
+    note.deleted_at = Some(now_unix());
+    note.pinned = false;
+    let note = note.clone();
+    save_notes(&state.file_path, &notes)?;
+    Ok(note)
+}
+
+#[tauri::command]
+fn restore_note(state: tauri::State<AppState>, id: String) -> Result<Note, String> {
+    let mut notes = state.notes.lock().map_err(|e| e.to_string())?;
+    let note = notes
+        .iter_mut()
+        .find(|n| n.id == id)
+        .ok_or_else(|| format!("Note {} not found", id))?;
+    note.deleted = false;
+    note.deleted_at = None;
+    let note = note.clone();
+    save_notes(&state.file_path, &notes)?;
+    Ok(note)
+}
+
+#[tauri::command]
 fn delete_note(state: tauri::State<AppState>, id: String) -> Result<(), String> {
     let mut notes = state.notes.lock().map_err(|e| e.to_string())?;
     notes.retain(|n| n.id != id);
@@ -145,6 +179,8 @@ pub fn run() {
             update_note,
             update_note_list,
             pin_note,
+            soft_delete_note,
+            restore_note,
             delete_note,
         ])
         .run(tauri::generate_context!())

@@ -10,19 +10,20 @@
 
 :root {
   --bg: #1c1f1a;
-  --sidebar-bg: #1f231e;
-  --main-bg: #1a1e19;
+  --sidebar-bg: #171717;
+  --main-bg: #2a2e2a;
   --surface: #262b22;
   --border: #2f3529;
-  --scrollbar: #3a4035;
-  --text: #d4d8c8;
+  --scrollbar: #484f42;
+  --text: #ffffff;
   --text-dim: #7a8070;
-  --accent: #8db87a;
+  --accent: #769569;
   --accent-subtle: rgba(141, 184, 122, 0.15);
   --item-hover: rgba(255, 255, 255, 0.05);
   --on-accent: #ffffff;
   --danger: #e05555;
   --danger-subtle: rgba(224, 85, 85, 0.1);
+  --table-border: #575c52;
   --radius: 9px;
 
   font-family:
@@ -537,8 +538,13 @@ body,
   transition: opacity 0.15s;
 }
 
-.new-note-fab:hover {
+.new-note-fab:hover:not(:disabled) {
   opacity: 0.85;
+}
+
+.new-note-fab:disabled {
+  opacity: 0.35;
+  cursor: default;
 }
 
 /* ── Sidebar search ─────────────────────── */
@@ -1187,6 +1193,17 @@ body,
   user-select: none;
 }
 
+.editor-created-by {
+  flex-shrink: 0;
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-dim);
+  opacity: 0.7;
+  padding: 2px 40px 0;
+  pointer-events: none;
+  user-select: none;
+}
+
 /* ─── Tiptap editor area ─────────────────────────────────── */
 
 .editor-scroll-area {
@@ -1411,6 +1428,37 @@ body,
   gap: 11px;
   margin-bottom: 6px;
   list-style: none;
+  position: relative;
+}
+
+.task-drag-handle {
+  position: absolute;
+  left: -24px;
+  top: 5px;
+  width: 10px;
+  height: 15px;
+  opacity: 0;
+  cursor: grab;
+  transition: opacity 0.15s;
+  background-image: radial-gradient(
+    circle,
+    var(--text-dim) 1.2px,
+    transparent 1.2px
+  );
+  background-size: 5px 5.5px;
+  background-repeat: repeat;
+}
+
+.task-drag-handle:active {
+  cursor: grabbing;
+}
+
+.ProseMirror ul[data-type="taskList"] > li:hover > .task-drag-handle {
+  opacity: 0.35;
+}
+
+.ProseMirror ul[data-type="taskList"] > li > .task-drag-handle:hover {
+  opacity: 0.7;
 }
 
 /* Label wraps the hidden input + the visual span */
@@ -1509,19 +1557,17 @@ body,
 .ProseMirror .tableWrapper {
   overflow-x: auto;
   margin: 10px 0;
-  border-radius: 8px;
 }
 
 .ProseMirror table {
   border-collapse: collapse;
   width: 100%;
   table-layout: fixed;
-  overflow: hidden;
 }
 
 .ProseMirror th,
 .ProseMirror td {
-  border: 1px solid var(--border);
+  border: 1px solid var(--table-border);
   padding: 8px 10px;
   font-size: 13px;
   line-height: 1.5;
@@ -1911,6 +1957,15 @@ body,
   background: var(--surface);
 }
 
+.context-menu-item-disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.context-menu-item-disabled:hover {
+  background: transparent;
+}
+
 .context-menu-item-danger {
   color: var(--danger);
 }
@@ -1935,22 +1990,6 @@ body,
   align-items: center;
   justify-content: center;
   background: transparent;
-}
-
-.about-card {
-  position: relative;
-  background: rgba(28, 31, 26, 0.97);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 16px;
-  box-shadow:
-    0 24px 60px rgba(0, 0, 0, 0.4),
-    0 4px 16px rgba(0, 0, 0, 0.2);
-  padding: 44px 48px 40px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  min-width: 280px;
 }
 
 .about-close {
@@ -2000,30 +2039,381 @@ body,
   font-weight: 400;
 }
 
-.about-author {
-  font-size: 13px;
-  color: var(--text-dim);
-  margin-top: 10px;
+.about-author-link {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 8px;
-}
-
-.about-github-link {
-  color: var(--text-dim);
-  transition: color 0.15s;
-  display: inline-flex;
-  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
   background: none;
   border: none;
   padding: 0;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--text-dim);
   cursor: pointer;
-  margin-top: 10px;
 }
 
-.about-github-link:hover {
+.about-author-link:hover {
+  text-decoration: underline;
+}
+
+/* ── About card wrap (for bug report expansion) ── */
+
+.about-card-wrap {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  position: relative;
+}
+
+.about-card-wrap .about-card {
+  position: relative;
+  background: rgba(28, 31, 26, 0.97);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.4),
+    0 4px 16px rgba(0, 0, 0, 0.2);
+  padding: 44px 48px 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 280px;
+  flex-shrink: 0;
+}
+
+.about-bug-report-btn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 16px;
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: var(--text-dim);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 400;
+  cursor: pointer;
+}
+
+.about-bug-report-btn:hover {
+  text-decoration: underline;
+}
+
+.about-bug-report-icon {
+  font-size: 12px;
+}
+
+/* ── Bug report panel ────────────────────── */
+
+.bug-report-panel {
+  width: 0;
+  opacity: 0;
+  overflow: hidden;
+  background: var(--sidebar-bg);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.4),
+    0 4px 16px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  transition:
+    width 0.32s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.24s ease,
+    padding 0.32s cubic-bezier(0.4, 0, 0.2, 1),
+    margin 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-left: 0;
+  pointer-events: none;
+}
+
+.about-card-wrap.bug-report-open .bug-report-panel {
+  width: 320px;
+  opacity: 1;
+  padding: 24px 20px;
+  margin-left: 12px;
+  pointer-events: auto;
+  overflow: hidden;
+}
+
+.bug-report-title {
+  font-size: 15px;
+  font-weight: 600;
   color: var(--text);
+  margin-bottom: 18px;
+  padding: 0 2px;
+  white-space: nowrap;
+}
+
+.bug-report-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1;
+}
+
+.bug-report-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.bug-report-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.bug-report-required {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.bug-report-hint {
+  font-size: 11px;
+  color: var(--accent);
+  font-weight: 500;
+  margin-top: -2px;
+}
+
+.bug-report-input,
+.bug-report-textarea {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 13px;
+  outline: none;
+  padding: 8px 10px;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+  -webkit-user-select: text;
+  user-select: text;
+  width: 100%;
+}
+
+.bug-report-input:focus,
+.bug-report-textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(141, 184, 122, 0.18);
+}
+
+.bug-report-input::placeholder,
+.bug-report-textarea::placeholder {
+  color: var(--text-dim);
+  opacity: 0.6;
+}
+
+.bug-report-textarea {
+  resize: vertical;
+  min-height: 80px;
+  line-height: 1.5;
+}
+
+.bug-report-input-error {
+  border-color: var(--danger) !important;
+  box-shadow: 0 0 0 3px rgba(224, 85, 85, 0.15) !important;
+}
+
+.bug-report-error-text {
+  font-size: 11px;
+  color: var(--danger);
+  font-weight: 500;
+}
+
+.bug-report-submit-btn {
+  margin-top: 18px;
+  width: 100%;
+  height: 36px;
+  background: var(--accent);
+  border: none;
+  border-radius: 9px;
+  color: var(--on-accent);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.1px;
+  transition:
+    opacity 0.15s,
+    transform 0.1s;
+  flex-shrink: 0;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bug-report-submit-btn:hover {
+  opacity: 0.88;
+}
+
+.bug-report-submit-btn:active {
+  transform: scale(0.97);
+}
+
+.bug-report-submit-btn:disabled {
+  opacity: 0.65;
+  cursor: default;
+}
+
+/* ── View Bug Reports panel ──────────────────── */
+
+.view-bugs-panel {
+  width: 0;
+  opacity: 0;
+  overflow: hidden;
+  background: var(--sidebar-bg);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.4),
+    0 4px 16px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  transition:
+    width 0.32s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.24s ease,
+    padding 0.32s cubic-bezier(0.4, 0, 0.2, 1),
+    margin 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-left: 0;
+  pointer-events: none;
+}
+
+.about-card-wrap.view-bugs-open .view-bugs-panel {
+  width: 360px;
+  opacity: 1;
+  padding: 24px 20px;
+  margin-left: 12px;
+  pointer-events: auto;
+  overflow-y: auto;
+}
+
+.view-bugs-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 14px;
+  padding: 0 2px;
+  white-space: nowrap;
+}
+
+.view-bugs-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 0;
+}
+
+.view-bugs-empty {
+  font-size: 13px;
+  color: var(--text-dim);
+  text-align: center;
+  padding: 24px 0;
+}
+
+.view-bugs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow-y: auto;
+  max-height: 400px;
+}
+
+.view-bugs-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  color: var(--text);
+  transition:
+    background 0.12s,
+    border-color 0.12s;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+.view-bugs-item:hover {
+  border-color: var(--accent-subtle);
+}
+
+.view-bugs-item.expanded {
+  border-color: var(--accent);
+}
+
+.view-bugs-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.view-bugs-item-desc {
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  flex: 1;
+}
+
+.view-bugs-item-chevron {
+  font-size: 10px;
+  color: var(--text-dim);
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.view-bugs-item-chevron.open {
+  transform: rotate(180deg);
+}
+
+.view-bugs-item-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+.view-bugs-item-details {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.view-bugs-detail-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.view-bugs-detail-text {
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.5;
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 /* ─── Account Modal ──────────────────────────────────────── */
@@ -2827,6 +3217,32 @@ body,
   background: rgba(0, 0, 0, 0.08);
 }
 
+/* Matcha theme preview */
+.stp-matcha {
+  background: #e5e8d4;
+}
+
+.stp-matcha .stp-sidebar-area {
+  background: #dbe0c6;
+  border-right: 1px solid #c3c8ad;
+}
+
+.stp-matcha .stp-item {
+  background: rgba(60, 80, 40, 0.1);
+}
+
+.stp-matcha .stp-item-active {
+  background: rgba(95, 138, 74, 0.35);
+}
+
+.stp-matcha .stp-title-line {
+  background: rgba(54, 61, 44, 0.22);
+}
+
+.stp-matcha .stp-body-line {
+  background: rgba(54, 61, 44, 0.1);
+}
+
 .settings-theme-card-label {
   font-size: 12px;
   color: var(--text);
@@ -3263,25 +3679,687 @@ body,
   }
 }
 
+/* ─── Sidebar To-do List button ──────────────────────────── */
+
+.sidebar-todo-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: calc(100% - 12px);
+  margin: 0 6px 2px;
+  padding: 8px 10px;
+  background: transparent;
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--accent);
+  transition: background 0.1s;
+  flex-shrink: 0;
+}
+
+.sidebar-todo-btn:hover {
+  background: var(--item-hover);
+}
+
+.sidebar-todo-btn.active {
+  background: var(--accent-subtle);
+}
+
+.sidebar-todo-btn-icon {
+  font-size: 14px;
+  color: var(--accent);
+}
+
+.sidebar-todo-btn.active .sidebar-todo-btn-icon {
+  color: var(--accent);
+}
+
+/* ─── Todo List View ─────────────────────────────────────── */
+
+.todo-view {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 32px 40px 40px;
+  overflow-y: auto;
+  gap: 24px;
+}
+
+.todo-view::-webkit-scrollbar {
+  width: 6px;
+}
+.todo-view::-webkit-scrollbar-track {
+  background: transparent;
+}
+.todo-view::-webkit-scrollbar-thumb {
+  background: var(--scrollbar);
+  border-radius: 4px;
+}
+
+.todo-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.5px;
+  flex-shrink: 0;
+}
+
+/* ── Long-term Goals section ─────────── */
+
+.todo-goals-section {
+  background: var(--sidebar-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.todo-goals-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: background 0.1s;
+}
+
+.todo-goals-header:hover {
+  background: var(--item-hover);
+}
+
+.todo-goals-label {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.todo-goals-chevron {
+  font-size: 12px;
+  color: var(--text-dim);
+  transition: transform 0.22s ease;
+}
+
+.todo-goals-chevron.collapsed {
+  transform: rotate(-90deg);
+}
+
+.todo-goals-body {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.25s ease;
+}
+
+.todo-goals-body.expanded {
+  padding-top: 5px;
+  grid-template-rows: 1fr;
+}
+
+.todo-goals-inner {
+  overflow: hidden;
+  padding: 0 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* ── Checkbox items (shared goals + tasks) ── */
+
+.todo-check-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 2px 0;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.todo-check-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  flex: 1;
+  min-width: 0;
+  padding: 2px 0;
+}
+
+.todo-check-toggle {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.todo-check-item input[type="checkbox"] {
+  display: none;
+}
+
+.todo-check-circle {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--scrollbar);
+  flex-shrink: 0;
+  position: relative;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
+}
+
+.todo-check-label:hover .todo-check-circle {
+  border-color: var(--accent);
+}
+
+.todo-check-item.checked .todo-check-circle {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.todo-check-item.checked .todo-check-circle::after {
+  content: "";
+  position: absolute;
+  top: 4px;
+  left: 3px;
+  width: 9px;
+  height: 5px;
+  border: 2px solid var(--on-accent);
+  border-top: none;
+  border-right: none;
+  transform: rotate(-48deg);
+}
+
+.todo-check-text {
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.4;
+  flex: 1;
+  min-width: 0;
+  cursor: text;
+  padding: 1px 0;
+  border-radius: 4px;
+}
+
+.todo-check-item.checked .todo-check-text {
+  color: var(--text-dim);
+  text-decoration: line-through;
+  text-decoration-color: var(--scrollbar);
+}
+
+.todo-edit-input {
+  flex: 1;
+  font-size: 14px;
+  color: var(--text);
+  background: var(--sidebar);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  padding: 1px 5px;
+  outline: none;
+  font-family: inherit;
+  line-height: 1.4;
+  min-width: 0;
+  margin: -1px 0;
+}
+
+/* ── Remove (X) button ── */
+
+.todo-remove-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 10px;
+  flex-shrink: 0;
+  opacity: 0;
+  transition:
+    opacity 0.12s,
+    background 0.12s,
+    color 0.12s;
+}
+
+.todo-check-item:hover .todo-remove-btn {
+  opacity: 0.6;
+}
+
+.todo-remove-btn:hover {
+  opacity: 1 !important;
+  background: var(--danger-subtle);
+  color: var(--danger);
+}
+
+/* ── Add row (input + button) ── */
+
+.todo-add-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.todo-add-input {
+  flex: 1;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 13px;
+  padding: 8px 12px;
+  outline: none;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.todo-add-input::placeholder {
+  color: var(--text-dim);
+  opacity: 0.6;
+}
+
+.todo-add-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(141, 184, 122, 0.18);
+}
+
+.todo-add-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--on-accent);
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  flex-shrink: 0;
+  transition:
+    opacity 0.15s,
+    transform 0.1s;
+}
+
+.todo-add-btn:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+.todo-add-btn:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.todo-add-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+/* ── Day navigation (compact mode) ───── */
+
+.todo-day-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.todo-day-nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--sidebar-bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 14px;
+  flex-shrink: 0;
+  transition:
+    background 0.12s,
+    border-color 0.12s,
+    color 0.12s;
+}
+
+.todo-day-nav-btn:hover:not(:disabled) {
+  background: var(--accent-subtle);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.todo-day-nav-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.todo-day-nav-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.todo-day-nav-date {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-dim);
+}
+
+/* ── 3-day cards section ─────────────── */
+
+.todo-days-section {
+  display: flex;
+  gap: 16px;
+  flex: 1;
+  min-height: 200px;
+}
+
+.todo-days-section.compact {
+  flex-direction: column;
+  min-height: 0;
+}
+
+.todo-day-card {
+  flex: 1;
+  background: var(--sidebar-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+}
+
+.todo-day-card.today {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.todo-day-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  flex-shrink: 0;
+}
+
+.todo-day-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.todo-day-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.todo-day-name.today {
+  color: var(--accent);
+}
+
+.todo-day-relative {
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.todo-day-count {
+  font-size: 12px;
+  color: var(--text-dim);
+  font-weight: 500;
+}
+
+.todo-day-tasks {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Matcha theme  —  tea-steeped reader view
+   ═══════════════════════════════════════════════════════════ */
+
+:root[data-theme="matcha"] {
+  --bg: #e5e8d4;
+  --sidebar-bg: #dbe0c6;
+  --main-bg: #eceee0;
+  --surface: #e8ebd6;
+  --border: #c3c8ad;
+  --scrollbar: #adb395;
+  --text: #363d2c;
+  --text-dim: #7a836a;
+  --accent: #5f8a4a;
+  --accent-subtle: rgba(95, 138, 74, 0.2);
+  --item-hover: rgba(60, 80, 40, 0.06);
+  --on-accent: #ffffff;
+  --danger: #c44040;
+  --danger-subtle: rgba(196, 64, 64, 0.08);
+  --table-border: #c3c8ad;
+}
+
+/* ── Matcha: popovers & dropdowns ─────────── */
+
+[data-theme="matcha"] .folder-dropdown,
+[data-theme="matcha"] .style-dropdown,
+[data-theme="matcha"] .attach-dropdown,
+[data-theme="matcha"] .context-menu,
+[data-theme="matcha"] .table-toolbar {
+  background: rgba(236, 238, 224, 0.96);
+  border-color: rgba(60, 80, 40, 0.12);
+  box-shadow:
+    0 8px 32px rgba(50, 60, 30, 0.1),
+    0 2px 8px rgba(50, 60, 30, 0.06);
+}
+
+[data-theme="matcha"] .folder-dropdown-item:hover,
+[data-theme="matcha"] .style-inline-btn:hover,
+[data-theme="matcha"] .style-option:hover,
+[data-theme="matcha"] .attach-option:hover,
+[data-theme="matcha"] .table-toolbar-btn:hover {
+  background: rgba(60, 80, 40, 0.08);
+}
+
+[data-theme="matcha"] .table-toolbar-divider {
+  background: rgba(60, 80, 40, 0.1);
+}
+
+[data-theme="matcha"] .style-dropdown-divider {
+  background: rgba(60, 80, 40, 0.1);
+}
+
+/* ── Matcha: file attachment ─────────────── */
+
+[data-theme="matcha"] .file-attachment-block {
+  background: rgba(60, 80, 40, 0.05);
+  border-color: rgba(60, 80, 40, 0.12);
+}
+
+[data-theme="matcha"] .file-attachment-block:hover {
+  background: rgba(60, 80, 40, 0.08);
+  border-color: rgba(60, 80, 40, 0.18);
+}
+
+[data-theme="matcha"] .file-attachment-download:hover {
+  background: rgba(60, 80, 40, 0.08);
+}
+
+/* ── Matcha: tooltips ──────────────────────── */
+
+[data-theme="matcha"] .toolbar-btn[data-tooltip]::before {
+  border-bottom-color: rgba(236, 238, 224, 0.97);
+}
+
+[data-theme="matcha"] .toolbar-btn[data-tooltip]::after {
+  background: rgba(236, 238, 224, 0.97);
+  border-color: rgba(60, 80, 40, 0.12);
+  box-shadow:
+    0 4px 6px -1px rgba(50, 60, 30, 0.08),
+    0 10px 24px -4px rgba(50, 60, 30, 0.12);
+}
+
+/* ── Matcha: modal cards ───────────────────── */
+
+[data-theme="matcha"] .about-card-wrap .about-card {
+  background: rgba(236, 238, 224, 0.97);
+  border-color: rgba(60, 80, 40, 0.12);
+  box-shadow:
+    0 24px 60px rgba(50, 60, 30, 0.12),
+    0 4px 16px rgba(50, 60, 30, 0.08);
+}
+
+[data-theme="matcha"] .bug-report-panel,
+[data-theme="matcha"] .view-bugs-panel,
+[data-theme="matcha"] .account-card-wrap .account-card,
+[data-theme="matcha"] .settings-card,
+[data-theme="matcha"] .manage-lists-card,
+[data-theme="matcha"] .avatar-picker-panel {
+  border-color: rgba(60, 80, 40, 0.12);
+  box-shadow:
+    0 24px 60px rgba(50, 60, 30, 0.12),
+    0 4px 16px rgba(50, 60, 30, 0.08);
+}
+
+/* ── Matcha: dividers & misc ───────────────── */
+
+[data-theme="matcha"] .note-list-divider {
+  background: var(--border);
+}
+
+[data-theme="matcha"] .avatar-picker-option:hover {
+  border-color: rgba(60, 80, 40, 0.15);
+}
+
+/* ── Matcha: focus rings ───────────────────── */
+
+[data-theme="matcha"] .sidebar-avatar:hover {
+  box-shadow: 0 0 0 3px rgba(95, 138, 74, 0.28);
+}
+
+[data-theme="matcha"] .sidebar-search-wrap:focus-within {
+  box-shadow: 0 0 0 3px rgba(95, 138, 74, 0.22);
+}
+
+[data-theme="matcha"] .toolbar-search:focus {
+  box-shadow: 0 0 0 3px rgba(95, 138, 74, 0.22);
+}
+
+[data-theme="matcha"] .auth-input:focus {
+  box-shadow: 0 0 0 3px rgba(95, 138, 74, 0.22);
+}
+
+[data-theme="matcha"] .bug-report-input:focus,
+[data-theme="matcha"] .bug-report-textarea:focus {
+  box-shadow: 0 0 0 3px rgba(95, 138, 74, 0.22);
+}
+
+[data-theme="matcha"] .account-avatar-large:hover {
+  box-shadow: 0 0 0 4px rgba(95, 138, 74, 0.24);
+}
+
+[data-theme="matcha"] .avatar-picker-option.selected {
+  box-shadow: 0 0 0 3px rgba(95, 138, 74, 0.28);
+}
+
+[data-theme="matcha"] .todo-add-input:focus {
+  box-shadow: 0 0 0 3px rgba(95, 138, 74, 0.22);
+}
+
+[data-theme="matcha"] .todo-day-card.today {
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+/* ── Matcha: caps-lock indicator ───────────── */
+
+[data-theme="matcha"] .account-password-input::-webkit-caps-lock-indicator {
+  filter: opacity(0.45);
+}
+
+/* ── Matcha: auth animations ───────────────── */
+
+[data-theme="matcha"] .auth-check-circle {
+  box-shadow: 0 0 0 0 rgba(95, 138, 74, 0.4);
+}
+
+/* ── Matcha: selected note text on accent bg ─ */
+
+[data-theme="matcha"]
+  .note-list.sidebar-focused
+  .note-item.active
+  .note-item-date,
+[data-theme="matcha"]
+  .note-list.sidebar-focused
+  .note-item.active
+  .note-item-preview,
+[data-theme="matcha"]
+  .note-list.sidebar-focused
+  .note-item.selected
+  .note-item-date,
+[data-theme="matcha"]
+  .note-list.sidebar-focused
+  .note-item.selected
+  .note-item-preview {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+/* ── Matcha: toasts ──────────────────────── */
+
+[data-theme="matcha"] .toast {
+  background: rgba(236, 238, 224, 0.94);
+  color: #363d2c;
+  box-shadow: 0 4px 24px rgba(50, 60, 30, 0.15);
+}
+
+[data-theme="matcha"] .toast-error {
+  background: rgba(196, 64, 64, 0.92);
+  color: #fff;
+}
+
+/* ── Matcha: modal overlays ──────────────── */
+
+[data-theme="matcha"] .about-overlay,
+[data-theme="matcha"] .account-overlay,
+[data-theme="matcha"] .settings-overlay,
+[data-theme="matcha"] .manage-lists-overlay {
+  background: rgba(54, 61, 44, 0.18);
+}
+
 /* ═══════════════════════════════════════════════════════════
    Light theme
    ═══════════════════════════════════════════════════════════ */
 
 :root[data-theme="light"] {
   --bg: #f7f6f3;
-  --sidebar-bg: #efeeeb;
-  --main-bg: #faf9f6;
-  --surface: #e5e4e0;
+  --sidebar-bg: #fafafa;
+  --main-bg: #ebebf0;
+  --surface: #fafafa;
   --border: #d5d3cd;
   --scrollbar: #c0beb7;
   --text: #2a2e25;
-  --text-dim: #7d8274;
+  --text-dim: #707081;
   --accent: #69915b;
   --accent-subtle: rgba(95, 154, 74, 0.338);
   --item-hover: rgba(0, 0, 0, 0.04);
   --on-accent: #ffffff;
   --danger: #d14040;
   --danger-subtle: rgba(209, 64, 64, 0.08);
+  --table-border: #d5d3cd;
 }
 
 /* ── Light: popovers & dropdowns ─────────── */
@@ -3346,7 +4424,7 @@ body,
 
 /* ── Light: modal cards ───────────────────── */
 
-[data-theme="light"] .about-card {
+[data-theme="light"] .about-card-wrap .about-card {
   background: rgba(255, 255, 255, 0.97);
   border-color: rgba(0, 0, 0, 0.1);
   box-shadow:
@@ -3354,6 +4432,8 @@ body,
     0 4px 16px rgba(0, 0, 0, 0.06);
 }
 
+[data-theme="light"] .bug-report-panel,
+[data-theme="light"] .view-bugs-panel,
 [data-theme="light"] .account-card-wrap .account-card,
 [data-theme="light"] .settings-card,
 [data-theme="light"] .manage-lists-card,
@@ -3392,12 +4472,25 @@ body,
   box-shadow: 0 0 0 3px rgba(95, 154, 74, 0.18);
 }
 
+[data-theme="light"] .bug-report-input:focus,
+[data-theme="light"] .bug-report-textarea:focus {
+  box-shadow: 0 0 0 3px rgba(95, 154, 74, 0.18);
+}
+
 [data-theme="light"] .account-avatar-large:hover {
   box-shadow: 0 0 0 4px rgba(95, 154, 74, 0.2);
 }
 
 [data-theme="light"] .avatar-picker-option.selected {
   box-shadow: 0 0 0 3px rgba(95, 154, 74, 0.25);
+}
+
+[data-theme="light"] .todo-add-input:focus {
+  box-shadow: 0 0 0 3px rgba(95, 154, 74, 0.18);
+}
+
+[data-theme="light"] .todo-day-card.today {
+  box-shadow: 0 0 0 1px var(--accent);
 }
 
 /* ── Light: caps-lock indicator ───────────── */
@@ -3431,6 +4524,69 @@ body,
   .note-item.selected
   .note-item-preview {
   color: rgba(255, 255, 255, 0.75);
+}
+
+/* ── Toast ── */
+
+.toast-container {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10000;
+  pointer-events: none;
+}
+
+.toast {
+  background: rgba(0, 0, 0, 0.82);
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
+  animation:
+    toast-in 0.32s ease-out,
+    toast-out 0.35s 3.1s ease-in forwards;
+  white-space: nowrap;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes toast-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(8px) scale(0.97);
+  }
+}
+
+.toast-error {
+  background: rgba(180, 40, 40, 0.88);
+}
+
+[data-theme="light"] .toast {
+  background: rgba(255, 255, 255, 0.92);
+  color: #1a1a1a;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+}
+
+[data-theme="light"] .toast-error {
+  background: rgba(200, 50, 50, 0.92);
+  color: #fff;
 }
 
 /* ── Light: modal overlays get subtle scrim ── */

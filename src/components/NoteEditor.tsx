@@ -22,6 +22,8 @@ import {
   faImage,
   faFilePdf,
   faTrash,
+  faArrowRotateLeft,
+  faTrashCan,
 } from "@fortawesome/free-solid-svg-icons";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Note } from "../App";
@@ -109,11 +111,15 @@ interface Props {
   note: Note;
   onSave: (id: string, content: string) => void;
   onDelete: () => void;
+  onRestore?: () => void;
+  onContentChange?: (id: string, content: string) => void;
   newNoteStartWith?: "title" | "heading" | "subheading" | "body";
   autoSortChecked?: boolean;
   autoFocus?: boolean;
   supabaseClient?: SupabaseClient | null;
   userId?: string | null;
+  creatorName?: string;
+  readOnly?: boolean;
 }
 
 function formatTimestamp(ts: number): string {
@@ -253,7 +259,7 @@ async function readPathAsFile(
   return new File([bytes], name, { type: mime });
 }
 
-export function NoteEditor({ note, onSave, onDelete, newNoteStartWith = "title", autoSortChecked = true, autoFocus = true, supabaseClient, userId }: Props) {
+export function NoteEditor({ note, onSave, onDelete, onRestore, onContentChange, newNoteStartWith = "title", autoSortChecked = true, autoFocus = true, supabaseClient, userId, creatorName, readOnly = false }: Props) {
   const saveTimer = useRef<ReturnType<typeof setTimeout>>();
   const [stylePickerOpen, setStylePickerOpen] = useState(false);
   const [attachMenuOpen, setAttachMenuOpen] = useState(false);
@@ -319,11 +325,13 @@ export function NoteEditor({ note, onSave, onDelete, newNoteStartWith = "title",
     content: note.content
       ? JSON.parse(note.content)
       : defaultContentForStartWith(newNoteStartWith),
+    editable: !readOnly,
     autofocus: autoFocus ? "end" : false,
     onUpdate({ editor }) {
+      const json = JSON.stringify(editor.getJSON());
+      onContentChange?.(note.id, json);
       clearTimeout(saveTimer.current);
       saveTimer.current = setTimeout(() => {
-        const json = JSON.stringify(editor.getJSON());
 
         const current = extractStorageUrls(json);
         const currentImages = new Set(current.imageUrls);
@@ -492,169 +500,195 @@ export function NoteEditor({ note, onSave, onDelete, newNoteStartWith = "title",
 
         <div className="toolbar-spacer" />
 
-        <div className="toolbar-center-group">
-          {/* ── Text style (Aa dropdown) ── */}
-          <div className="style-dropdown-wrap" ref={stylePickerRef}>
+        {readOnly ? (
+          <div className="toolbar-center-group">
+            {onRestore && (
+              <button
+                className={btn(false)}
+                onMouseDown={(e) => { e.preventDefault(); onRestore(); }}
+                title="Restore Note"
+              >
+                <FontAwesomeIcon icon={faArrowRotateLeft} />
+              </button>
+            )}
             <button
-              className={btn(stylePickerOpen)}
-              onClick={() => setStylePickerOpen((v) => !v)}
-              title="Text Style"
+              className={btn(false, "toolbar-btn-danger")}
+              onMouseDown={(e) => { e.preventDefault(); onDelete(); }}
+              title="Delete Permanently"
             >
-              <span className="aa-label">Aa</span>
+              <FontAwesomeIcon icon={faTrashCan} />
+            </button>
+          </div>
+        ) : (
+          <div className="toolbar-center-group">
+            {/* ── Text style (Aa dropdown) ── */}
+            <div className="style-dropdown-wrap" ref={stylePickerRef}>
+              <button
+                className={btn(stylePickerOpen)}
+                onClick={() => setStylePickerOpen((v) => !v)}
+                title="Text Style"
+              >
+                <span className="aa-label">Aa</span>
+              </button>
+
+              {stylePickerOpen && (
+                <div className="style-dropdown">
+                  <div className="style-inline-row">
+                    <button
+                      className={`style-inline-btn${editor.isActive("bold") ? " active" : ""}`}
+                      onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleBold().run(); }}
+                    >
+                      <span className="style-inline-bold">B</span>
+                    </button>
+                    <button
+                      className={`style-inline-btn${editor.isActive("italic") ? " active" : ""}`}
+                      onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleItalic().run(); }}
+                    >
+                      <span className="style-inline-italic">I</span>
+                    </button>
+                    <button
+                      className={`style-inline-btn${editor.isActive("underline") ? " active" : ""}`}
+                      onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleUnderline().run(); }}
+                    >
+                      <span className="style-inline-underline">U</span>
+                    </button>
+                    <button
+                      className={`style-inline-btn${editor.isActive("strike") ? " active" : ""}`}
+                      onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleStrike().run(); }}
+                    >
+                      <span className="style-inline-strike">S</span>
+                    </button>
+                  </div>
+                  <div className="style-dropdown-divider" />
+                  {BLOCK_STYLES.map(({ value, label, prefix, dividerBefore }) => {
+                    const isActive = activeStyle() === value;
+                    return (
+                      <React.Fragment key={value}>
+                        {dividerBefore && <div className="style-dropdown-divider" />}
+                        <button
+                          className={`style-option${isActive ? " active" : ""}`}
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            applyStyle(value);
+                          }}
+                        >
+                          <span className="style-check">{isActive ? "✓" : ""}</span>
+                          <span className={`style-label style-label-${value}`}>
+                            {prefix && <span className="style-prefix">{prefix}</span>}
+                            {label}
+                          </span>
+                        </button>
+                      </React.Fragment>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            <button
+              className={btn(false)}
+              onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleTaskList().run(); }}
+              title="Checklist"
+            >
+              <FontAwesomeIcon icon={faSquareCheck} />
             </button>
 
-            {stylePickerOpen && (
-              <div className="style-dropdown">
-                <div className="style-inline-row">
+            <button
+              className={btn(false)}
+              onMouseDown={(e) => {
+                e.preventDefault();
+                editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
+              }}
+              title="Table"
+            >
+              <FontAwesomeIcon icon={faTableCellsLarge} />
+            </button>
+
+            {/* ── Attachment menu ── */}
+            <div className="attach-dropdown-wrap" ref={attachMenuRef}>
+              <button
+                className={btn(attachMenuOpen)}
+                onClick={() => setAttachMenuOpen((v) => !v)}
+                title="Attachments"
+              >
+                <FontAwesomeIcon icon={faPaperclip} />
+              </button>
+
+              {attachMenuOpen && (
+                <div className="attach-dropdown">
                   <button
-                    className={`style-inline-btn${editor.isActive("bold") ? " active" : ""}`}
-                    onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleBold().run(); }}
+                    className="attach-option"
+                    onMouseDown={async (e) => {
+                      e.preventDefault();
+                      setAttachMenuOpen(false);
+                      if (!editor) return;
+                      const selected = await open({
+                        multiple: true,
+                        filters: [{ name: "Images", extensions: ["png", "jpg", "jpeg", "gif", "webp", "bmp", "svg", "heic"] }],
+                      });
+                      if (!selected) return;
+                      const paths = Array.isArray(selected) ? selected : [selected];
+                      for (const filePath of paths) {
+                        const file = await readPathAsFile(filePath, imageMimeMap);
+                        const src = await resolveImage.current!(file);
+                        editor.chain().focus().setImage({ src }).run();
+                      }
+                    }}
                   >
-                    <span className="style-inline-bold">B</span>
+                    <FontAwesomeIcon icon={faImage} className="attach-option-icon" />
+                    <span>Attach Photo</span>
                   </button>
                   <button
-                    className={`style-inline-btn${editor.isActive("italic") ? " active" : ""}`}
-                    onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleItalic().run(); }}
+                    className="attach-option"
+                    onMouseDown={async (e) => {
+                      e.preventDefault();
+                      setAttachMenuOpen(false);
+                      if (!editor) return;
+                      const selected = await open({
+                        multiple: true,
+                        filters: [{ name: "PDF Documents", extensions: ["pdf"] }],
+                      });
+                      if (!selected) return;
+                      const paths = Array.isArray(selected) ? selected : [selected];
+                      for (const filePath of paths) {
+                        const file = await readPathAsFile(filePath, { pdf: "application/pdf" });
+                        const result = await resolveFile.current!(file);
+                        if (result) {
+                          editor
+                            .chain()
+                            .focus()
+                            .insertContent({ type: "fileAttachment", attrs: result })
+                            .run();
+                        }
+                      }
+                    }}
                   >
-                    <span className="style-inline-italic">I</span>
-                  </button>
-                  <button
-                    className={`style-inline-btn${editor.isActive("underline") ? " active" : ""}`}
-                    onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleUnderline().run(); }}
-                  >
-                    <span className="style-inline-underline">U</span>
-                  </button>
-                  <button
-                    className={`style-inline-btn${editor.isActive("strike") ? " active" : ""}`}
-                    onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleStrike().run(); }}
-                  >
-                    <span className="style-inline-strike">S</span>
+                    <FontAwesomeIcon icon={faFilePdf} className="attach-option-icon" />
+                    <span>Attach PDF</span>
                   </button>
                 </div>
-                <div className="style-dropdown-divider" />
-                {BLOCK_STYLES.map(({ value, label, prefix, dividerBefore }) => {
-                  const isActive = activeStyle() === value;
-                  return (
-                    <React.Fragment key={value}>
-                      {dividerBefore && <div className="style-dropdown-divider" />}
-                      <button
-                        className={`style-option${isActive ? " active" : ""}`}
-                        onMouseDown={(e) => {
-                          e.preventDefault();
-                          applyStyle(value);
-                        }}
-                      >
-                        <span className="style-check">{isActive ? "✓" : ""}</span>
-                        <span className={`style-label style-label-${value}`}>
-                          {prefix && <span className="style-prefix">{prefix}</span>}
-                          {label}
-                        </span>
-                      </button>
-                    </React.Fragment>
-                  );
-                })}
-              </div>
-            )}
+              )}
+            </div>
           </div>
-
-          <button
-            className={btn(false)}
-            onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleTaskList().run(); }}
-            title="Checklist"
-          >
-            <FontAwesomeIcon icon={faSquareCheck} />
-          </button>
-
-          <button
-            className={btn(false)}
-            onMouseDown={(e) => {
-              e.preventDefault();
-              editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
-            }}
-            title="Table"
-          >
-            <FontAwesomeIcon icon={faTableCellsLarge} />
-          </button>
-
-          {/* ── Attachment menu ── */}
-          <div className="attach-dropdown-wrap" ref={attachMenuRef}>
-            <button
-              className={btn(attachMenuOpen)}
-              onClick={() => setAttachMenuOpen((v) => !v)}
-              title="Attachments"
-            >
-              <FontAwesomeIcon icon={faPaperclip} />
-            </button>
-
-            {attachMenuOpen && (
-              <div className="attach-dropdown">
-                <button
-                  className="attach-option"
-                  onMouseDown={async (e) => {
-                    e.preventDefault();
-                    setAttachMenuOpen(false);
-                    if (!editor) return;
-                    const selected = await open({
-                      multiple: true,
-                      filters: [{ name: "Images", extensions: ["png", "jpg", "jpeg", "gif", "webp", "bmp", "svg", "heic"] }],
-                    });
-                    if (!selected) return;
-                    const paths = Array.isArray(selected) ? selected : [selected];
-                    for (const filePath of paths) {
-                      const file = await readPathAsFile(filePath, imageMimeMap);
-                      const src = await resolveImage.current!(file);
-                      editor.chain().focus().setImage({ src }).run();
-                    }
-                  }}
-                >
-                  <FontAwesomeIcon icon={faImage} className="attach-option-icon" />
-                  <span>Attach Photo</span>
-                </button>
-                <button
-                  className="attach-option"
-                  onMouseDown={async (e) => {
-                    e.preventDefault();
-                    setAttachMenuOpen(false);
-                    if (!editor) return;
-                    const selected = await open({
-                      multiple: true,
-                      filters: [{ name: "PDF Documents", extensions: ["pdf"] }],
-                    });
-                    if (!selected) return;
-                    const paths = Array.isArray(selected) ? selected : [selected];
-                    for (const filePath of paths) {
-                      const file = await readPathAsFile(filePath, { pdf: "application/pdf" });
-                      const result = await resolveFile.current!(file);
-                      if (result) {
-                        editor
-                          .chain()
-                          .focus()
-                          .insertContent({ type: "fileAttachment", attrs: result })
-                          .run();
-                      }
-                    }
-                  }}
-                >
-                  <FontAwesomeIcon icon={faFilePdf} className="attach-option-icon" />
-                  <span>Attach PDF</span>
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
+        )}
 
         <div className="toolbar-spacer" />
 
-        <button
-          className={btn(false, "toolbar-btn-danger")}
-          onMouseDown={(e) => { e.preventDefault(); onDelete(); }}
-          title="Delete Note"
-        >
-          <FontAwesomeIcon icon={faTrash} />
-        </button>
+        {!readOnly && (
+          <button
+            className={btn(false, "toolbar-btn-danger")}
+            onMouseDown={(e) => { e.preventDefault(); onDelete(); }}
+            title="Delete Note"
+          >
+            <FontAwesomeIcon icon={faTrash} />
+          </button>
+        )}
       </div>
 
       <div className="editor-timestamp">{formatTimestamp(note.updated_at)}</div>
+      {creatorName && (
+        <div className="editor-created-by">Created by {creatorName}</div>
+      )}
 
       <div className="editor-scroll-area" ref={editorScrollRef}>
         <EditorContent editor={editor} className="editor" />
