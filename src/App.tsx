@@ -471,7 +471,11 @@ function App() {
 			const merged = new Map(localMap);
 			for (const [id, cloudNote] of cloudMap) {
 				const local = localMap.get(id);
-				if (!local || cloudNote.updated_at > local.updated_at) {
+				if (!local) {
+					merged.set(id, cloudNote);
+				} else if (cloudNote.deleted && !local.deleted) {
+					merged.set(id, { ...local, deleted: true, deleted_at: cloudNote.deleted_at });
+				} else if (cloudNote.updated_at > local.updated_at) {
 					merged.set(id, cloudNote);
 				}
 			}
@@ -485,6 +489,8 @@ function App() {
 							content: local.content,
 							list: local.list,
 							pinned: local.pinned,
+							deleted: local.deleted,
+							deleted_at: local.deleted_at,
 							created_at: local.created_at,
 							updated_at: local.updated_at,
 						})
@@ -500,7 +506,9 @@ function App() {
 			invoke("set_notes", { notes: sorted });
 			return sorted;
 		});
-	}, [user]);
+
+		fetchSharedNotes();
+	}, [user, fetchSharedNotes]);
 
 	useEffect(() => {
 		if (!user || loading || cloudSyncAttempted.current) return;
