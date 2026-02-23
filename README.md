@@ -1,6 +1,15 @@
-# matcha
+<br />
+<div align="center">
+  <a href="https://github.com/alexshoe/matcha">
+    <img width="158" height="105" alt="matcha_logo_m" src="https://github.com/user-attachments/assets/c3f37e6e-13d6-4ff3-aea7-47064c7a69b9" />
+  </a>
+  <h3 align="center">matcha</h3>
+  <p align="center">
+    A lightweight, cross-platform to-do list app.
+  </p>
+</div>
 
-A lightweight, cross-platform to-do list app.
+-----
 
 - Rich text editing — headings, bold, italic, lists, blockquotes, tables
 - Task lists with checkboxes and drag-to-reorder
