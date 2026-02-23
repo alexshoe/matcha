@@ -49,7 +49,9 @@ interface SidebarProps {
 	onSetActiveFolder: (folder: string) => void;
 	onSetSidebarFocused: (focused: boolean) => void;
 	onRenameNote: (id: string, newTitle: string) => void;
-	onContextMenu: (menu: { x: number; y: number; noteId: string } | null) => void;
+	onContextMenu: (
+		menu: { x: number; y: number; noteId: string } | null,
+	) => void;
 	onOpenAccount: () => void;
 	onOpenAbout: () => void;
 	onOpenSettings: () => void;
@@ -227,16 +229,14 @@ export function Sidebar({
 					targetIdx = topIdx > 0 ? topIdx - 1 : topIdx;
 				} else {
 					const bottomIdx = Math.max(...indices);
-					targetIdx =
-						bottomIdx < ids.length - 1 ? bottomIdx + 1 : bottomIdx;
+					targetIdx = bottomIdx < ids.length - 1 ? bottomIdx + 1 : bottomIdx;
 				}
 			} else {
 				const currentIdx = ids.indexOf(selectedId ?? "");
 				if (currentIdx === -1) {
 					targetIdx = 0;
 				} else {
-					targetIdx =
-						e.key === "ArrowUp" ? currentIdx - 1 : currentIdx + 1;
+					targetIdx = e.key === "ArrowUp" ? currentIdx - 1 : currentIdx + 1;
 				}
 			}
 
@@ -259,11 +259,7 @@ export function Sidebar({
 		<aside className="sidebar" style={{ width }}>
 			<div className="sidebar-header">
 				<div className="sidebar-user">
-					<div
-						className="sidebar-avatar"
-						role="button"
-						onClick={onOpenAccount}
-					>
+					<div className="sidebar-avatar" role="button" onClick={onOpenAccount}>
 						{avatarNum ? (
 							<img
 								src={`/avatars/avatar_${avatarNum}.png`}
@@ -429,28 +425,25 @@ export function Sidebar({
 							))}
 							<div className="folder-dropdown-separator" />
 							<button
-								className={`folder-dropdown-item${activeFolder === "Shared List" ? " active" : ""}`}
+								className={`folder-dropdown-item${activeFolder === "Shared Notes" ? " active" : ""}`}
 								onClick={() => {
-									onSetActiveFolder("Shared List");
-									localStorage.setItem("matcha_activeList", "Shared List");
+									onSetActiveFolder("Shared Notes");
+									localStorage.setItem("matcha_activeList", "Shared Notes");
 									setFolderDropdownOpen(false);
 								}}
 							>
 								<span className="folder-dropdown-check-col">
-									{activeFolder === "Shared List" && (
+									{activeFolder === "Shared Notes" && (
 										<FontAwesomeIcon icon={faCheck} />
 									)}
 								</span>
-								<span className="folder-dropdown-name">Shared List</span>
+								<span className="folder-dropdown-name">Shared Notes</span>
 							</button>
 							<button
 								className={`folder-dropdown-item${activeFolder === "Recently Deleted" ? " active" : ""}`}
 								onClick={() => {
 									onSetActiveFolder("Recently Deleted");
-									localStorage.setItem(
-										"matcha_activeList",
-										"Recently Deleted",
-									);
+									localStorage.setItem("matcha_activeList", "Recently Deleted");
 									setFolderDropdownOpen(false);
 								}}
 							>

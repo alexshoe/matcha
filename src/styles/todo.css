@@ -271,7 +271,7 @@
   justify-content: center;
   width: 16px;
   flex-shrink: 0;
-  color: var(--text-dim);
+  color: var(--text);
   font-size: 10px;
   cursor: grab;
   opacity: 0;
@@ -280,11 +280,11 @@
 }
 
 .todo-check-item:hover .todo-drag-handle {
-  opacity: 0.45;
+  opacity: 0.28;
 }
 
 .todo-drag-handle:hover {
-  opacity: 0.8 !important;
+  opacity: 0.55 !important;
 }
 
 .todo-drag-handle:active {

@@ -3,7 +3,7 @@ import { Extension, mergeAttributes } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
 import { OrderedList } from "@tiptap/extension-ordered-list";
 import { TaskList } from "@tiptap/extension-task-list";
-import { TaskItem } from "@tiptap/extension-task-item";
+import { DraggableTaskItem } from "../extensions/DraggableTaskItem";
 import Placeholder from "@tiptap/extension-placeholder";
 import { ResizableImage } from "../extensions/ResizableImage";
 import { FileAttachment } from "../extensions/FileAttachment";
@@ -431,7 +431,7 @@ export function NoteEditor({
 		}),
 		CounterOrderedList,
 		TaskList,
-		TaskItem.configure({ nested: true }),
+		DraggableTaskItem.configure({ nested: true }),
 		ResizableImage.configure({ inline: false, allowBase64: true }),
 		FileAttachment,
 		Table.configure({ resizable: true, lastColumnResizable: false }),
