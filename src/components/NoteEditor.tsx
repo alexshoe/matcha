@@ -23,6 +23,8 @@ import {
 	faTrash,
 	faArrowRotateLeft,
 	faTrashCan,
+	faUserPlus,
+	faRightFromBracket,
 } from "@fortawesome/free-solid-svg-icons";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Note } from "../types";
@@ -121,6 +123,8 @@ interface Props {
 	userId: string;
 	creatorName?: string;
 	readOnly?: boolean;
+	onShare?: () => void;
+	onLeaveShared?: () => void;
 }
 
 function formatTimestamp(ts: number): string {
@@ -375,6 +379,8 @@ export function NoteEditor({
 	userId,
 	creatorName,
 	readOnly = false,
+	onShare,
+	onLeaveShared,
 }: Props) {
 	const saveTimer = useRef<ReturnType<typeof setTimeout>>();
 	const [stylePickerOpen, setStylePickerOpen] = useState(false);
@@ -882,6 +888,32 @@ export function NoteEditor({
 				)}
 
 				<div className="toolbar-spacer" />
+
+				{onShare && !readOnly && (
+					<button
+						className={btn(false)}
+						onMouseDown={(e) => {
+							e.preventDefault();
+							onShare();
+						}}
+						title="Share Note"
+					>
+						<FontAwesomeIcon icon={faUserPlus} />
+					</button>
+				)}
+
+				{onLeaveShared && (
+					<button
+						className={btn(false, "toolbar-btn-danger")}
+						onMouseDown={(e) => {
+							e.preventDefault();
+							onLeaveShared();
+						}}
+						title="Leave Shared Note"
+					>
+						<FontAwesomeIcon icon={faRightFromBracket} />
+					</button>
+				)}
 
 				{!readOnly && (
 					<button

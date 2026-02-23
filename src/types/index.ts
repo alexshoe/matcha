@@ -9,6 +9,18 @@ export interface Note {
 	deleted_at: number | null;
 }
 
+export interface SharedNoteEntry extends Note {
+	owner_display_name: string;
+	owner_avatar_num: number | null;
+	is_own: boolean;
+	shared_with_names?: string[];
+}
+
+export interface UserProfile {
+	display_name: string;
+	avatar_num: number | null;
+}
+
 export type SortNotesBy = "date_edited" | "date_created" | "title";
 export type NewNoteStart = "title" | "heading" | "subheading" | "body";
 

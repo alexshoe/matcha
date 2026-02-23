@@ -13,6 +13,7 @@ import {
 	faSquareCheck,
 } from "@fortawesome/free-solid-svg-icons";
 import type { Note } from "../App";
+import type { SharedNoteEntry } from "../types";
 import { extractPreview } from "../utils/noteContent";
 import { getSearchSnippet, highlightText } from "../utils/search";
 import { formatDate } from "../utils/format";
@@ -37,6 +38,8 @@ interface SidebarProps {
 	activeFolder: string;
 	noteLists: string[];
 	isRecentlyDeleted: boolean;
+	isSharedFolder: boolean;
+	sharedNotesMap: Map<string, SharedNoteEntry>;
 	sortFn: (a: Note, b: Note) => number;
 	onSelectNote: (noteId: string, noteIds: string[]) => void;
 	onNoteClick: (note: Note, e: React.MouseEvent) => void;
@@ -96,6 +99,8 @@ export function Sidebar({
 	activeFolder,
 	noteLists,
 	isRecentlyDeleted,
+	isSharedFolder,
+	sharedNotesMap,
 	sortFn,
 	onSelectNote,
 	onNoteClick,
@@ -205,6 +210,25 @@ export function Sidebar({
 						<span className="note-item-preview">{preview}</span>
 					) : null}
 				</div>
+				{isSharedFolder && (() => {
+					const shared = sharedNotesMap.get(note.id);
+					if (!shared) return null;
+					const label = shared.is_own
+						? `Shared with ${shared.shared_with_names?.join(", ") ?? "…"}`
+						: `By ${shared.owner_display_name}`;
+					return (
+						<div className="note-item-shared-by">
+							{!shared.is_own && shared.owner_avatar_num && (
+								<img
+									src={`/avatars/avatar_${shared.owner_avatar_num}.png`}
+									alt=""
+									className="note-item-shared-avatar"
+								/>
+							)}
+							{label}
+						</div>
+					);
+				})()}
 			</button>
 		);
 	}
@@ -283,7 +307,7 @@ export function Sidebar({
 					className="new-note-fab"
 					onClick={onCreateNote}
 					title="New Note"
-					disabled={selectedNoteIsEmpty || isRecentlyDeleted}
+					disabled={selectedNoteIsEmpty || isRecentlyDeleted || isSharedFolder}
 				>
 					<FontAwesomeIcon icon={faPenToSquare} />
 				</button>

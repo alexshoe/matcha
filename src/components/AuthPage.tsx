@@ -3,7 +3,7 @@ import { makeSupabaseClient, supabase } from "../lib/supabase";
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 
 type LoginState = "idle" | "loading" | "success" | "exiting";
-type AuthMode = "login" | "signup" | "forgot";
+type AuthMode = "login" | "signup" | "forgot" | "reset";
 
 function validatePassword(pw: string): string | null {
 	if (pw.length < 8) return "Password must be at least 8 characters.";
@@ -52,6 +52,11 @@ export function AuthPage({
 	const [loginState, setLoginState] = useState<LoginState>("idle");
 	const [error, setError] = useState<string | null>(null);
 	const [infoMessage, setInfoMessage] = useState<string | null>(null);
+	const [otpToken, setOtpToken] = useState("");
+	const [resetPassword, setResetPassword] = useState("");
+	const [resetConfirm, setResetConfirm] = useState("");
+	const [showResetPassword, setShowResetPassword] = useState(false);
+	const [showResetConfirm, setShowResetConfirm] = useState(false);
 
 	const busy = loginState !== "idle";
 
@@ -63,6 +68,11 @@ export function AuthPage({
 	function switchMode(next: AuthMode) {
 		resetMessages();
 		setSignUpDisplayName("");
+		setOtpToken("");
+		setResetPassword("");
+		setResetConfirm("");
+		setShowResetPassword(false);
+		setShowResetConfirm(false);
 		setMode(next);
 	}
 
@@ -172,14 +182,68 @@ export function AuthPage({
 		if (authError) {
 			setError(sanitizeAuthError(authError.message));
 		} else {
-			setMode("login");
-			setInfoMessage("Password reset email sent — check your inbox.");
+			setMode("reset");
+			setInfoMessage("Check your email for an 8-digit reset code.");
 		}
+	}
+
+	async function handleResetWithOtp() {
+		if (busy) return;
+		if (!otpToken.trim()) {
+			setError("Enter the 8-digit code from your email.");
+			return;
+		}
+		const pwError = validatePassword(resetPassword);
+		if (pwError) {
+			setError(pwError);
+			return;
+		}
+		if (resetPassword !== resetConfirm) {
+			setError("Passwords don't match.");
+			return;
+		}
+		resetMessages();
+		setLoginState("loading");
+		const client = makeSupabaseClient(true);
+		if (!client) {
+			setError("Supabase is not configured.");
+			setLoginState("idle");
+			return;
+		}
+		const { error: verifyError } = await client.auth.verifyOtp({
+			email: email.trim(),
+			token: otpToken.trim(),
+			type: "recovery",
+		});
+		if (verifyError) {
+			setError(
+				verifyError.message.includes("expired")
+					? "Code has expired. Please request a new one."
+					: sanitizeAuthError(verifyError.message),
+			);
+			setLoginState("idle");
+			return;
+		}
+		const { error: updateError } = await client.auth.updateUser({
+			password: resetPassword,
+		});
+		if (updateError) {
+			setError(sanitizeAuthError(updateError.message));
+			setLoginState("idle");
+			return;
+		}
+		setLoginState("idle");
+		setMode("login");
+		setOtpToken("");
+		setResetPassword("");
+		setResetConfirm("");
+		setInfoMessage("Password updated! Sign in with your new password.");
 	}
 
 	function handleSubmit() {
 		if (mode === "login") handleLogin();
 		else if (mode === "signup") handleSignUp();
+		else if (mode === "reset") handleResetWithOtp();
 		else handleForgotPassword();
 	}
 
@@ -188,7 +252,9 @@ export function AuthPage({
 			? "Sign in"
 			: mode === "signup"
 				? "Create account"
-				: "Send reset link";
+				: mode === "reset"
+					? "Reset password"
+					: "Send reset code";
 
 	return (
 		<div className="auth-overlay">
@@ -226,6 +292,7 @@ export function AuthPage({
 				<div className="auth-form">
 					{error && <div className="auth-error">{error}</div>}
 					{infoMessage && <div className="auth-info">{infoMessage}</div>}
+				{mode !== "reset" && (
 					<div className="auth-field">
 						<label className="auth-label">Email</label>
 						<input
@@ -238,6 +305,7 @@ export function AuthPage({
 							disabled={busy}
 						/>
 					</div>
+				)}
 					{mode === "signup" && (
 						<div className="auth-field">
 							<label className="auth-label">Display name</label>
@@ -252,10 +320,94 @@ export function AuthPage({
 							/>
 						</div>
 					)}
-					{mode !== "forgot" && (
+				{mode === "reset" && (
+					<>
 						<div className="auth-field">
-							<div className="auth-label-row">
-								<label className="auth-label">Password</label>
+							<label className="auth-label">Reset code</label>
+							<input
+								className="auth-input auth-otp-input"
+								type="text"
+								inputMode="numeric"
+								maxLength={8}
+								placeholder="– – – – – – – –"
+								value={otpToken}
+								onChange={(e) =>
+									setOtpToken(e.target.value.replace(/\D/g, ""))
+								}
+								onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+								disabled={busy}
+							/>
+						</div>
+						<div className="auth-field">
+							<label className="auth-label">New password</label>
+							<div className="auth-input-wrapper">
+								<input
+									className="auth-input auth-input-password"
+									type={showResetPassword ? "text" : "password"}
+									placeholder="••••••••"
+									value={resetPassword}
+									onChange={(e) => setResetPassword(e.target.value)}
+									onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+									disabled={busy}
+								/>
+								<button
+									className="auth-password-toggle"
+									onClick={() => setShowResetPassword((v) => !v)}
+									tabIndex={-1}
+									aria-label={showResetPassword ? "Hide password" : "Reveal password"}
+									disabled={busy}
+								>
+									{showResetPassword ? (
+										<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" width="16" height="16">
+											<path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+											<circle cx="10" cy="10" r="2.5" stroke="currentColor" strokeWidth="1.5" />
+										</svg>
+									) : (
+										<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" width="16" height="16">
+											<path d="M3 3l14 14M8.5 8.6A2.5 2.5 0 0012.4 12.5M6.3 6.4C4.3 7.6 2.9 9.3 2 10c1.5 2.5 4.5 6 8 6 1.5 0 2.9-.5 4.1-1.3M10 4c3.5 0 6.5 3.5 8 6-.5.9-1.2 1.9-2.1 2.7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+										</svg>
+									)}
+								</button>
+							</div>
+						</div>
+						<div className="auth-field">
+							<label className="auth-label">Confirm password</label>
+							<div className="auth-input-wrapper">
+								<input
+									className="auth-input auth-input-password"
+									type={showResetConfirm ? "text" : "password"}
+									placeholder="••••••••"
+									value={resetConfirm}
+									onChange={(e) => setResetConfirm(e.target.value)}
+									onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+									disabled={busy}
+								/>
+								<button
+									className="auth-password-toggle"
+									onClick={() => setShowResetConfirm((v) => !v)}
+									tabIndex={-1}
+									aria-label={showResetConfirm ? "Hide password" : "Reveal password"}
+									disabled={busy}
+								>
+									{showResetConfirm ? (
+										<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" width="16" height="16">
+											<path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+											<circle cx="10" cy="10" r="2.5" stroke="currentColor" strokeWidth="1.5" />
+										</svg>
+									) : (
+										<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" width="16" height="16">
+											<path d="M3 3l14 14M8.5 8.6A2.5 2.5 0 0012.4 12.5M6.3 6.4C4.3 7.6 2.9 9.3 2 10c1.5 2.5 4.5 6 8 6 1.5 0 2.9-.5 4.1-1.3M10 4c3.5 0 6.5 3.5 8 6-.5.9-1.2 1.9-2.1 2.7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+										</svg>
+									)}
+								</button>
+							</div>
+						</div>
+					</>
+				)}
+				{mode !== "forgot" && mode !== "reset" && (
+					<div className="auth-field">
+						<div className="auth-label-row">
+							<label className="auth-label">Password</label>
 								{mode === "login" && (
 									<button
 										className="auth-forgot-btn"
@@ -352,17 +504,17 @@ export function AuthPage({
 							submitLabel
 						)}
 					</button>
-					{mode === "forgot" ? (
-						<p className="auth-signup-row">
-							<button
-								className="auth-signup-link"
-								onClick={() => switchMode("login")}
-								disabled={busy}
-							>
-								Back to sign in
-							</button>
-						</p>
-					) : mode === "login" ? (
+				{mode === "forgot" || mode === "reset" ? (
+					<p className="auth-signup-row">
+						<button
+							className="auth-signup-link"
+							onClick={() => switchMode("login")}
+							disabled={busy}
+						>
+							Back to sign in
+						</button>
+					</p>
+				) : mode === "login" ? (
 						<p className="auth-signup-row">
 							Don't have an account?{" "}
 							<button

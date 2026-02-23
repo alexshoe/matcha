@@ -15,10 +15,12 @@ import { SettingsModal } from "./components/modals/SettingsModal";
 import { ManageListsModal } from "./components/modals/ManageListsModal";
 import { AboutModal } from "./components/modals/AboutModal";
 import { AccountModal } from "./components/modals/AccountModal";
+import { ShareNoteModal } from "./components/modals/ShareNoteModal";
 import { supabase } from "./lib/supabase";
 import { deleteAllNoteImages, deleteAllNoteFiles } from "./lib/storage";
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 import type { SortNotesBy, NewNoteStart } from "./components/modals/SettingsModal";
+import type { SharedNoteEntry } from "./types";
 import "./styles/index.css";
 import { extractPreview, extractAllText, isNoteEmpty } from "./utils/noteContent";
 import { formatBytes } from "./utils/format";
@@ -132,6 +134,10 @@ function App() {
 	const [sharedNoteCreator, setSharedNoteCreator] = useState<string | null>(
 		null,
 	);
+	const [sharedNotes, setSharedNotes] = useState<SharedNoteEntry[]>([]);
+	const [sharedNotesLoading, setSharedNotesLoading] = useState(false);
+	const [shareModalNoteId, setShareModalNoteId] = useState<string | null>(null);
+	const [leaveConfirmNoteId, setLeaveConfirmNoteId] = useState<string | null>(null);
 
 	// ── Animation ref ──
 	const prevNoteRects = useRef<Map<string, DOMRect>>(new Map());
@@ -289,33 +295,115 @@ function App() {
 			});
 	}, [accountOpen, user, notes]);
 
+	const fetchSharedNotes = useCallback(async () => {
+		const db = activeSupabase.current;
+		if (!db || !user) return;
+		setSharedNotesLoading(true);
+
+		const [sharedWithMe, sharedByMe] = await Promise.all([
+			db
+				.from("note_sharing")
+				.select("note_id, notes(*), users!note_sharing_owner_id_fkey(display_name, avatar_num)")
+				.eq("shared_with_id", user.id),
+			db
+				.from("note_sharing")
+				.select("note_id, shared_with_id, users!note_sharing_shared_with_id_fkey(display_name)")
+				.eq("owner_id", user.id),
+		]);
+
+		const ownDisplayName = displayName;
+		const entries = new Map<string, SharedNoteEntry>();
+
+		for (const row of sharedWithMe.data ?? []) {
+			const note = row.notes as unknown as Record<string, unknown> | null;
+			if (!note || note.deleted) continue;
+			const owner = row.users as unknown as Record<string, unknown> | null;
+			entries.set(note.id as string, {
+				id: note.id as string,
+				content: note.content as string,
+				created_at: note.created_at as number,
+				updated_at: note.updated_at as number,
+				pinned: note.pinned as boolean,
+				list: note.list as string,
+				deleted: note.deleted as boolean,
+				deleted_at: (note.deleted_at as number | null) ?? null,
+				owner_display_name: (owner?.display_name as string) ?? "Unknown",
+				owner_avatar_num: (owner?.avatar_num as number | null) ?? null,
+				is_own: false,
+			});
+		}
+
+		const mySharedNoteIds = new Map<string, string[]>();
+		for (const row of sharedByMe.data ?? []) {
+			const recipient = row.users as unknown as Record<string, unknown> | null;
+			if (!recipient?.display_name) continue;
+			const names = mySharedNoteIds.get(row.note_id) ?? [];
+			names.push(recipient.display_name as string);
+			mySharedNoteIds.set(row.note_id, names);
+		}
+
+		if (mySharedNoteIds.size > 0) {
+			const noteIds = [...mySharedNoteIds.keys()];
+			const { data: myNotes } = await db
+				.from("notes")
+				.select("*")
+				.in("id", noteIds)
+				.eq("deleted", false);
+
+			for (const note of myNotes ?? []) {
+				if (!entries.has(note.id)) {
+					entries.set(note.id, {
+						...note,
+						owner_display_name: ownDisplayName,
+						owner_avatar_num: null,
+						is_own: true,
+						shared_with_names: mySharedNoteIds.get(note.id),
+					});
+				} else {
+					const existing = entries.get(note.id);
+					if (existing) {
+						existing.is_own = true;
+						existing.shared_with_names = mySharedNoteIds.get(note.id);
+					}
+				}
+			}
+		}
+
+		const result = [...entries.values()].sort(
+			(a, b) => b.updated_at - a.updated_at,
+		);
+		setSharedNotes(result);
+		setSharedNotesLoading(false);
+		return result;
+	}, [user, displayName]);
+
 	useEffect(() => {
-		if (
-			activeFolder !== "Shared List" ||
-			!selectedId ||
-			!activeSupabase.current
-		) {
+		if (activeFolder === "Shared Notes") {
+			fetchSharedNotes().then((result) => {
+				if (result && result.length > 0) {
+					setSelectedId(result[0].id);
+					setSelectedNoteIds([result[0].id]);
+				}
+			});
+		} else {
+			setSharedNotes([]);
+		}
+	}, [activeFolder, fetchSharedNotes]);
+
+	useEffect(() => {
+		if (activeFolder !== "Shared Notes" || !selectedId) {
 			setSharedNoteCreator(null);
 			return;
 		}
-		const db = activeSupabase.current;
-		db.from("notes")
-			.select("user_id")
-			.eq("id", selectedId)
-			.maybeSingle()
-			.then(async ({ data }) => {
-				if (!data?.user_id) {
-					setSharedNoteCreator(null);
-					return;
-				}
-				const { data: userData } = await db
-					.from("users")
-					.select("display_name")
-					.eq("user_id", data.user_id)
-					.maybeSingle();
-				setSharedNoteCreator(userData?.display_name || null);
-			});
-	}, [selectedId, activeFolder]);
+		const shared = sharedNotes.find((n) => n.id === selectedId);
+		if (shared && !shared.is_own) {
+			setSharedNoteCreator(shared.owner_display_name);
+		} else if (shared?.is_own && shared.shared_with_names?.length) {
+			setSharedNoteCreator(`You → ${shared.shared_with_names.join(", ")}`);
+		} else {
+			setSharedNoteCreator(null);
+		}
+	}, [selectedId, activeFolder, sharedNotes]);
 
 	useEffect(() => {
 		invoke<Note[]>("get_notes")
@@ -427,7 +515,8 @@ function App() {
 
 		const db = activeSupabase.current;
 		if (db && user) {
-			db.from("notes")
+			await db
+				.from("notes")
 				.update({ list: target })
 				.eq("user_id", user.id)
 				.eq("list", removed);
@@ -455,7 +544,8 @@ function App() {
 
 		const db = activeSupabase.current;
 		if (db && user) {
-			db.from("notes")
+			await db
+				.from("notes")
 				.update({ list: trimmed })
 				.eq("user_id", user.id)
 				.eq("list", oldName);
@@ -527,6 +617,62 @@ function App() {
 	},
 	[user],
 );
+
+	const saveSharedNote = useCallback(
+		async (id: string, content: string) => {
+			const db = activeSupabase.current;
+			if (!db) return;
+			const now = Math.floor(Date.now() / 1000);
+			await db
+				.from("notes")
+				.update({ content, updated_at: now })
+				.eq("id", id);
+			setSharedNotes((prev) =>
+				prev.map((n) =>
+					n.id === id ? { ...n, content, updated_at: now } : n,
+				).sort((a, b) => b.updated_at - a.updated_at),
+			);
+		},
+		[],
+	);
+
+	async function leaveSharedNote(noteId: string) {
+		const db = activeSupabase.current;
+		if (!db || !user) return;
+		await db
+			.from("note_sharing")
+			.delete()
+			.eq("note_id", noteId)
+			.eq("shared_with_id", user.id);
+		setSharedNotes((prev) => {
+			const next = prev.filter((n) => n.id !== noteId);
+			if (selectedId === noteId) {
+				setSelectedId(next[0]?.id ?? null);
+				setSelectedNoteIds(next[0] ? [next[0].id] : []);
+			}
+			return next;
+		});
+		setLeaveConfirmNoteId(null);
+	}
+
+	async function unshareOwnNote(noteId: string) {
+		const db = activeSupabase.current;
+		if (!db || !user) return;
+		await db
+			.from("note_sharing")
+			.delete()
+			.eq("note_id", noteId)
+			.eq("owner_id", user.id);
+		setSharedNotes((prev) => {
+			const next = prev.filter((n) => n.id !== noteId);
+			if (selectedId === noteId) {
+				setSelectedId(next[0]?.id ?? null);
+				setSelectedNoteIds(next[0] ? [next[0].id] : []);
+			}
+			return next;
+		});
+		setLeaveConfirmNoteId(null);
+	}
 
 	async function softDeleteNote(id: string) {
 		const updated = await invoke<Note>("soft_delete_note", { id });
@@ -765,7 +911,16 @@ function App() {
 	);
 
 	const isRecentlyDeleted = activeFolder === "Recently Deleted";
+	const isSharedFolder = activeFolder === "Shared Notes";
 	const filteredNotes = useMemo(() => {
+		if (isSharedFolder) {
+			return searchQuery.trim()
+				? sharedNotes.filter((n) => {
+						const text = extractAllText(n.content).toLowerCase();
+						return text.includes(searchQuery.trim().toLowerCase());
+					})
+				: sharedNotes;
+		}
 		const listFilteredNotes = isRecentlyDeleted
 			? notes.filter((n) => n.deleted)
 			: notes.filter((n) => n.list === activeFolder && !n.deleted);
@@ -775,11 +930,13 @@ function App() {
 					return text.includes(searchQuery.trim().toLowerCase());
 				})
 			: listFilteredNotes;
-	}, [notes, activeFolder, searchQuery, isRecentlyDeleted]);
+	}, [notes, activeFolder, searchQuery, isRecentlyDeleted, isSharedFolder, sharedNotes]);
 	const pinnedNotes = filteredNotes.filter((n) => n.pinned).sort(sortFn);
 	const regularNotes = filteredNotes.filter((n) => !n.pinned).sort(sortFn);
 
-	const selectedNote = notes.find((n) => n.id === selectedId) ?? null;
+	const selectedNote = isSharedFolder
+		? sharedNotes.find((n) => n.id === selectedId) ?? null
+		: notes.find((n) => n.id === selectedId) ?? null;
 	const selectedNoteIsEmpty = selectedNote
 		? isNoteEmpty(selectedNote.content)
 		: false;
@@ -787,6 +944,12 @@ function App() {
 	const allVisibleNotes = searchQuery.trim()
 		? [...filteredNotes].sort(sortFn)
 		: [...(pinnedExpanded ? pinnedNotes : []), ...regularNotes];
+
+	const sharedNotesMap = useMemo(() => {
+		const map = new Map<string, typeof sharedNotes[number]>();
+		for (const sn of sharedNotes) map.set(sn.id, sn);
+		return map;
+	}, [sharedNotes]);
 
 	// ── Note click handler ──
 
@@ -863,7 +1026,7 @@ function App() {
 				onResizeStart={onResizeStart}
 				displayName={displayName}
 				avatarNum={avatarNum}
-				loading={loading}
+				loading={isSharedFolder ? sharedNotesLoading : loading}
 				notes={notes}
 				filteredNotes={filteredNotes}
 				pinnedNotes={pinnedNotes}
@@ -878,6 +1041,8 @@ function App() {
 				activeFolder={activeFolder}
 				noteLists={noteLists}
 				isRecentlyDeleted={isRecentlyDeleted}
+				isSharedFolder={isSharedFolder}
+				sharedNotesMap={sharedNotesMap}
 				sortFn={sortFn}
 				onSelectNote={(noteId, noteIds) => {
 					setSelectedId(noteId);
@@ -913,44 +1078,60 @@ function App() {
 				{showTodoList ? (
 					<TodoList supabaseClient={activeSupabase.current} userId={user!.id} autoSortChecked={autoSortChecked} />
 				) : selectedNote ? (
-					<NoteEditor
-						key={selectedNote.id}
-						note={selectedNote}
-						onSave={isRecentlyDeleted ? () => {} : saveNote}
-						onDelete={
-							isRecentlyDeleted
-								? () => permanentDeleteNote(selectedNote.id)
-								: () => softDeleteNote(selectedNote.id)
-						}
-						onRestore={
-							isRecentlyDeleted ? () => restoreNote(selectedNote.id) : undefined
-						}
-						onContentChange={
-							isRecentlyDeleted
-								? undefined
-								: (id, content) => {
-										latestEditorContent.current = { id, content };
-									}
-						}
-						newNoteStartWith={newNoteStartWith}
-						autoSortChecked={autoSortChecked}
-						autoFocus={
-							isRecentlyDeleted ? false : shouldAutoFocusEditor.current
-						}
-						supabaseClient={activeSupabase.current}
-						userId={user!.id}
-						creatorName={
-							activeFolder === "Shared List"
-								? (sharedNoteCreator ?? undefined)
-								: undefined
-						}
-						readOnly={isRecentlyDeleted}
-					/>
+				<NoteEditor
+					key={selectedNote.id}
+					note={selectedNote}
+					onSave={isRecentlyDeleted ? () => {} : isSharedFolder ? saveSharedNote : saveNote}
+					onDelete={
+						isRecentlyDeleted
+							? () => permanentDeleteNote(selectedNote.id)
+							: () => softDeleteNote(selectedNote.id)
+					}
+					onRestore={
+						isRecentlyDeleted ? () => restoreNote(selectedNote.id) : undefined
+					}
+					onContentChange={
+						isRecentlyDeleted
+							? undefined
+							: (id, content) => {
+									latestEditorContent.current = { id, content };
+								}
+					}
+					newNoteStartWith={newNoteStartWith}
+					autoSortChecked={autoSortChecked}
+					autoFocus={
+						isRecentlyDeleted ? false : shouldAutoFocusEditor.current
+					}
+					supabaseClient={activeSupabase.current}
+					userId={user!.id}
+					creatorName={
+						isSharedFolder
+							? (sharedNoteCreator ?? undefined)
+							: undefined
+					}
+					readOnly={isRecentlyDeleted}
+					onShare={
+						!isRecentlyDeleted && activeSupabase.current && (
+							!isSharedFolder || sharedNotesMap.get(selectedNote.id)?.is_own
+						)
+							? () => setShareModalNoteId(selectedNote.id)
+							: undefined
+					}
+					onLeaveShared={
+						isSharedFolder && !sharedNotesMap.get(selectedNote.id)?.is_own
+							? () => setLeaveConfirmNoteId(selectedNote.id)
+							: undefined
+					}
+				/>
 				) : (
 					<div className="empty-state">
-						<p className="empty-state-text">
-							{loading ? "loading…" : "Create a note to get started"}
-						</p>
+					<p className="empty-state-text">
+						{loading || sharedNotesLoading
+							? "loading…"
+							: isSharedFolder
+								? "No shared notes yet"
+								: "Create a note to get started"}
+					</p>
 					</div>
 				)}
 			</main>
@@ -1012,6 +1193,18 @@ function App() {
 				/>
 			)}
 
+			{shareModalNoteId && activeSupabase.current && (
+				<ShareNoteModal
+					noteId={shareModalNoteId}
+					supabaseClient={activeSupabase.current}
+					userId={user!.id}
+					onClose={() => {
+						setShareModalNoteId(null);
+						if (isSharedFolder) fetchSharedNotes();
+					}}
+				/>
+			)}
+
 			{contextMenu && (
 				<ul
 					className="context-menu"
@@ -1039,6 +1232,42 @@ function App() {
 							>
 								Delete Permanently
 							</li>
+						</>
+					) : isSharedFolder ? (
+						<>
+							{sharedNotesMap.get(contextMenu.noteId)?.is_own ? (
+								<>
+									<li
+										className="context-menu-item"
+										onClick={() => {
+											setShareModalNoteId(contextMenu.noteId);
+											setContextMenu(null);
+										}}
+									>
+										Manage Sharing…
+									</li>
+									<li className="context-menu-separator" />
+									<li
+										className="context-menu-item context-menu-item-danger"
+										onClick={() => {
+											setLeaveConfirmNoteId(contextMenu.noteId);
+											setContextMenu(null);
+										}}
+									>
+										Unshare Note
+									</li>
+								</>
+							) : (
+								<li
+									className="context-menu-item context-menu-item-danger"
+									onClick={() => {
+										setLeaveConfirmNoteId(contextMenu.noteId);
+										setContextMenu(null);
+									}}
+								>
+									Leave Shared Note
+								</li>
+							)}
 						</>
 					) : (
 						<>
@@ -1074,19 +1303,30 @@ function App() {
 							>
 								Rename
 							</li>
+						<li
+							className="context-menu-item"
+							onClick={() => {
+								const note = notes.find((n) => n.id === contextMenu.noteId);
+								pinNote(contextMenu.noteId, !note?.pinned);
+								setContextMenu(null);
+							}}
+						>
+							{notes.find((n) => n.id === contextMenu.noteId)?.pinned
+								? "Unpin Note"
+								: "Pin Note"}
+						</li>
+						{activeSupabase.current && (
 							<li
 								className="context-menu-item"
 								onClick={() => {
-									const note = notes.find((n) => n.id === contextMenu.noteId);
-									pinNote(contextMenu.noteId, !note?.pinned);
+									setShareModalNoteId(contextMenu.noteId);
 									setContextMenu(null);
 								}}
 							>
-								{notes.find((n) => n.id === contextMenu.noteId)?.pinned
-									? "Unpin Note"
-									: "Pin Note"}
+								Share Note…
 							</li>
-							<li className="context-menu-separator" />
+						)}
+						<li className="context-menu-separator" />
 							<li
 								className="context-menu-item context-menu-item-danger"
 								onClick={() => {
@@ -1099,6 +1339,47 @@ function App() {
 						</>
 					)}
 				</ul>
+			)}
+
+			{leaveConfirmNoteId && (
+				<div className="share-overlay" onMouseDown={() => setLeaveConfirmNoteId(null)}>
+					<div className="leave-confirm-card" onMouseDown={(e) => e.stopPropagation()}>
+						<p className="leave-confirm-title">
+							{sharedNotesMap.get(leaveConfirmNoteId)?.is_own
+								? "Unshare this note?"
+								: "Leave this shared note?"}
+						</p>
+						<p className="leave-confirm-desc">
+							{sharedNotesMap.get(leaveConfirmNoteId)?.is_own
+								? "This will remove sharing for all recipients. They will no longer be able to view or edit this note."
+								: "You will no longer be able to view or edit this note."}
+						</p>
+						<div className="leave-confirm-actions">
+							<button
+								type="button"
+								className="leave-confirm-cancel"
+								onClick={() => setLeaveConfirmNoteId(null)}
+							>
+								Cancel
+							</button>
+							<button
+								type="button"
+								className="leave-confirm-btn"
+								onClick={() => {
+									if (sharedNotesMap.get(leaveConfirmNoteId)?.is_own) {
+										unshareOwnNote(leaveConfirmNoteId);
+									} else {
+										leaveSharedNote(leaveConfirmNoteId);
+									}
+								}}
+							>
+								{sharedNotesMap.get(leaveConfirmNoteId)?.is_own
+									? "Unshare"
+									: "Leave"}
+							</button>
+						</div>
+					</div>
+				</div>
 			)}
 
 			{toastMessage && (
