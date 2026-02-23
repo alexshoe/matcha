@@ -473,8 +473,12 @@ function App() {
 				const local = localMap.get(id);
 				if (!local) {
 					merged.set(id, cloudNote);
-				} else if (cloudNote.deleted && !local.deleted) {
-					merged.set(id, { ...local, deleted: true, deleted_at: cloudNote.deleted_at });
+				} else if (cloudNote.deleted !== local.deleted) {
+					merged.set(id, {
+						...(cloudNote.updated_at >= local.updated_at ? cloudNote : local),
+						deleted: cloudNote.deleted,
+						deleted_at: cloudNote.deleted_at,
+					});
 				} else if (cloudNote.updated_at > local.updated_at) {
 					merged.set(id, cloudNote);
 				}
