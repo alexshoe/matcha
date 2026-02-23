@@ -4,7 +4,6 @@ import StarterKit from "@tiptap/starter-kit";
 import { OrderedList } from "@tiptap/extension-ordered-list";
 import { TaskList } from "@tiptap/extension-task-list";
 import { DraggableTaskItem } from "../extensions/DraggableTaskItem";
-import Placeholder from "@tiptap/extension-placeholder";
 import { ResizableImage } from "../extensions/ResizableImage";
 import { FileAttachment } from "../extensions/FileAttachment";
 import { Table } from "@tiptap/extension-table";

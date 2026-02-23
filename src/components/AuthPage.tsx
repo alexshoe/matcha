@@ -26,10 +26,8 @@ function isRateLimited(key: string, cooldownMs: number): boolean {
 function sanitizeAuthError(message: string): string {
 	const map: Record<string, string> = {
 		"Invalid login credentials": "Incorrect email or password.",
-		"Email not confirmed":
-			"Please confirm your email before signing in.",
-		"User already registered":
-			"An account with this email already exists.",
+		"Email not confirmed": "Please confirm your email before signing in.",
+		"User already registered": "An account with this email already exists.",
 		"Password should be at least 6 characters":
 			"Password does not meet requirements.",
 	};
@@ -281,31 +279,26 @@ export function AuthPage({
 					</div>
 				)}
 				<div className="auth-logo">
-					<img
-						src="/matcha_logo_dark.png"
-						alt="Matcha"
-						width="80"
-						height="64"
-					/>
+					<img src="/matcha_logo_m.png" alt="Matcha" width="110" height="60" />
 				</div>
-				<h1 className="auth-title">Matcha</h1>
+				<h1 className="auth-title">matcha</h1>
 				<div className="auth-form">
 					{error && <div className="auth-error">{error}</div>}
 					{infoMessage && <div className="auth-info">{infoMessage}</div>}
-				{mode !== "reset" && (
-					<div className="auth-field">
-						<label className="auth-label">Email</label>
-						<input
-							className="auth-input"
-							type="email"
-							placeholder="you@example.com"
-							value={email}
-							onChange={(e) => setEmail(e.target.value)}
-							onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-							disabled={busy}
-						/>
-					</div>
-				)}
+					{mode !== "reset" && (
+						<div className="auth-field">
+							<label className="auth-label">Email</label>
+							<input
+								className="auth-input"
+								type="email"
+								placeholder="you@example.com"
+								value={email}
+								onChange={(e) => setEmail(e.target.value)}
+								onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+								disabled={busy}
+							/>
+						</div>
+					)}
 					{mode === "signup" && (
 						<div className="auth-field">
 							<label className="auth-label">Display name</label>
@@ -320,94 +313,156 @@ export function AuthPage({
 							/>
 						</div>
 					)}
-				{mode === "reset" && (
-					<>
-						<div className="auth-field">
-							<label className="auth-label">Reset code</label>
-							<input
-								className="auth-input auth-otp-input"
-								type="text"
-								inputMode="numeric"
-								maxLength={8}
-								placeholder="– – – – – – – –"
-								value={otpToken}
-								onChange={(e) =>
-									setOtpToken(e.target.value.replace(/\D/g, ""))
-								}
-								onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-								disabled={busy}
-							/>
-						</div>
-						<div className="auth-field">
-							<label className="auth-label">New password</label>
-							<div className="auth-input-wrapper">
+					{mode === "reset" && (
+						<>
+							<div className="auth-field">
+								<label className="auth-label">Reset code</label>
 								<input
-									className="auth-input auth-input-password"
-									type={showResetPassword ? "text" : "password"}
-									placeholder="••••••••"
-									value={resetPassword}
-									onChange={(e) => setResetPassword(e.target.value)}
+									className="auth-input auth-otp-input"
+									type="text"
+									inputMode="numeric"
+									maxLength={8}
+									placeholder="– – – – – – – –"
+									value={otpToken}
+									onChange={(e) =>
+										setOtpToken(e.target.value.replace(/\D/g, ""))
+									}
 									onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
 									disabled={busy}
 								/>
-								<button
-									className="auth-password-toggle"
-									onClick={() => setShowResetPassword((v) => !v)}
-									tabIndex={-1}
-									aria-label={showResetPassword ? "Hide password" : "Reveal password"}
-									disabled={busy}
-								>
-									{showResetPassword ? (
-										<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" width="16" height="16">
-											<path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
-											<circle cx="10" cy="10" r="2.5" stroke="currentColor" strokeWidth="1.5" />
-										</svg>
-									) : (
-										<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" width="16" height="16">
-											<path d="M3 3l14 14M8.5 8.6A2.5 2.5 0 0012.4 12.5M6.3 6.4C4.3 7.6 2.9 9.3 2 10c1.5 2.5 4.5 6 8 6 1.5 0 2.9-.5 4.1-1.3M10 4c3.5 0 6.5 3.5 8 6-.5.9-1.2 1.9-2.1 2.7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-										</svg>
-									)}
-								</button>
 							</div>
-						</div>
+							<div className="auth-field">
+								<label className="auth-label">New password</label>
+								<div className="auth-input-wrapper">
+									<input
+										className="auth-input auth-input-password"
+										type={showResetPassword ? "text" : "password"}
+										placeholder="••••••••"
+										value={resetPassword}
+										onChange={(e) => setResetPassword(e.target.value)}
+										onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+										disabled={busy}
+									/>
+									<button
+										className="auth-password-toggle"
+										onClick={() => setShowResetPassword((v) => !v)}
+										tabIndex={-1}
+										aria-label={
+											showResetPassword ? "Hide password" : "Reveal password"
+										}
+										disabled={busy}
+									>
+										{showResetPassword ? (
+											<svg
+												viewBox="0 0 20 20"
+												fill="none"
+												xmlns="http://www.w3.org/2000/svg"
+												width="16"
+												height="16"
+											>
+												<path
+													d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6z"
+													stroke="currentColor"
+													strokeWidth="1.5"
+													strokeLinejoin="round"
+												/>
+												<circle
+													cx="10"
+													cy="10"
+													r="2.5"
+													stroke="currentColor"
+													strokeWidth="1.5"
+												/>
+											</svg>
+										) : (
+											<svg
+												viewBox="0 0 20 20"
+												fill="none"
+												xmlns="http://www.w3.org/2000/svg"
+												width="16"
+												height="16"
+											>
+												<path
+													d="M3 3l14 14M8.5 8.6A2.5 2.5 0 0012.4 12.5M6.3 6.4C4.3 7.6 2.9 9.3 2 10c1.5 2.5 4.5 6 8 6 1.5 0 2.9-.5 4.1-1.3M10 4c3.5 0 6.5 3.5 8 6-.5.9-1.2 1.9-2.1 2.7"
+													stroke="currentColor"
+													strokeWidth="1.5"
+													strokeLinecap="round"
+													strokeLinejoin="round"
+												/>
+											</svg>
+										)}
+									</button>
+								</div>
+							</div>
+							<div className="auth-field">
+								<label className="auth-label">Confirm password</label>
+								<div className="auth-input-wrapper">
+									<input
+										className="auth-input auth-input-password"
+										type={showResetConfirm ? "text" : "password"}
+										placeholder="••••••••"
+										value={resetConfirm}
+										onChange={(e) => setResetConfirm(e.target.value)}
+										onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+										disabled={busy}
+									/>
+									<button
+										className="auth-password-toggle"
+										onClick={() => setShowResetConfirm((v) => !v)}
+										tabIndex={-1}
+										aria-label={
+											showResetConfirm ? "Hide password" : "Reveal password"
+										}
+										disabled={busy}
+									>
+										{showResetConfirm ? (
+											<svg
+												viewBox="0 0 20 20"
+												fill="none"
+												xmlns="http://www.w3.org/2000/svg"
+												width="16"
+												height="16"
+											>
+												<path
+													d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6z"
+													stroke="currentColor"
+													strokeWidth="1.5"
+													strokeLinejoin="round"
+												/>
+												<circle
+													cx="10"
+													cy="10"
+													r="2.5"
+													stroke="currentColor"
+													strokeWidth="1.5"
+												/>
+											</svg>
+										) : (
+											<svg
+												viewBox="0 0 20 20"
+												fill="none"
+												xmlns="http://www.w3.org/2000/svg"
+												width="16"
+												height="16"
+											>
+												<path
+													d="M3 3l14 14M8.5 8.6A2.5 2.5 0 0012.4 12.5M6.3 6.4C4.3 7.6 2.9 9.3 2 10c1.5 2.5 4.5 6 8 6 1.5 0 2.9-.5 4.1-1.3M10 4c3.5 0 6.5 3.5 8 6-.5.9-1.2 1.9-2.1 2.7"
+													stroke="currentColor"
+													strokeWidth="1.5"
+													strokeLinecap="round"
+													strokeLinejoin="round"
+												/>
+											</svg>
+										)}
+									</button>
+								</div>
+							</div>
+						</>
+					)}
+					{mode !== "forgot" && mode !== "reset" && (
 						<div className="auth-field">
-							<label className="auth-label">Confirm password</label>
-							<div className="auth-input-wrapper">
-								<input
-									className="auth-input auth-input-password"
-									type={showResetConfirm ? "text" : "password"}
-									placeholder="••••••••"
-									value={resetConfirm}
-									onChange={(e) => setResetConfirm(e.target.value)}
-									onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-									disabled={busy}
-								/>
-								<button
-									className="auth-password-toggle"
-									onClick={() => setShowResetConfirm((v) => !v)}
-									tabIndex={-1}
-									aria-label={showResetConfirm ? "Hide password" : "Reveal password"}
-									disabled={busy}
-								>
-									{showResetConfirm ? (
-										<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" width="16" height="16">
-											<path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
-											<circle cx="10" cy="10" r="2.5" stroke="currentColor" strokeWidth="1.5" />
-										</svg>
-									) : (
-										<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" width="16" height="16">
-											<path d="M3 3l14 14M8.5 8.6A2.5 2.5 0 0012.4 12.5M6.3 6.4C4.3 7.6 2.9 9.3 2 10c1.5 2.5 4.5 6 8 6 1.5 0 2.9-.5 4.1-1.3M10 4c3.5 0 6.5 3.5 8 6-.5.9-1.2 1.9-2.1 2.7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-										</svg>
-									)}
-								</button>
-							</div>
-						</div>
-					</>
-				)}
-				{mode !== "forgot" && mode !== "reset" && (
-					<div className="auth-field">
-						<div className="auth-label-row">
-							<label className="auth-label">Password</label>
+							<div className="auth-label-row">
+								<label className="auth-label">Password</label>
 								{mode === "login" && (
 									<button
 										className="auth-forgot-btn"
@@ -504,17 +559,17 @@ export function AuthPage({
 							submitLabel
 						)}
 					</button>
-				{mode === "forgot" || mode === "reset" ? (
-					<p className="auth-signup-row">
-						<button
-							className="auth-signup-link"
-							onClick={() => switchMode("login")}
-							disabled={busy}
-						>
-							Back to sign in
-						</button>
-					</p>
-				) : mode === "login" ? (
+					{mode === "forgot" || mode === "reset" ? (
+						<p className="auth-signup-row">
+							<button
+								className="auth-signup-link"
+								onClick={() => switchMode("login")}
+								disabled={busy}
+							>
+								Back to sign in
+							</button>
+						</p>
+					) : mode === "login" ? (
 						<p className="auth-signup-row">
 							Don't have an account?{" "}
 							<button

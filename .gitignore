@@ -30,3 +30,6 @@ dist-ssr
 .cursor
 .claude
 
+# Tauri/Rust build artifacts
+src-tauri/target/
+src-tauri/build
