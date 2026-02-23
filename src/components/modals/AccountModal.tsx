@@ -420,10 +420,10 @@ export function AccountModal({
 							<span className="account-row-label">Storage used</span>
 							<span className="account-row-value">{storageUsedLabel}</span>
 						</div>
-						<div className="account-row account-row-end">
-							<button
-								className="account-sync-btn"
-								disabled={syncing}
+					<div className="account-row account-row-center">
+						<button
+							className="account-sync-btn"
+							disabled={syncing}
 								onClick={async () => {
 									setSyncing(true);
 									setSyncDone(false);

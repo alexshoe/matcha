@@ -10,6 +10,7 @@ import {
 	faMagnifyingGlass,
 	faXmark,
 	faSquareCheck,
+	faRotate,
 } from "@fortawesome/free-solid-svg-icons";
 import type { Note } from "../App";
 import type { SharedNoteEntry } from "../types";
@@ -53,6 +54,7 @@ interface SidebarProps {
 	onContextMenu: (
 		menu: { x: number; y: number; noteId: string } | null,
 	) => void;
+	onManualSync: () => Promise<void>;
 	onOpenAccount: () => void;
 	onOpenAbout: () => void;
 	onOpenSettings: () => void;
@@ -110,6 +112,7 @@ export function Sidebar({
 	onSetSidebarFocused,
 	onRenameNote,
 	onContextMenu,
+	onManualSync,
 	onOpenAccount,
 	onOpenAbout,
 	onOpenSettings,
@@ -124,6 +127,7 @@ export function Sidebar({
 }: SidebarProps) {
 	const [folderDropdownOpen, setFolderDropdownOpen] = useState(false);
 	const folderDropdownRef = useRef<HTMLDivElement>(null);
+	const [syncing, setSyncing] = useState(false);
 
 	useEffect(() => {
 		if (!folderDropdownOpen) return;
@@ -298,14 +302,27 @@ export function Sidebar({
 						</span>
 					</div>
 				</div>
-				<button
-					className="new-note-fab"
-					onClick={onCreateNote}
-					title="New Note"
-					disabled={selectedNoteIsEmpty || isRecentlyDeleted || isSharedFolder}
-				>
-					<FontAwesomeIcon icon={faPenToSquare} />
-				</button>
+				<div className="sidebar-header-actions">
+					<button
+						className="sidebar-sync-btn"
+						title="Sync now"
+						disabled={syncing}
+						onClick={async () => {
+							setSyncing(true);
+							try { await onManualSync(); } finally { setSyncing(false); }
+						}}
+					>
+						<FontAwesomeIcon icon={faRotate} className={syncing ? "fa-spin" : ""} />
+					</button>
+					<button
+						className="new-note-fab"
+						onClick={onCreateNote}
+						title="New Note"
+						disabled={selectedNoteIsEmpty || isRecentlyDeleted || isSharedFolder}
+					>
+						<FontAwesomeIcon icon={faPenToSquare} />
+					</button>
+				</div>
 			</div>
 
 			<div className="sidebar-search-wrap">

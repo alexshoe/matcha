@@ -546,6 +546,12 @@
   padding-bottom: 6px;
 }
 
+.account-row-center {
+  justify-content: center;
+  padding-top: 2px;
+  padding-bottom: 6px;
+}
+
 .account-change-password-btn {
   background: transparent;
   border: none;

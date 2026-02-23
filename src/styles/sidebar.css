@@ -469,6 +469,40 @@
   font-weight: 500;
 }
 
+.sidebar-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.sidebar-sync-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: none;
+  color: var(--text-dim);
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  flex-shrink: 0;
+  transition:
+    color 0.15s,
+    opacity 0.15s;
+}
+
+.sidebar-sync-btn:hover:not(:disabled) {
+  color: var(--text);
+}
+
+.sidebar-sync-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
 .new-note-fab {
   display: flex;
   align-items: center;
@@ -695,4 +729,3 @@
   text-overflow: ellipsis;
   opacity: 0.7;
 }
-
