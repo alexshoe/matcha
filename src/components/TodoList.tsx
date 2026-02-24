@@ -19,6 +19,10 @@ interface TodoListProps {
 	supabaseClient: SupabaseClient | null;
 	userId: string;
 	autoSortChecked?: boolean;
+	externalUpdate?: {
+		goals: TodoGoal[];
+		tasks: Record<string, TodoTask[]>;
+	} | null;
 }
 
 function genId(): string {
@@ -56,7 +60,36 @@ function parseJson<T>(raw: string | null | undefined, fallback: T): T {
 	}
 }
 
-export function TodoList({ supabaseClient, userId, autoSortChecked = true }: TodoListProps) {
+/** Check whether any date key in tasks is before today */
+function needsRollover(tasks: Record<string, TodoTask[]>, todayKey: string): boolean {
+	return Object.keys(tasks).some((key) => key < todayKey);
+}
+
+/** Move unchecked tasks from past days into today; discard checked + old keys */
+function rolloverPastTasks(
+	tasks: Record<string, TodoTask[]>,
+	todayKey: string,
+): Record<string, TodoTask[]> {
+	const rolledOver: TodoTask[] = [];
+	const cleaned: Record<string, TodoTask[]> = {};
+
+	for (const [key, taskList] of Object.entries(tasks)) {
+		if (key < todayKey) {
+			for (const task of taskList) {
+				if (!task.checked) rolledOver.push(task);
+			}
+		} else {
+			cleaned[key] = taskList;
+		}
+	}
+
+	if (rolledOver.length > 0) {
+		cleaned[todayKey] = [...rolledOver, ...(cleaned[todayKey] || [])];
+	}
+	return cleaned;
+}
+
+export function TodoList({ supabaseClient, userId, autoSortChecked = true, externalUpdate }: TodoListProps) {
 	const [goals, setGoals] = useState<TodoGoal[]>(() =>
 		parseJson(localStorage.getItem("matcha_todo_goals"), []),
 	);
@@ -106,27 +139,91 @@ export function TodoList({ supabaseClient, userId, autoSortChecked = true }: Tod
 			.eq("user_id", userId)
 			.maybeSingle()
 			.then(({ data }) => {
+				const todayStr = dateKey(new Date());
 				if (data) {
 					const remoteGoals = parseJson<TodoGoal[]>(data.long_term_goals, []);
-					const remoteTasks = parseJson<Record<string, TodoTask[]>>(data.to_do_list, {});
+					let remoteTasks = parseJson<Record<string, TodoTask[]>>(data.to_do_list, {});
+					if (needsRollover(remoteTasks, todayStr)) {
+						remoteTasks = rolloverPastTasks(remoteTasks, todayStr);
+					}
 					setGoals(remoteGoals);
 					setTasks(remoteTasks);
 					localStorage.setItem("matcha_todo_goals", JSON.stringify(remoteGoals));
 					localStorage.setItem("matcha_todo_tasks", JSON.stringify(remoteTasks));
+				} else {
+					// No remote data — rollover whatever was loaded from localStorage
+					setTasks((prev) =>
+						needsRollover(prev, todayStr) ? rolloverPastTasks(prev, todayStr) : prev,
+					);
 				}
 				loaded.current = true;
 			});
 	}, [supabaseClient, userId]);
 
+	const isRemoteUpdate = useRef(false);
+
 	useEffect(() => {
 		localStorage.setItem("matcha_todo_goals", JSON.stringify(goals));
+		if (isRemoteUpdate.current) return;
 		if (loaded.current || !supabaseClient) syncToSupabase();
 	}, [goals, supabaseClient, syncToSupabase]);
 
 	useEffect(() => {
 		localStorage.setItem("matcha_todo_tasks", JSON.stringify(tasks));
+		if (isRemoteUpdate.current) return;
 		if (loaded.current || !supabaseClient) syncToSupabase();
 	}, [tasks, supabaseClient, syncToSupabase]);
+
+	// ── Handle realtime updates from other devices ──
+	useEffect(() => {
+		if (!externalUpdate) return;
+		isRemoteUpdate.current = true;
+		setGoals(externalUpdate.goals);
+		const todayStr = dateKey(new Date());
+		const cleanedTasks = needsRollover(externalUpdate.tasks, todayStr)
+			? rolloverPastTasks(externalUpdate.tasks, todayStr)
+			: externalUpdate.tasks;
+		setTasks(cleanedTasks);
+		// Reset flag after React processes the state updates
+		requestAnimationFrame(() => {
+			isRemoteUpdate.current = false;
+		});
+	}, [externalUpdate]);
+
+	// ── Rollover for offline / no-Supabase mode ──
+	useEffect(() => {
+		if (supabaseClient) return; // Supabase path handles its own rollover
+		const todayStr = dateKey(new Date());
+		setTasks((prev) =>
+			needsRollover(prev, todayStr) ? rolloverPastTasks(prev, todayStr) : prev,
+		);
+	}, [supabaseClient]);
+
+	// ── Midnight rollover timer (handles app left open overnight) ──
+	const midnightTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+	useEffect(() => {
+		function scheduleMidnight(): ReturnType<typeof setTimeout> {
+			const now = new Date();
+			const tomorrow = new Date(now);
+			tomorrow.setDate(tomorrow.getDate() + 1);
+			tomorrow.setHours(0, 0, 0, 0);
+			const ms = tomorrow.getTime() - now.getTime() + 100; // +100ms buffer
+
+			return setTimeout(() => {
+				const todayStr = dateKey(new Date());
+				setTasks((prev) =>
+					needsRollover(prev, todayStr) ? rolloverPastTasks(prev, todayStr) : prev,
+				);
+				midnightTimer.current = scheduleMidnight();
+			}, ms);
+		}
+
+		midnightTimer.current = scheduleMidnight();
+		return () => {
+			if (midnightTimer.current) clearTimeout(midnightTimer.current);
+		};
+	}, []);
 
 	const [isCompact, setIsCompact] = useState(false);
 	const [singleDayIdx, setSingleDayIdx] = useState(0);

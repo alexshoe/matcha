@@ -19,10 +19,16 @@ pub struct Note {
     #[serde(default)]
     pub deleted: bool,
     pub deleted_at: Option<u64>,
+    #[serde(default = "default_version")]
+    pub version_num: u64,
 }
 
 fn default_list() -> String {
     "My Notes".to_string()
+}
+
+fn default_version() -> u64 {
+    1
 }
 
 pub struct AppState {
@@ -68,6 +74,7 @@ fn create_note(state: tauri::State<AppState>, list: String) -> Result<Note, Stri
         list,
         deleted: false,
         deleted_at: None,
+        version_num: 1,
     };
     notes.push(note.clone());
     save_notes(&state.file_path, &notes)?;
@@ -87,6 +94,7 @@ fn update_note(
         .ok_or_else(|| format!("Note {} not found", id))?;
     note.content = content;
     note.updated_at = now_unix();
+    note.version_num += 1;
     let note = note.clone();
     save_notes(&state.file_path, &notes)?;
     Ok(note)
@@ -163,6 +171,34 @@ fn set_notes(state: tauri::State<AppState>, notes: Vec<Note>) -> Result<(), Stri
     save_notes(&state.file_path, &local)
 }
 
+#[tauri::command]
+fn check_first_run(state: tauri::State<AppState>) -> Result<bool, String> {
+    let flag_path = state
+        .file_path
+        .parent()
+        .ok_or("No parent dir")?
+        .join("initialized.flag");
+    if flag_path.exists() {
+        Ok(false)
+    } else {
+        // Fresh install or reinstall — clear local notes so cloud data takes priority
+        let mut notes = state.notes.lock().map_err(|e| e.to_string())?;
+        *notes = Vec::new();
+        save_notes(&state.file_path, &notes)?;
+        Ok(true)
+    }
+}
+
+#[tauri::command]
+fn mark_initialized(state: tauri::State<AppState>) -> Result<(), String> {
+    let flag_path = state
+        .file_path
+        .parent()
+        .ok_or("No parent dir")?
+        .join("initialized.flag");
+    fs::write(&flag_path, "1").map_err(|e| e.to_string())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -190,6 +226,8 @@ pub fn run() {
             restore_note,
             delete_note,
             set_notes,
+            check_first_run,
+            mark_initialized,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

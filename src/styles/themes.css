@@ -8,6 +8,8 @@
   --main-bg: #eceee0;
   --surface: #e8ebd6;
   --border: #c3c8ad;
+  --border-subtle: #b8bc9f;
+  --border-bold: #b8c287;
   --scrollbar: #adb395;
   --text: #363d2c;
   --text-dim: #7a836a;
@@ -216,6 +218,8 @@
   --main-bg: #ebebf0;
   --surface: #fafafa;
   --border: #d5d3cd;
+  --border-subtle: #dfddd6;
+  --border-bold: #bebcb7;
   --scrollbar: #c0beb7;
   --text: #2a2e25;
   --text-dim: #707081;
@@ -408,7 +412,7 @@
   color: #fff;
   padding: 10px 20px;
   border-radius: 10px;
-  font-size: 13.5px;
+  font-size: 0.9rem;
   font-weight: 500;
   letter-spacing: 0.01em;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);

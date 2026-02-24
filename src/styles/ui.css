@@ -4,7 +4,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 12px;
+  font-size: 0.8rem;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -21,7 +21,7 @@
 }
 
 .note-list-section-label svg {
-  font-size: 10px;
+  font-size: 0.667rem;
   opacity: 0.7;
 }
 
@@ -84,7 +84,7 @@
   align-items: center;
   padding: 7px 11px;
   border-radius: 7px;
-  font-size: 13px;
+  font-size: 0.867rem;
   color: var(--text);
   cursor: pointer;
   transition: background 0.1s;

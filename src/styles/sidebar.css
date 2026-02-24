@@ -30,11 +30,11 @@
 
 .sidebar-footer-sort-icon {
   color: var(--text-dim);
-  font-size: 12px;
+  font-size: 0.8rem;
 }
 
 .sidebar-footer-label {
-  font-size: 13px;
+  font-size: 0.867rem;
   font-weight: 600;
   color: var(--text);
 }
@@ -62,7 +62,7 @@
 }
 
 .folder-chevron {
-  font-size: 9px;
+  font-size: 0.6rem;
   color: var(--text-dim);
   transition: transform 0.2s ease;
 }
@@ -100,7 +100,7 @@
   cursor: pointer;
   text-align: left;
   font-family: inherit;
-  font-size: 13px;
+  font-size: 0.867rem;
   color: var(--text);
   transition: background 0.1s;
 }
@@ -114,7 +114,7 @@
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  font-size: 11px;
+  font-size: 0.733rem;
   color: var(--text);
 }
 
@@ -185,12 +185,12 @@
 }
 
 .manage-lists-header-icon {
-  font-size: 16px;
+  font-size: 1.067rem;
   color: var(--text-dim);
 }
 
 .manage-lists-header-title {
-  font-size: 16px;
+  font-size: 1.067rem;
   font-weight: 600;
   color: var(--text);
 }
@@ -221,7 +221,7 @@
 }
 
 .manage-lists-row-icon {
-  font-size: 13px;
+  font-size: 0.867rem;
   color: var(--text-dim);
   flex-shrink: 0;
   width: 16px;
@@ -234,7 +234,7 @@
 
 .manage-lists-row-name {
   flex: 1;
-  font-size: 13px;
+  font-size: 0.867rem;
   font-weight: 500;
   color: var(--text);
   white-space: nowrap;
@@ -259,7 +259,7 @@
   border-radius: 6px;
   color: var(--text-dim);
   cursor: pointer;
-  font-size: 12px;
+  font-size: 0.8rem;
   transition:
     background 0.12s,
     color 0.12s;
@@ -281,7 +281,7 @@
   border: 1px solid var(--accent);
   border-radius: 6px;
   outline: none;
-  font-size: 13px;
+  font-size: 0.867rem;
   font-weight: 500;
   font-family: inherit;
   color: var(--text);
@@ -309,7 +309,7 @@
   border: 1px solid var(--border);
   border-radius: 6px;
   outline: none;
-  font-size: 13px;
+  font-size: 0.867rem;
   font-family: inherit;
   color: var(--text);
   padding: 7px 10px;
@@ -339,7 +339,7 @@
   color: var(--on-accent);
   cursor: pointer;
   font-family: inherit;
-  font-size: 12px;
+  font-size: 0.8rem;
   font-weight: 600;
   flex-shrink: 0;
   transition:
@@ -377,7 +377,7 @@
   border-radius: 8px;
   color: var(--text-dim);
   cursor: pointer;
-  font-size: 15px;
+  font-size: 1rem;
   transition:
     background 0.12s,
     color 0.12s;
@@ -410,7 +410,7 @@
   justify-content: space-between;
   padding: 10px 14px 16px;
   flex-shrink: 0;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--border-subtle);
   margin: 0 -8px 4px;
 }
 
@@ -457,14 +457,14 @@
 }
 
 .sidebar-display-name {
-  font-size: 14px;
+  font-size: 0.933rem;
   font-weight: 600;
   color: var(--text-primary);
   line-height: 1.2;
 }
 
 .sidebar-note-count {
-  font-size: 11px;
+  font-size: 0.733rem;
   color: var(--text-dim);
   font-weight: 500;
 }
@@ -487,7 +487,7 @@
   color: var(--text-dim);
   border: none;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 0.8rem;
   flex-shrink: 0;
   transition:
     color 0.15s,
@@ -514,7 +514,7 @@
   color: var(--on-accent);
   border: none;
   cursor: pointer;
-  font-size: 13px;
+  font-size: 0.867rem;
   flex-shrink: 0;
   transition: opacity 0.15s;
 }
@@ -552,7 +552,7 @@
 }
 
 .sidebar-search-icon {
-  font-size: 11px;
+  font-size: 0.733rem;
   color: var(--text-dim);
   flex-shrink: 0;
 }
@@ -562,7 +562,7 @@
   background: transparent;
   border: none;
   outline: none;
-  font-size: 13px;
+  font-size: 0.867rem;
   font-family: inherit;
   color: var(--text);
   padding: 0;
@@ -587,7 +587,7 @@
   border-radius: 50%;
   color: var(--sidebar-bg);
   cursor: pointer;
-  font-size: 8px;
+  font-size: 0.533rem;
   flex-shrink: 0;
   transition: background 0.12s;
 }
@@ -637,7 +637,7 @@
 }
 
 .sidebar-empty {
-  font-size: 12px;
+  font-size: 0.8rem;
   color: var(--text-dim);
   padding: 6px 10px;
 }
@@ -702,7 +702,7 @@
 }
 
 .note-item-title {
-  font-size: 13px;
+  font-size: 0.867rem;
   font-weight: 500;
   color: var(--text);
   white-space: nowrap;
@@ -714,7 +714,7 @@
   display: flex;
   align-items: baseline;
   gap: 5px;
-  font-size: 11px;
+  font-size: 0.733rem;
   color: var(--text-dim);
   overflow: hidden;
 }

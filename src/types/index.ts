@@ -7,6 +7,7 @@ export interface Note {
 	list: string;
 	deleted: boolean;
 	deleted_at: number | null;
+	version_num: number;
 }
 
 export interface SharedNoteEntry extends Note {

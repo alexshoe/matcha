@@ -24,3 +24,25 @@ Currently supports Windows and MacOS -- iOS coming soon.
 
 <img width="1507" height="820" alt="Screenshot 2026-02-24 at 12 30 55 AM" src="https://github.com/user-attachments/assets/ad7958de-b2c4-432d-8bb9-fced059df2ce" />
 
+
+## Setup
+
+**Prerequisites:** [Node.js](https://nodejs.org/), [Rust](https://www.rust-lang.org/tools/install), and the [Tauri v2 prerequisites](https://v2.tauri.app/start/prerequisites/) for your OS.
+
+```sh
+git clone https://github.com/alexshoe/matcha.git
+cd matcha
+npm install
+```
+
+To run in dev mode:
+
+```sh
+npm run tauri dev
+```
+
+To create a production build:
+
+```sh
+npm run tauri build
+```

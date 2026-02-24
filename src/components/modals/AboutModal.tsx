@@ -152,12 +152,12 @@ export function AboutModal({
 						<img
 							src="/matcha_logo_m.png"
 							alt="Matcha"
-							width="120"
-							height="120"
+							width="110"
+							height="60"
 						/>
 					</div>
 					<h1 className="about-name">matcha</h1>
-					<p className="about-version">Version 1.0.0</p>
+					<p className="about-version">Version 0.1.0</p>
 					<button
 						className="about-author-link"
 						onClick={() => openUrl("https://github.com/alexshoe")}

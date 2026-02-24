@@ -180,6 +180,36 @@ function findListItem(state: { selection: { $from: any } }) {
 	return null;
 }
 
+function indentListItem(editor: any): boolean {
+	const hit = findListItem(editor.state);
+	if (!hit) return false;
+	const indent = hit.node.attrs.indent || 0;
+	if (indent < MAX_INDENT) {
+		editor.view.dispatch(
+			editor.state.tr.setNodeMarkup(hit.pos, undefined, {
+				...hit.node.attrs,
+				indent: indent + 1,
+			}),
+		);
+	}
+	return true;
+}
+
+function outdentListItem(editor: any): boolean {
+	const hit = findListItem(editor.state);
+	if (!hit) return false;
+	const indent = hit.node.attrs.indent || 0;
+	if (indent > 0) {
+		editor.view.dispatch(
+			editor.state.tr.setNodeMarkup(hit.pos, undefined, {
+				...hit.node.attrs,
+				indent: indent - 1,
+			}),
+		);
+	}
+	return true;
+}
+
 const TabIndent = Extension.create({
 	name: "tabIndent",
 
@@ -211,19 +241,7 @@ const TabIndent = Extension.create({
 				if (editor.isActive("table")) {
 					return editor.commands.goToNextCell();
 				}
-				const hit = findListItem(editor.state);
-				if (hit) {
-					const indent = hit.node.attrs.indent || 0;
-					if (indent < MAX_INDENT) {
-						editor.view.dispatch(
-							editor.state.tr.setNodeMarkup(hit.pos, undefined, {
-								...hit.node.attrs,
-								indent: indent + 1,
-							}),
-						);
-					}
-					return true;
-				}
+				if (indentListItem(editor)) return true;
 				editor.view.dispatch(editor.state.tr.insertText("\t"));
 				return true;
 			},
@@ -232,21 +250,13 @@ const TabIndent = Extension.create({
 				if (editor.isActive("table")) {
 					return editor.commands.goToPreviousCell();
 				}
-				const hit = findListItem(editor.state);
-				if (hit) {
-					const indent = hit.node.attrs.indent || 0;
-					if (indent > 0) {
-						editor.view.dispatch(
-							editor.state.tr.setNodeMarkup(hit.pos, undefined, {
-								...hit.node.attrs,
-								indent: indent - 1,
-							}),
-						);
-					}
-					return true;
-				}
+				if (outdentListItem(editor)) return true;
 				return true;
 			},
+
+			"Mod-]": ({ editor }) => indentListItem(editor),
+
+			"Mod-[": ({ editor }) => outdentListItem(editor),
 
 			Backspace: ({ editor }) => {
 				const { $from, empty } = editor.state.selection;
@@ -487,7 +497,7 @@ export function NoteEditor({
 				knownFileUrls.current = currentFiles;
 
 				onSave(note.id, json);
-			}, 500);
+			}, 1000);
 		},
 		editorProps: {
 			handlePaste(view, event) {
@@ -515,18 +525,22 @@ export function NoteEditor({
 				const files = event.dataTransfer?.files;
 				if (!files || files.length === 0) return false;
 				const imageFiles: File[] = [];
+				const pdfFiles: File[] = [];
 				for (let i = 0; i < files.length; i++) {
 					if (files[i].type.startsWith("image/")) {
 						imageFiles.push(files[i]);
+					} else if (files[i].type === "application/pdf") {
+						pdfFiles.push(files[i]);
 					}
 				}
-				if (imageFiles.length === 0) return false;
+				if (imageFiles.length === 0 && pdfFiles.length === 0) return false;
 				event.preventDefault();
 				if (editor) {
 					const pos = view.posAtCoords({
 						left: event.clientX,
 						top: event.clientY,
 					});
+					// Insert images at drop position
 					imageFiles.forEach(async (file) => {
 						const src = await resolveImage.current!(file);
 						if (pos) {
@@ -538,6 +552,32 @@ export function NoteEditor({
 								.run();
 						} else {
 							editor.chain().focus().setImage({ src }).run();
+						}
+					});
+					// Insert PDFs as file attachments at drop position
+					pdfFiles.forEach(async (file) => {
+						const result = await resolveFile.current!(file);
+						if (result) {
+							if (pos) {
+								editor
+									.chain()
+									.focus()
+									.setTextSelection(pos.pos)
+									.insertContent({
+										type: "fileAttachment",
+										attrs: result,
+									})
+									.run();
+							} else {
+								editor
+									.chain()
+									.focus()
+									.insertContent({
+										type: "fileAttachment",
+										attrs: result,
+									})
+									.run();
+							}
 						}
 					});
 				}

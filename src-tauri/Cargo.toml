@@ -1,6 +1,6 @@
 [package]
 name = "matcha"
-version = "1.0.0"
+version = "0.1.0"
 description = "A lightweight, cross-platform to-do list app"
 authors = ["Alex Hsu"]
 edition = "2021"

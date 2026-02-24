@@ -115,7 +115,7 @@
   border-radius: 8px;
   background: var(--danger-subtle);
   color: var(--danger);
-  font-size: 16px;
+  font-size: 1.067rem;
   flex-shrink: 0;
 }
 
@@ -127,7 +127,7 @@
 }
 
 .file-attachment-name {
-  font-size: 13px;
+  font-size: 0.867rem;
   font-weight: 500;
   color: var(--text);
   white-space: nowrap;
@@ -136,7 +136,7 @@
 }
 
 .file-attachment-size {
-  font-size: 11px;
+  font-size: 0.733rem;
   color: var(--text-dim);
 }
 
@@ -152,7 +152,7 @@
   border: none;
   border-radius: 6px;
   color: var(--text-dim);
-  font-size: 14px;
+  font-size: 0.933rem;
   cursor: pointer;
   transition:
     background 0.15s,
@@ -167,7 +167,6 @@
 /* Horizontal rule */
 .ProseMirror hr {
   border: none;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--border-bold);
   margin: 16px 0;
 }
-

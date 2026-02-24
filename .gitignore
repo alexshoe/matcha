@@ -29,6 +29,7 @@ dist-ssr
 .agents
 .cursor
 .claude
+.mcp.json
 
 # Tauri/Rust build artifacts
 src-tauri/target/

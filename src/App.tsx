@@ -40,6 +40,7 @@ export interface Note {
 	list: string;
 	deleted: boolean;
 	deleted_at: number | null;
+	version_num: number;
 }
 
 function App() {
@@ -62,6 +63,8 @@ function App() {
 	);
 	const recentlyCleanedUpIds = useRef(new Set<string>());
 	const cloudSyncAttempted = useRef(false);
+	const isFirstRun = useRef(false);
+	const lastSentVersions = useRef<Map<string, number>>(new Map());
 
 	// ── Sidebar / UI state ──
 	const [sidebarWidth, setSidebarWidth] = useState(240);
@@ -127,6 +130,12 @@ function App() {
 	const [toastMessage, setToastMessage] = useState<string | null>(null);
 	const [toastIsError, setToastIsError] = useState(false);
 
+	// ── Realtime todo sync ──
+	const [todoExternalUpdate, setTodoExternalUpdate] = useState<{
+		goals: { id: string; text: string; checked: boolean }[];
+		tasks: Record<string, { id: string; text: string; checked: boolean }[]>;
+	} | null>(null);
+
 	// ── Shared notes ──
 	const [sharedNoteCreator, setSharedNoteCreator] = useState<string | null>(
 		null,
@@ -141,7 +150,7 @@ function App() {
 	// ── Animation ref ──
 	const prevNoteRects = useRef<Map<string, DOMRect>>(new Map());
 
-	const SIDEBAR_MIN = 220;
+	const SIDEBAR_MIN = 240;
 	const SIDEBAR_MAX = 480;
 
 	// ── Resize handler ──
@@ -175,6 +184,17 @@ function App() {
 	);
 
 	// ── Effects ──
+
+	// Prevent browser from navigating to dropped files (fullscreen takeover)
+	useEffect(() => {
+		const preventDrag = (e: DragEvent) => e.preventDefault();
+		document.addEventListener("dragover", preventDrag);
+		document.addEventListener("drop", preventDrag);
+		return () => {
+			document.removeEventListener("dragover", preventDrag);
+			document.removeEventListener("drop", preventDrag);
+		};
+	}, []);
 
 	useEffect(() => {
 		document.documentElement.setAttribute("data-theme", theme);
@@ -297,6 +317,8 @@ function App() {
 		if (!db || !user) return;
 		setSharedNotesLoading(true);
 
+		console.log("[SharedNotes] fetching for user:", user.id);
+
 		const [sharedWithMe, sharedByMe] = await Promise.all([
 			db
 				.from("note_sharing")
@@ -311,6 +333,21 @@ function App() {
 				)
 				.eq("owner_id", user.id),
 		]);
+
+		console.log(
+			"[SharedNotes] sharedWithMe raw:",
+			JSON.stringify(sharedWithMe, null, 2),
+		);
+		console.log(
+			"[SharedNotes] sharedByMe raw:",
+			JSON.stringify(sharedByMe, null, 2),
+		);
+
+		const rawRows = await db.from("note_sharing").select("*");
+		console.log(
+			"[SharedNotes] ALL note_sharing rows visible to me:",
+			JSON.stringify(rawRows, null, 2),
+		);
 
 		const ownDisplayName = displayName;
 		const entries = new Map<string, SharedNoteEntry>();
@@ -328,6 +365,7 @@ function App() {
 				list: note.list as string,
 				deleted: note.deleted as boolean,
 				deleted_at: (note.deleted_at as number | null) ?? null,
+				version_num: (note.version_num as number) ?? 1,
 				owner_display_name: (owner?.display_name as string) ?? "Unknown",
 				owner_avatar_num: (owner?.avatar_num as number | null) ?? null,
 				is_own: false,
@@ -373,6 +411,14 @@ function App() {
 		const result = [...entries.values()].sort(
 			(a, b) => b.updated_at - a.updated_at,
 		);
+		console.log(
+			"[SharedNotes] final entries:",
+			result.map((r) => ({
+				id: r.id,
+				is_own: r.is_own,
+				owner: r.owner_display_name,
+			})),
+		);
 		setSharedNotes(result);
 		setSharedNotesLoading(false);
 		return result;
@@ -407,7 +453,11 @@ function App() {
 	}, [selectedId, activeFolder, sharedNotes]);
 
 	useEffect(() => {
-		invoke<Note[]>("get_notes")
+		invoke<boolean>("check_first_run")
+			.then((firstRun) => {
+				isFirstRun.current = firstRun;
+				return invoke<Note[]>("get_notes");
+			})
 			.then((loaded) => {
 				const sorted = [...loaded].sort((a, b) => b.updated_at - a.updated_at);
 				setNotes(sorted);
@@ -434,6 +484,14 @@ function App() {
 					setIsAuthenticated(true);
 				} else {
 					client.auth.signOut();
+					// No user session — if this is a first run, mark initialized now
+					// (cloud sync won't run without a user, so nothing to pull)
+					if (isFirstRun.current) {
+						isFirstRun.current = false;
+						invoke("mark_initialized").catch((e: unknown) =>
+							console.warn("Failed to mark initialized:", e),
+						);
+					}
 				}
 				setSessionChecked(true);
 			});
@@ -459,6 +517,8 @@ function App() {
 		const db = activeSupabase.current;
 		if (!db || !user) return;
 
+		const firstRun = isFirstRun.current;
+
 		const { data, error } = await db
 			.from("notes")
 			.select("*")
@@ -475,9 +535,20 @@ function App() {
 			list: (n.list as string) || "My Notes",
 			deleted: (n.deleted as boolean) ?? false,
 			deleted_at: (n.deleted_at as number | null) ?? null,
+			version_num: (n.version_num as number) ?? 1,
 		}));
 
 		setNotes((prev) => {
+			// On first run (fresh install/reinstall), cloud takes priority —
+			// don't push any local-only notes to cloud since they're stale.
+			if (firstRun) {
+				const sorted = [...cloudNotes].sort(
+					(a, b) => b.updated_at - a.updated_at,
+				);
+				invoke("set_notes", { notes: sorted });
+				return sorted;
+			}
+
 			const localMap = new Map(prev.map((n) => [n.id, n]));
 			const cloudMap = new Map(cloudNotes.map((n) => [n.id, n]));
 
@@ -493,6 +564,11 @@ function App() {
 						deleted_at: cloudNote.deleted_at,
 					});
 				} else if (cloudNote.updated_at > local.updated_at) {
+					merged.set(id, cloudNote);
+				} else if (
+					cloudNote.updated_at === local.updated_at &&
+					cloudNote.version_num > local.version_num
+				) {
 					merged.set(id, cloudNote);
 				}
 			}
@@ -510,6 +586,7 @@ function App() {
 							deleted_at: local.deleted_at,
 							created_at: local.created_at,
 							updated_at: local.updated_at,
+							version_num: local.version_num,
 						})
 						.then(({ error: e }) => {
 							if (e) console.warn("Supabase push error:", e.message);
@@ -524,6 +601,14 @@ function App() {
 			return sorted;
 		});
 
+		// Mark as initialized after successful first-run sync
+		if (firstRun) {
+			isFirstRun.current = false;
+			invoke("mark_initialized").catch((e: unknown) =>
+				console.warn("Failed to mark initialized:", e),
+			);
+		}
+
 		fetchSharedNotes();
 	}, [user, fetchSharedNotes]);
 
@@ -532,6 +617,168 @@ function App() {
 		cloudSyncAttempted.current = true;
 		performCloudSync();
 	}, [user, loading, performCloudSync]);
+
+	// ── Helper: map a Supabase record to a local Note ──
+	function mapCloudNote(record: Record<string, unknown>): Note {
+		return {
+			id: record.id as string,
+			content: (record.content as string) || "",
+			created_at: record.created_at as number,
+			updated_at: record.updated_at as number,
+			pinned: (record.pinned as boolean) ?? false,
+			list: (record.list as string) || "My Notes",
+			deleted: (record.deleted as boolean) ?? false,
+			deleted_at: (record.deleted_at as number | null) ?? null,
+			version_num: (record.version_num as number) ?? 1,
+		};
+	}
+
+	// ── Supabase Realtime subscriptions ──
+	useEffect(() => {
+		const db = activeSupabase.current;
+		if (!db || !user) return;
+
+		// Notes channel — broad subscription, client-side filter
+		const notesChannel = db
+			.channel("notes-realtime")
+			.on(
+				"postgres_changes",
+				{ event: "*", schema: "public", table: "notes" },
+				(payload) => {
+					const record = payload.new as Record<string, unknown> | null;
+					if (!record?.id) return;
+
+					const noteVersion = (record.version_num as number) ?? 1;
+
+					// Skip our own echoes
+					const lastSent = lastSentVersions.current.get(
+						record.id as string,
+					);
+					if (lastSent !== undefined && noteVersion <= lastSent) return;
+
+					if (payload.eventType === "INSERT") {
+						const mapped = mapCloudNote(record);
+						setNotes((prev) => {
+							if (prev.some((n) => n.id === mapped.id)) return prev;
+							const next = [...prev, mapped].sort(
+								(a, b) => b.updated_at - a.updated_at,
+							);
+							invoke("set_notes", { notes: next });
+							return next;
+						});
+					} else if (payload.eventType === "UPDATE") {
+						const mapped = mapCloudNote(record);
+
+						// Update own notes
+						setNotes((prev) => {
+							const existing = prev.find((n) => n.id === mapped.id);
+							if (
+								!existing ||
+								mapped.version_num <= existing.version_num
+							)
+								return prev;
+							const next = prev
+								.map((n) => (n.id === mapped.id ? mapped : n))
+								.sort((a, b) => b.updated_at - a.updated_at);
+							invoke("set_notes", { notes: next });
+							return next;
+						});
+
+						// Update shared notes
+						setSharedNotes((prev) =>
+							prev
+								.map((n) =>
+									n.id === mapped.id &&
+									mapped.version_num > (n.version_num ?? 0)
+										? { ...n, ...mapped }
+										: n,
+								)
+								.sort((a, b) => b.updated_at - a.updated_at),
+						);
+
+						// Toast if this is the currently-open note
+						setNotes((prev) => {
+							const current = prev.find(
+								(n) => n.id === mapped.id,
+							);
+							if (current && current.id === selectedId) {
+								showToast(
+									"Note updated on another device",
+									false,
+								);
+							}
+							return prev;
+						});
+					} else if (payload.eventType === "DELETE") {
+						const oldRecord = payload.old as Record<
+							string,
+							unknown
+						> | null;
+						const deletedId = (oldRecord?.id as string) ?? null;
+						if (deletedId) {
+							setNotes((prev) => {
+								const next = prev.filter(
+									(n) => n.id !== deletedId,
+								);
+								invoke("set_notes", { notes: next });
+								return next;
+							});
+						}
+					}
+				},
+			)
+			.subscribe();
+
+		// Note sharing channel — re-fetch shared notes on any change
+		const sharingChannel = db
+			.channel("sharing-realtime")
+			.on(
+				"postgres_changes",
+				{ event: "*", schema: "public", table: "note_sharing" },
+				() => {
+					fetchSharedNotes();
+				},
+			)
+			.subscribe();
+
+		// Todo channel — filtered to own user
+		const todoChannel = db
+			.channel("todo-realtime")
+			.on(
+				"postgres_changes",
+				{
+					event: "*",
+					schema: "public",
+					table: "to_do_list",
+					filter: `user_id=eq.${user.id}`,
+				},
+				(payload) => {
+					const record = payload.new as Record<
+						string,
+						unknown
+					> | null;
+					if (!record) return;
+					try {
+						const goals = JSON.parse(
+							(record.long_term_goals as string) || "[]",
+						);
+						const tasks = JSON.parse(
+							(record.to_do_list as string) || "{}",
+						);
+						setTodoExternalUpdate({ goals, tasks });
+					} catch {
+						// ignore malformed payloads
+					}
+				},
+			)
+			.subscribe();
+
+		return () => {
+			db.removeChannel(notesChannel);
+			db.removeChannel(sharingChannel);
+			db.removeChannel(todoChannel);
+		};
+	}, [user, selectedId, fetchSharedNotes]);
 
 	useLayoutEffect(() => {
 		const container = noteListRef.current;
@@ -623,10 +870,12 @@ function App() {
 						pinned: updated.pinned,
 						created_at: updated.created_at,
 						updated_at: updated.updated_at,
+						version_num: updated.version_num,
 					})
 					.then(({ error }) => {
 						if (error) console.warn("Supabase sync error:", error.message);
 					});
+				lastSentVersions.current.set(updated.id, updated.version_num);
 			}
 		},
 		[user],
@@ -636,13 +885,23 @@ function App() {
 		const db = activeSupabase.current;
 		if (!db) return;
 		const now = Math.floor(Date.now() / 1000);
-		await db.from("notes").update({ content, updated_at: now }).eq("id", id);
+		const sharedNote = sharedNotes.find((n) => n.id === id);
+		const newVersion = (sharedNote?.version_num ?? 0) + 1;
+		await db
+			.from("notes")
+			.update({ content, updated_at: now, version_num: newVersion })
+			.eq("id", id);
 		setSharedNotes((prev) =>
 			prev
-				.map((n) => (n.id === id ? { ...n, content, updated_at: now } : n))
+				.map((n) =>
+					n.id === id
+						? { ...n, content, updated_at: now, version_num: newVersion }
+						: n,
+				)
 				.sort((a, b) => b.updated_at - a.updated_at),
 		);
-	}, []);
+		lastSentVersions.current.set(id, newVersion);
+	}, [sharedNotes]);
 
 	async function leaveSharedNote(noteId: string) {
 		const db = activeSupabase.current;
@@ -811,6 +1070,7 @@ function App() {
 								pinned: note.pinned,
 								created_at: note.created_at,
 								updated_at: note.updated_at,
+								version_num: note.version_num,
 							})
 							.then(({ error }) => {
 								if (error) console.warn("Supabase sync error:", error.message);
@@ -1094,6 +1354,7 @@ function App() {
 						supabaseClient={activeSupabase.current}
 						userId={user!.id}
 						autoSortChecked={autoSortChecked}
+						externalUpdate={todoExternalUpdate}
 					/>
 				) : selectedNote ? (
 					<NoteEditor

@@ -15,7 +15,7 @@
 .ProseMirror td {
   border: 1px solid var(--table-border);
   padding: 8px 10px;
-  font-size: 13px;
+  font-size: 0.867rem;
   line-height: 1.5;
   vertical-align: top;
   min-width: 80px;
@@ -103,7 +103,7 @@
   border-radius: 6px;
   color: var(--text-dim);
   cursor: pointer;
-  font-size: 11px;
+  font-size: 0.733rem;
   font-family: inherit;
   white-space: nowrap;
   transition:
@@ -122,7 +122,7 @@
 }
 
 .table-toolbar-label {
-  font-size: 11px;
+  font-size: 0.733rem;
   line-height: 1;
 }
 
