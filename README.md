@@ -21,4 +21,6 @@
 
 Currently supports Windows and MacOS -- iOS coming soon.
 
-<img width="1506" height="813" alt="Screenshot 2026-02-23 at 2 10 02 PM" src="https://github.com/user-attachments/assets/83f31a98-12d2-4118-99ff-0db899a7fba5" />
+
+<img width="1507" height="820" alt="Screenshot 2026-02-24 at 12 30 55 AM" src="https://github.com/user-attachments/assets/ad7958de-b2c4-432d-8bb9-fced059df2ce" />
+
