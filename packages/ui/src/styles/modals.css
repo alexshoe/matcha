@@ -1701,10 +1701,34 @@
   opacity: 0.88;
 }
 
-/* ─── Mobile modal tweaks (≤768px) ──────────────────────── */
+/* ─── Mobile modal tweaks (≤900px) ──────────────────────── */
 
-@media (max-width: 768px) {
-  /* Avatar picker: replace account card with picker only */
+@media (max-width: 900px) {
+  /* ── Account overlay: push below notch, allow scrolling ── */
+  .account-overlay {
+    align-items: flex-start;
+    padding: max(16px, env(safe-area-inset-top)) 0 max(16px, env(safe-area-inset-bottom));
+    overflow-y: auto;
+  }
+
+  .account-card-wrap .account-card {
+    width: calc(100vw - 32px);
+    max-height: none;
+    overflow-y: auto;
+  }
+
+  /* ── Settings overlay: push below notch, allow scrolling ── */
+  .settings-overlay {
+    align-items: flex-start;
+    padding: max(16px, env(safe-area-inset-top)) 0 max(16px, env(safe-area-inset-bottom));
+    overflow-y: auto;
+  }
+
+  .settings-card {
+    width: calc(100vw - 32px);
+  }
+
+  /* ── Avatar picker: replace account card with picker only ── */
   .account-card-wrap {
     flex-direction: column;
   }
@@ -1714,11 +1738,17 @@
   }
 
   .account-card-wrap.picker-open .avatar-picker-panel {
-    width: 100% !important;
+    width: calc(100vw - 32px) !important;
     opacity: 1 !important;
     overflow: visible !important;
     pointer-events: auto !important;
     padding: 20px 16px !important;
+  }
+
+  /* ── Avatar grid: 4 columns (~30% smaller icons) on mobile ── */
+  .account-card-wrap.picker-open .avatar-picker-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
   }
 }
 

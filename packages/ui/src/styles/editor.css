@@ -571,25 +571,38 @@
   display: none;
 }
 
-/* ─── Mobile editor tweaks (≤768px) ─────────────────────── */
+/* ─── Mobile editor tweaks (≤900px) ─────────────────────── */
 
-@media (max-width: 768px) {
-  /* Single-row toolbar: back on left, 4 buttons perfectly centered, share/del on right */
+@media (max-width: 900px) {
+  /* Top toolbar: back on left, share/del on right — push below notch */
   .toolbar {
     overflow: visible;
     flex-wrap: nowrap;
-    padding: 16px 8px;
+    padding: max(16px, env(safe-area-inset-top)) 8px 12px;
     gap: 4px;
     min-height: 48px;
     position: relative;
     justify-content: space-between;
   }
 
-  /* Perfectly center the 4-button group regardless of left/right widths */
+  /* Formatting group moves to a fixed bottom bar on mobile (like Apple Notes) */
   .toolbar-center-group {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
+    position: fixed;
+    left: 12px;
+    bottom: max(16px, env(safe-area-inset-bottom));
+    transform: none;
+    z-index: 100;
+  }
+
+  /* Dropdowns from the bottom bar open upward */
+  .toolbar-center-group .style-dropdown {
+    top: auto;
+    bottom: calc(100% + 6px);
+  }
+
+  .toolbar-center-group .attach-dropdown {
+    top: auto;
+    bottom: calc(100% + 6px);
   }
 
   .toolbar-mobile-back {
@@ -630,7 +643,8 @@
     font-size: 16px; /* prevents iOS auto-zoom on focus */
   }
 
+  /* Extra bottom padding to clear the fixed format bar */
   .editor-scroll-area {
-    padding-bottom: max(24px, env(safe-area-inset-bottom));
+    padding-bottom: calc(max(16px, env(safe-area-inset-bottom)) + 64px);
   }
 }

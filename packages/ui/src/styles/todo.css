@@ -62,20 +62,22 @@
   flex-shrink: 0;
 }
 
+/* Push the ? info button to the far right of the title row */
 .todo-info-wrap {
   position: relative;
   display: flex;
   align-items: center;
+  margin-left: auto;
   margin-top: 4px;
 }
 
 .todo-info-icon {
-  font-size: 0.85rem;
+  font-size: 1.05rem;
   color: var(--text-muted);
-  opacity: 0.45;
+  opacity: 0.5;
   cursor: default;
   transition: opacity 0.15s;
-  margin-left: 10px;
+  margin-left: 0;
 }
 
 .todo-info-wrap:hover .todo-info-icon {
@@ -85,9 +87,10 @@
 .todo-info-tooltip {
   display: none;
   position: absolute;
-  left: 50%;
+  right: 0;
+  left: auto;
   top: calc(100% + 6px);
-  transform: translateX(-50%);
+  transform: none;
   background: var(--surface-2, var(--sidebar-bg));
   color: var(--text-muted);
   font-size: 0.78rem;

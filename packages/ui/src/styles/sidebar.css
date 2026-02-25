@@ -731,9 +731,9 @@
   opacity: 0.7;
 }
 
-/* ─── Mobile sidebar tweaks (≤768px) ────────────────────── */
+/* ─── Mobile sidebar tweaks (≤900px) ────────────────────── */
 
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   /* ── Sizing ── */
   .note-item {
     min-height: 58px;
