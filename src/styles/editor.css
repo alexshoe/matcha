@@ -8,6 +8,10 @@
   overflow: hidden;
 }
 
+.os-windows .main {
+  min-width: 400px;
+}
+
 /* ─── Empty state ────────────────────────────────────────── */
 
 .empty-state {
