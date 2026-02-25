@@ -550,7 +550,8 @@ export function TodoList({
 					/>
 				</div>
 				<div className={`todo-goals-body${goalsExpanded ? " expanded" : ""}`}>
-					<div className="todo-goals-inner">
+					<div className="todo-goals-collapse-wrapper">
+						<div className="todo-goals-inner">
 						{goals.map((goal) => (
 							<div
 								key={goal.id}
@@ -599,25 +600,26 @@ export function TodoList({
 								</button>
 							</div>
 						))}
-					</div>
-					<div className="todo-add-row">
-						<input
-							className="todo-add-input"
-							placeholder="Add a long-term goal..."
-							value={goalInput}
-							onChange={(e) => setGoalInput(e.target.value)}
-							onKeyDown={(e) => {
-								if (e.key === "Enter") addGoal();
-							}}
-						/>
-						<button
-							type="button"
-							className="todo-add-btn"
-							onClick={addGoal}
-							disabled={!goalInput.trim()}
-						>
-							<FontAwesomeIcon icon={faPlus} />
-						</button>
+						</div>
+						<div className="todo-add-row">
+							<input
+								className="todo-add-input"
+								placeholder="Add a long-term goal..."
+								value={goalInput}
+								onChange={(e) => setGoalInput(e.target.value)}
+								onKeyDown={(e) => {
+									if (e.key === "Enter") addGoal();
+								}}
+							/>
+							<button
+								type="button"
+								className="todo-add-btn"
+								onClick={addGoal}
+								disabled={!goalInput.trim()}
+							>
+								<FontAwesomeIcon icon={faPlus} />
+							</button>
+						</div>
 					</div>
 				</div>
 			</div>

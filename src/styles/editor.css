@@ -430,6 +430,115 @@
   box-shadow: 0 0 0 3px rgba(141, 184, 122, 0.18);
 }
 
+/* ── Find bar ────────────────────────────────────────────── */
+
+.find-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--main-bg);
+  flex-shrink: 0;
+  animation: findBarIn 0.15s ease-out;
+}
+
+@keyframes findBarIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.find-bar-icon {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  flex-shrink: 0;
+}
+
+.find-bar-input {
+  flex: 1;
+  min-width: 0;
+  height: 28px;
+  padding: 0 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.867rem;
+  outline: none;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.find-bar-input::placeholder {
+  color: var(--text-dim);
+  opacity: 0.6;
+}
+
+.find-bar-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(141, 184, 122, 0.18);
+}
+
+.find-bar-counter {
+  font-size: 0.767rem;
+  color: var(--text-dim);
+  white-space: nowrap;
+  flex-shrink: 0;
+  min-width: 36px;
+  text-align: center;
+}
+
+.find-bar-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  border: none;
+  border-radius: 7px;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 0.767rem;
+  transition:
+    background 0.1s,
+    color 0.1s;
+  flex-shrink: 0;
+}
+
+.find-bar-btn:hover {
+  background: var(--surface);
+  color: var(--text);
+}
+
+.find-bar-close:hover {
+  background: var(--danger-subtle);
+  color: var(--danger);
+}
+
+/* ── Search match highlights (applied via ProseMirror decorations) ── */
+
+.search-match {
+  background: rgba(245, 158, 11, 0.28);
+  border-radius: 2px;
+}
+
+.search-match-current {
+  background: rgba(245, 158, 11, 0.7);
+  border-radius: 2px;
+  color: #1a1a1a;
+}
+
 /* ─── Editor timestamp ───────────────────────────────────── */
 
 .editor-timestamp {

@@ -152,22 +152,25 @@
   transition: grid-template-rows 0.25s ease;
 }
 
-/* Both direct children need overflow:hidden for the 0fr collapse to work */
-.todo-goals-body > * {
-  overflow: hidden;
-}
-
 .todo-goals-body.expanded {
   padding-top: 5px;
-  /* inner gets scrollable space; add-row gets its natural height */
-  grid-template-rows: 1fr auto;
+  grid-template-rows: 1fr;
 }
 
+/* Single grid child — collapses to 0 via overflow:hidden */
+.todo-goals-collapse-wrapper {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Scrollable list */
 .todo-goals-inner {
   padding: 0 20px;
   display: flex;
   flex-direction: column;
   gap: 6px;
+  overflow: hidden;
 }
 
 .todo-goals-body.expanded .todo-goals-inner {
@@ -176,10 +179,10 @@
   overflow-y: auto;
 }
 
-/* When expanded, let the add-row render normally */
-.todo-goals-body.expanded > .todo-add-row {
-  overflow: visible;
+/* Add-row sits below the list, outside the scroll area */
+.todo-goals-collapse-wrapper > .todo-add-row {
   padding: 0 20px 16px;
+  flex-shrink: 0;
 }
 
 .todo-goals-body.expanded .todo-goals-inner::-webkit-scrollbar {

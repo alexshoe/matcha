@@ -11,7 +11,8 @@ import { TableRow } from "@tiptap/extension-table-row";
 import { TableCell } from "@tiptap/extension-table-cell";
 import { TableHeader } from "@tiptap/extension-table-header";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
-import React, { useRef, useState, useEffect } from "react";
+import { Decoration, DecorationSet } from "@tiptap/pm/view";
+import React, { useRef, useState, useEffect, useReducer } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
 	faSquareCheck,
@@ -24,6 +25,10 @@ import {
 	faTrashCan,
 	faUserPlus,
 	faRightFromBracket,
+	faMagnifyingGlass,
+	faChevronUp,
+	faChevronDown,
+	faXmark,
 } from "@fortawesome/free-solid-svg-icons";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Note } from "../types";
@@ -324,6 +329,73 @@ const SingleLevelBlockquote = Extension.create({
 	},
 });
 
+// ── In-note search ────────────────────────────────────────────────────────────
+
+const searchPluginKey = new PluginKey<{ query: string; currentIndex: number }>(
+	"searchHighlight",
+);
+
+function findAllMatches(
+	doc: any,
+	query: string,
+): { from: number; to: number }[] {
+	if (!query.trim()) return [];
+	const results: { from: number; to: number }[] = [];
+	const q = query.toLowerCase();
+	doc.descendants((node: any, pos: number) => {
+		if (!node.isText) return;
+		const text: string = node.text!.toLowerCase();
+		let i = 0;
+		while (true) {
+			const f = text.indexOf(q, i);
+			if (f === -1) break;
+			results.push({ from: pos + f, to: pos + f + query.length });
+			i = f + 1;
+		}
+	});
+	return results;
+}
+
+const SearchHighlight = Extension.create({
+	name: "searchHighlight",
+	addProseMirrorPlugins() {
+		return [
+			new Plugin({
+				key: searchPluginKey,
+				state: {
+					init() {
+						return { query: "", currentIndex: 0 };
+					},
+					apply(tr, prev) {
+						const meta = tr.getMeta(searchPluginKey);
+						return meta !== undefined ? meta : prev;
+					},
+				},
+				props: {
+					decorations(state) {
+						const { query, currentIndex } =
+							searchPluginKey.getState(state)!;
+						if (!query.trim()) return DecorationSet.empty;
+						const matches = findAllMatches(state.doc, query);
+						if (matches.length === 0) return DecorationSet.empty;
+						const decos = matches.map((m, i) =>
+							Decoration.inline(m.from, m.to, {
+								class:
+									i === currentIndex
+										? "search-match-current"
+										: "search-match",
+							}),
+						);
+						return DecorationSet.create(state.doc, decos);
+					},
+				},
+			}),
+		];
+	},
+});
+
+// ── End in-note search ────────────────────────────────────────────────────────
+
 function defaultContentForStartWith(startWith: string) {
 	switch (startWith) {
 		case "heading":
@@ -396,11 +468,16 @@ export function NoteEditor({
 	const saveTimer = useRef<ReturnType<typeof setTimeout>>();
 	const [stylePickerOpen, setStylePickerOpen] = useState(false);
 	const [attachMenuOpen, setAttachMenuOpen] = useState(false);
+	const [findOpen, setFindOpen] = useState(false);
+	const [findQuery, setFindQuery] = useState("");
+	const [findIndex, setFindIndex] = useState(0);
 	const stylePickerRef = useRef<HTMLDivElement>(null);
 	const attachMenuRef = useRef<HTMLDivElement>(null);
 	const editorScrollRef = useRef<HTMLDivElement>(null);
+	const findInputRef = useRef<HTMLInputElement>(null);
 	const autoSortRef = useRef(autoSortChecked);
 	autoSortRef.current = autoSortChecked;
+	const [, forceUpdate] = useReducer((n: number) => n + 1, 0);
 
 	const supabaseRef = useRef(supabaseClient);
 	supabaseRef.current = supabaseClient;
@@ -458,6 +535,7 @@ export function NoteEditor({
 		SingleLevelBlockquote,
 		TabIndent,
 		SortTaskItems.configure({ getEnabled: () => autoSortRef.current }),
+		SearchHighlight,
 	];
 
 	const editor = useEditor({
@@ -598,7 +676,7 @@ export function NoteEditor({
 		if (saveTimer.current) return;
 		try {
 			const parsed = note.content ? JSON.parse(note.content) : null;
-			if (parsed) editor.commands.setContent(parsed, false);
+			if (parsed) editor.commands.setContent(parsed, { emitUpdate: false });
 		} catch {
 			// ignore malformed content
 		}
@@ -623,7 +701,61 @@ export function NoteEditor({
 		return () => document.removeEventListener("mousedown", handleClickOutside);
 	}, []);
 
+	// Re-render when editor doc changes while find bar is open (keeps counter fresh)
+	useEffect(() => {
+		if (!editor || !findOpen) return;
+		editor.on("update", forceUpdate);
+		return () => {
+			editor.off("update", forceUpdate);
+		};
+	}, [editor, findOpen]);
+
+	// Cmd+F / Ctrl+F global shortcut
+	useEffect(() => {
+		const handler = (e: KeyboardEvent) => {
+			if ((e.metaKey || e.ctrlKey) && e.key === "f") {
+				e.preventDefault();
+				setFindOpen(true);
+				setTimeout(() => {
+					findInputRef.current?.focus();
+					findInputRef.current?.select();
+				}, 10);
+			}
+		};
+		window.addEventListener("keydown", handler, true);
+		return () => window.removeEventListener("keydown", handler, true);
+	}, []);
+
 	if (!editor) return null;
+
+	function dispatchSearch(query: string, index: number) {
+		if (!editor) return;
+		editor.view.dispatch(
+			editor.state.tr.setMeta(searchPluginKey, { query, currentIndex: index }),
+		);
+	}
+
+	function closeFindBar() {
+		setFindOpen(false);
+		setFindQuery("");
+		setFindIndex(0);
+		dispatchSearch("", 0);
+	}
+
+	function navigateFind(dir: 1 | -1) {
+		if (!editor || !findQuery.trim()) return;
+		const matches = findAllMatches(editor.state.doc, findQuery);
+		if (matches.length === 0) return;
+		const newIndex =
+			((findIndex + dir) % matches.length + matches.length) % matches.length;
+		setFindIndex(newIndex);
+		dispatchSearch(findQuery, newIndex);
+		setTimeout(() => {
+			document
+				.querySelector(".search-match-current")
+				?.scrollIntoView({ block: "center", behavior: "smooth" });
+		}, 0);
+	}
 
 	function activeStyle(): TextStyle {
 		if (!editor) return "paragraph";
@@ -986,7 +1118,77 @@ export function NoteEditor({
 				)}
 			</div>
 
-			<div className="editor-timestamp">{formatTimestamp(note.updated_at)}</div>
+			{findOpen && (() => {
+				const matches = findAllMatches(editor.state.doc, findQuery);
+				const safeIndex =
+					matches.length > 0 ? Math.min(findIndex, matches.length - 1) : 0;
+				return (
+					<div className="find-bar">
+						<FontAwesomeIcon
+							icon={faMagnifyingGlass}
+							className="find-bar-icon"
+						/>
+						<input
+							ref={findInputRef}
+							className="find-bar-input"
+							value={findQuery}
+							placeholder="Find in note…"
+							onChange={(e) => {
+								const q = e.target.value;
+								setFindQuery(q);
+								setFindIndex(0);
+								dispatchSearch(q, 0);
+							}}
+							onKeyDown={(e) => {
+								if (e.key === "Escape") closeFindBar();
+								else if (e.key === "Enter") {
+									e.preventDefault();
+									navigateFind(e.shiftKey ? -1 : 1);
+								}
+							}}
+						/>
+						{findQuery && (
+							<span className="find-bar-counter">
+								{matches.length > 0
+									? `${safeIndex + 1}/${matches.length}`
+									: "0/0"}
+							</span>
+						)}
+						<button
+							className="find-bar-btn"
+							onMouseDown={(e) => {
+								e.preventDefault();
+								navigateFind(-1);
+							}}
+							title="Previous match (Shift+Enter)"
+						>
+							<FontAwesomeIcon icon={faChevronUp} />
+						</button>
+						<button
+							className="find-bar-btn"
+							onMouseDown={(e) => {
+								e.preventDefault();
+								navigateFind(1);
+							}}
+							title="Next match (Enter)"
+						>
+							<FontAwesomeIcon icon={faChevronDown} />
+						</button>
+						<button
+							className="find-bar-btn find-bar-close"
+							onMouseDown={(e) => {
+								e.preventDefault();
+								closeFindBar();
+							}}
+							title="Close (Esc)"
+						>
+							<FontAwesomeIcon icon={faXmark} />
+						</button>
+					</div>
+				);
+			})()}
+
+		<div className="editor-timestamp">{formatTimestamp(note.updated_at)}</div>
 			{creatorName && (
 				<div className="editor-created-by">Created by {creatorName}</div>
 			)}
