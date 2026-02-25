@@ -6,6 +6,7 @@ import React, {
 	useMemo,
 	useRef,
 } from "react";
+import { flushSync } from "react-dom";
 import { WebNoteEditor } from "./components/WebNoteEditor";
 import { WebAboutModal } from "./components/modals/WebAboutModal";
 import {
@@ -51,6 +52,7 @@ function App() {
 	const lastSentVersions = useRef<Map<string, number>>(new Map());
 
 	// ── Sidebar / UI state ──
+	const [mobileView, setMobileView] = useState<"list" | "editor">("list");
 	const [sidebarWidth, setSidebarWidth] = useState(240);
 	const [pinnedExpanded, setPinnedExpanded] = useState(true);
 	const [sidebarFocused, setSidebarFocused] = useState(false);
@@ -671,9 +673,10 @@ function App() {
 
 	// ── Note CRUD ──
 
-	async function createNote() {
+	async function createNote(listOverride?: string) {
 		cleanupEmptyNote(selectedId);
 		setShowTodoList(false);
+		setMobileView("editor");
 		shouldAutoFocusEditor.current = true;
 		const id = crypto.randomUUID();
 		const now = Math.floor(Date.now() / 1000);
@@ -683,7 +686,7 @@ function App() {
 			created_at: now,
 			updated_at: now,
 			pinned: false,
-			list: activeFolder,
+			list: listOverride ?? activeFolder,
 			deleted: false,
 			deleted_at: null,
 			version_num: 1,
@@ -1165,6 +1168,7 @@ function App() {
 			selectionAnchorId.current = note.id;
 		}
 
+		setMobileView("editor");
 		noteListRef.current?.focus();
 	}
 
@@ -1185,7 +1189,7 @@ function App() {
 	}
 
 	return (
-		<div className="app">
+		<div className="app" data-mobile-view={mobileView}>
 			<Sidebar
 				width={sidebarWidth}
 				onResizeStart={onResizeStart}
@@ -1214,10 +1218,23 @@ function App() {
 					selectionAnchorId.current = noteId;
 				}}
 				onNoteClick={handleNoteClick}
-				onCreateNote={createNote}
+				onCreateNote={() => {
+					if (isRecentlyDeleted || isSharedFolder) {
+						// flushSync forces the folder switch to render (and fire its
+						// useEffect) synchronously BEFORE createNote runs, so the
+						// activeFolder effect never sees the new empty note as selectedId
+						flushSync(() => {
+							setActiveFolder("My Notes");
+							localStorage.setItem("matcha_activeList", "My Notes");
+						});
+						createNote("My Notes");
+					} else {
+						createNote();
+					}
+				}}
 				onDeleteSelectedNotes={deleteSelectedNotes}
 				onCleanupEmptyNote={cleanupEmptyNote}
-				onSetShowTodoList={setShowTodoList}
+				onSetShowTodoList={(show) => { setShowTodoList(show); if (show) setMobileView("editor"); }}
 				onSetPinnedExpanded={setPinnedExpanded}
 				onSetSearchQuery={setSearchQuery}
 				onSetActiveFolder={setActiveFolder}
@@ -1238,6 +1255,18 @@ function App() {
 			/>
 
 			<main className="main" onMouseDown={() => setSidebarFocused(false)}>
+				{showTodoList && (
+					<button
+						className="mobile-back-btn"
+						onClick={() => setMobileView("list")}
+						aria-label="Back to notes"
+					>
+						<svg width="9" height="15" viewBox="0 0 9 15" fill="none" aria-hidden="true">
+							<path d="M8 1L1.5 7.5L8 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+						</svg>
+						Notes
+					</button>
+				)}
 				{showTodoList ? (
 					<TodoList
 						supabaseClient={activeSupabase.current}
@@ -1294,6 +1323,7 @@ function App() {
 								? () => setLeaveConfirmNoteId(selectedNote.id)
 								: undefined
 						}
+						onMobileBack={() => setMobileView("list")}
 					/>
 				) : (
 					<div className="empty-state">

@@ -730,3 +730,79 @@
   text-overflow: ellipsis;
   opacity: 0.7;
 }
+
+/* ─── Mobile sidebar tweaks (≤768px) ────────────────────── */
+
+@media (max-width: 768px) {
+  /* ── Sizing ── */
+  .note-item {
+    min-height: 58px;
+    padding: 11px 14px;
+    gap: 4px;
+  }
+
+  .note-item-title {
+    font-size: 1rem;
+  }
+
+  .note-item-meta {
+    font-size: 0.867rem;
+  }
+
+  .sidebar-search-input {
+    font-size: 16px; /* prevents iOS auto-zoom on focus */
+    height: 36px;
+  }
+
+  .sidebar-header {
+    padding-top: max(12px, env(safe-area-inset-top));
+    padding-left: 6px;
+    padding-right: 6px;
+  }
+
+  .sidebar-footer {
+    padding-bottom: max(8px, env(safe-area-inset-bottom));
+  }
+
+  .sidebar-footer-btn {
+    min-width: 40px;
+    min-height: 40px;
+    font-size: 1rem;
+  }
+
+  .new-note-fab {
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+  }
+
+  /* ── No persistent active/selected highlight on mobile ── */
+  .note-item.active,
+  .note-item.selected,
+  .note-list.sidebar-focused .note-item.active,
+  .note-list.sidebar-focused .note-item.selected {
+    background: none;
+  }
+
+  .note-list.sidebar-focused .note-item.active .note-item-title,
+  .note-list.sidebar-focused .note-item.selected .note-item-title {
+    color: var(--text);
+  }
+
+  .note-list.sidebar-focused .note-item.active .note-item-date,
+  .note-list.sidebar-focused .note-item.active .note-item-preview,
+  .note-list.sidebar-focused .note-item.selected .note-item-date,
+  .note-list.sidebar-focused .note-item.selected .note-item-preview {
+    color: var(--text-dim);
+  }
+
+  /* ── Tap feedback via CSS :active ── */
+  .note-item:active {
+    background: var(--accent) !important;
+    opacity: 0.85;
+  }
+
+  .note-item:active .note-item-title {
+    color: var(--on-accent);
+  }
+}

@@ -126,6 +126,7 @@ interface Props {
 	readOnly?: boolean;
 	onShare?: () => void;
 	onLeaveShared?: () => void;
+	onMobileBack?: () => void;
 }
 
 function formatTimestamp(ts: number): string {
@@ -434,6 +435,7 @@ export function WebNoteEditor({
 	readOnly = false,
 	onShare,
 	onLeaveShared,
+	onMobileBack,
 }: Props) {
 	const saveTimer = useRef<ReturnType<typeof setTimeout>>();
 	const [stylePickerOpen, setStylePickerOpen] = useState(false);
@@ -845,6 +847,17 @@ export function WebNoteEditor({
 			/>
 
 			<div className="toolbar">
+				{onMobileBack && (
+					<button
+						className="toolbar-mobile-back"
+						onClick={onMobileBack}
+						aria-label="Back to notes"
+					>
+						<svg width="9" height="15" viewBox="0 0 9 15" fill="none" aria-hidden="true">
+							<path d="M8 1L1.5 7.5L8 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+						</svg>
+					</button>
+				)}
 				<div className="toolbar-spacer" />
 
 				{readOnly ? (
