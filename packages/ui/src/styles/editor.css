@@ -549,7 +549,7 @@
   flex-shrink: 0;
   font-size: 0.8rem;
   color: var(--text-dim);
-  padding: 15px 40px 0;
+  padding: 10px 40px 10px;
   pointer-events: none;
   user-select: none;
 }
