@@ -12,6 +12,7 @@
 -----
 
 - Rich text editing — headings, bold, italic, lists, blockquotes, tables
+- What-you-see-is-what-you-get markdown editing
 - Task lists with checkboxes and drag-to-reorder
 - Dedicated to-do list view
 - Image and PDF file attachments
