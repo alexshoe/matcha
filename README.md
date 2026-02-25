@@ -20,8 +20,7 @@
 - Full-text search
 - Cloud sync and note sharing via Supabase
 
-Currently supports Windows and MacOS -- iOS coming soon.
-
+Currently supports Windows and MacOS -- Web app and iOS versions coming soon.
 
 <img width="1507" height="820" alt="Screenshot 2026-02-24 at 12 30 55 AM" src="https://github.com/user-attachments/assets/ad7958de-b2c4-432d-8bb9-fced059df2ce" />
 
