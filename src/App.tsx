@@ -514,9 +514,10 @@ function App() {
 					setSelectedId(null);
 					setSelectedNoteIds([]);
 					invoke("set_notes", { notes: [] }).catch(() => {});
-				} else if (session?.user) {
-					setUser(session.user);
-				}
+			} else if (session?.user) {
+				activeSupabase.current = client;
+				setUser(session.user);
+			}
 			});
 
 			return () => subscription.unsubscribe();
@@ -622,11 +623,15 @@ function App() {
 		fetchSharedNotes();
 	}, [user, fetchSharedNotes]);
 
+	const handleSync = useCallback(async () => {
+		await performCloudSync();
+	}, [performCloudSync]);
+
 	useEffect(() => {
-		if (!user || loading || cloudSyncAttempted.current) return;
+		if (!isAuthenticated || loading || cloudSyncAttempted.current) return;
 		cloudSyncAttempted.current = true;
-		performCloudSync();
-	}, [user, loading, performCloudSync]);
+		handleSync();
+	}, [isAuthenticated, loading, handleSync]);
 
 	// ── Helper: map a Supabase record to a local Note ──
 	function mapCloudNote(record: Record<string, unknown>): Note {
@@ -1344,8 +1349,7 @@ function App() {
 				onSetSidebarFocused={setSidebarFocused}
 				onRenameNote={renameNote}
 				onContextMenu={setContextMenu}
-				onManualSync={performCloudSync}
-				onOpenAccount={() => setAccountOpen(true)}
+			onOpenAccount={() => setAccountOpen(true)}
 				onOpenAbout={() => setAboutOpen(true)}
 				onOpenSettings={() => setSettingsOpen(true)}
 				renamingId={renamingId}

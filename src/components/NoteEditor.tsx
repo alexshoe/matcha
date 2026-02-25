@@ -22,7 +22,6 @@ import {
 	faFilePdf,
 	faTrash,
 	faArrowRotateLeft,
-	faTrashCan,
 	faUserPlus,
 	faRightFromBracket,
 	faMagnifyingGlass,
@@ -373,17 +372,14 @@ const SearchHighlight = Extension.create({
 				},
 				props: {
 					decorations(state) {
-						const { query, currentIndex } =
-							searchPluginKey.getState(state)!;
+						const { query, currentIndex } = searchPluginKey.getState(state)!;
 						if (!query.trim()) return DecorationSet.empty;
 						const matches = findAllMatches(state.doc, query);
 						if (matches.length === 0) return DecorationSet.empty;
 						const decos = matches.map((m, i) =>
 							Decoration.inline(m.from, m.to, {
 								class:
-									i === currentIndex
-										? "search-match-current"
-										: "search-match",
+									i === currentIndex ? "search-match-current" : "search-match",
 							}),
 						);
 						return DecorationSet.create(state.doc, decos);
@@ -747,7 +743,7 @@ export function NoteEditor({
 		const matches = findAllMatches(editor.state.doc, findQuery);
 		if (matches.length === 0) return;
 		const newIndex =
-			((findIndex + dir) % matches.length + matches.length) % matches.length;
+			(((findIndex + dir) % matches.length) + matches.length) % matches.length;
 		setFindIndex(newIndex);
 		dispatchSearch(findQuery, newIndex);
 		setTimeout(() => {
@@ -857,7 +853,7 @@ export function NoteEditor({
 							}}
 							title="Delete Permanently"
 						>
-							<FontAwesomeIcon icon={faTrashCan} />
+							<FontAwesomeIcon icon={faTrash} />
 						</button>
 					</div>
 				) : (
@@ -1118,77 +1114,78 @@ export function NoteEditor({
 				)}
 			</div>
 
-			{findOpen && (() => {
-				const matches = findAllMatches(editor.state.doc, findQuery);
-				const safeIndex =
-					matches.length > 0 ? Math.min(findIndex, matches.length - 1) : 0;
-				return (
-					<div className="find-bar">
-						<FontAwesomeIcon
-							icon={faMagnifyingGlass}
-							className="find-bar-icon"
-						/>
-						<input
-							ref={findInputRef}
-							className="find-bar-input"
-							value={findQuery}
-							placeholder="Find in note…"
-							onChange={(e) => {
-								const q = e.target.value;
-								setFindQuery(q);
-								setFindIndex(0);
-								dispatchSearch(q, 0);
-							}}
-							onKeyDown={(e) => {
-								if (e.key === "Escape") closeFindBar();
-								else if (e.key === "Enter") {
+			{findOpen &&
+				(() => {
+					const matches = findAllMatches(editor.state.doc, findQuery);
+					const safeIndex =
+						matches.length > 0 ? Math.min(findIndex, matches.length - 1) : 0;
+					return (
+						<div className="find-bar">
+							<FontAwesomeIcon
+								icon={faMagnifyingGlass}
+								className="find-bar-icon"
+							/>
+							<input
+								ref={findInputRef}
+								className="find-bar-input"
+								value={findQuery}
+								placeholder="Find in note…"
+								onChange={(e) => {
+									const q = e.target.value;
+									setFindQuery(q);
+									setFindIndex(0);
+									dispatchSearch(q, 0);
+								}}
+								onKeyDown={(e) => {
+									if (e.key === "Escape") closeFindBar();
+									else if (e.key === "Enter") {
+										e.preventDefault();
+										navigateFind(e.shiftKey ? -1 : 1);
+									}
+								}}
+							/>
+							{findQuery && (
+								<span className="find-bar-counter">
+									{matches.length > 0
+										? `${safeIndex + 1}/${matches.length}`
+										: "0/0"}
+								</span>
+							)}
+							<button
+								className="find-bar-btn"
+								onMouseDown={(e) => {
 									e.preventDefault();
-									navigateFind(e.shiftKey ? -1 : 1);
-								}
-							}}
-						/>
-						{findQuery && (
-							<span className="find-bar-counter">
-								{matches.length > 0
-									? `${safeIndex + 1}/${matches.length}`
-									: "0/0"}
-							</span>
-						)}
-						<button
-							className="find-bar-btn"
-							onMouseDown={(e) => {
-								e.preventDefault();
-								navigateFind(-1);
-							}}
-							title="Previous match (Shift+Enter)"
-						>
-							<FontAwesomeIcon icon={faChevronUp} />
-						</button>
-						<button
-							className="find-bar-btn"
-							onMouseDown={(e) => {
-								e.preventDefault();
-								navigateFind(1);
-							}}
-							title="Next match (Enter)"
-						>
-							<FontAwesomeIcon icon={faChevronDown} />
-						</button>
-						<button
-							className="find-bar-btn find-bar-close"
-							onMouseDown={(e) => {
-								e.preventDefault();
-								closeFindBar();
-							}}
-							title="Close (Esc)"
-						>
-							<FontAwesomeIcon icon={faXmark} />
-						</button>
-					</div>
-				);
-			})()}
+									navigateFind(-1);
+								}}
+								title="Previous match (Shift+Enter)"
+							>
+								<FontAwesomeIcon icon={faChevronUp} />
+							</button>
+							<button
+								className="find-bar-btn"
+								onMouseDown={(e) => {
+									e.preventDefault();
+									navigateFind(1);
+								}}
+								title="Next match (Enter)"
+							>
+								<FontAwesomeIcon icon={faChevronDown} />
+							</button>
+							<button
+								className="find-bar-btn find-bar-close"
+								onMouseDown={(e) => {
+									e.preventDefault();
+									closeFindBar();
+								}}
+								title="Close (Esc)"
+							>
+								<FontAwesomeIcon icon={faXmark} />
+							</button>
+						</div>
+					);
+				})()}
 
-		<div className="editor-timestamp">{formatTimestamp(note.updated_at)}</div>
+			<div className="editor-timestamp">{formatTimestamp(note.updated_at)}</div>
 			{creatorName && (
 				<div className="editor-created-by">Created by {creatorName}</div>
 			)}

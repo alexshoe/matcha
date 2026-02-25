@@ -9,7 +9,6 @@ import {
 	faMagnifyingGlass,
 	faXmark,
 	faSquareCheck,
-	faRotate,
 } from "@fortawesome/free-solid-svg-icons";
 import type { Note } from "../App";
 import type { SharedNoteEntry } from "../types";
@@ -53,7 +52,6 @@ interface SidebarProps {
 	onContextMenu: (
 		menu: { x: number; y: number; noteId: string } | null,
 	) => void;
-	onManualSync: () => Promise<void>;
 	onOpenAccount: () => void;
 	onOpenAbout: () => void;
 	onOpenSettings: () => void;
@@ -111,7 +109,6 @@ export function Sidebar({
 	onSetSidebarFocused,
 	onRenameNote,
 	onContextMenu,
-	onManualSync,
 	onOpenAccount,
 	onOpenAbout,
 	onOpenSettings,
@@ -126,7 +123,6 @@ export function Sidebar({
 }: SidebarProps) {
 	const [folderDropdownOpen, setFolderDropdownOpen] = useState(false);
 	const folderDropdownRef = useRef<HTMLDivElement>(null);
-	const [syncing, setSyncing] = useState(false);
 
 	useEffect(() => {
 		if (!folderDropdownOpen) return;
@@ -302,36 +298,18 @@ export function Sidebar({
 						</span>
 					</div>
 				</div>
-				<div className="sidebar-header-actions">
-					<button
-						className="sidebar-sync-btn"
-						title="Sync now"
-						disabled={syncing}
-						onClick={async () => {
-							setSyncing(true);
-							try {
-								await onManualSync();
-							} finally {
-								setSyncing(false);
-							}
-						}}
-					>
-						<FontAwesomeIcon
-							icon={faRotate}
-							className={syncing ? "fa-spin" : ""}
-						/>
-					</button>
-					<button
-						className="new-note-fab"
-						onClick={onCreateNote}
-						title="New Note"
-						disabled={
-							selectedNoteIsEmpty || isRecentlyDeleted || isSharedFolder
-						}
-					>
-						<FontAwesomeIcon icon={faPenToSquare} />
-					</button>
-				</div>
+			<div className="sidebar-header-actions">
+				<button
+					className="new-note-fab"
+					onClick={onCreateNote}
+					title="New Note"
+					disabled={
+						selectedNoteIsEmpty || isRecentlyDeleted || isSharedFolder
+					}
+				>
+					<FontAwesomeIcon icon={faPenToSquare} />
+				</button>
+			</div>
 			</div>
 
 			<div className="sidebar-search-wrap">
@@ -402,34 +380,37 @@ export function Sidebar({
 				) : searchQuery.trim() ? (
 					[...filteredNotes].sort(sortFn).map((note) => renderNoteItem(note))
 				) : (
-					<>
-						{pinnedNotes.length > 0 && (
-							<>
-								<div
-									className="note-list-section-label"
-									onClick={() => onSetPinnedExpanded((v) => !v)}
-								>
-									<span>Pinned</span>
-									<FontAwesomeIcon
-										icon={faChevronDown}
-										className={`section-chevron${pinnedExpanded ? "" : " collapsed"}`}
-									/>
+				<>
+					{pinnedNotes.length > 0 && !isRecentlyDeleted && (
+						<>
+							<div
+								className="note-list-section-label"
+								onClick={() => onSetPinnedExpanded((v) => !v)}
+							>
+								<span>Pinned</span>
+								<FontAwesomeIcon
+									icon={faChevronDown}
+									className={`section-chevron${pinnedExpanded ? "" : " collapsed"}`}
+								/>
+							</div>
+							<div
+								className={`pinned-accordion${pinnedExpanded ? " expanded" : ""}`}
+							>
+								<div className="pinned-accordion-inner">
+									{pinnedNotes.map((note) => renderNoteItem(note))}
 								</div>
-								<div
-									className={`pinned-accordion${pinnedExpanded ? " expanded" : ""}`}
-								>
-									<div className="pinned-accordion-inner">
-										{pinnedNotes.map((note) => renderNoteItem(note))}
-									</div>
-								</div>
-								<div className="note-list-divider" />
-							</>
-						)}
-						<div className="note-list-section-label note-list-section-label--plain">
-							<span>{activeFolder}</span>
-						</div>
-						{regularNotes.map((note) => renderNoteItem(note))}
-					</>
+							</div>
+							<div className="note-list-divider" />
+						</>
+					)}
+					<div className="note-list-section-label note-list-section-label--plain">
+						<span>{activeFolder}</span>
+					</div>
+					{(isRecentlyDeleted
+						? [...filteredNotes].sort(sortFn)
+						: regularNotes
+					).map((note) => renderNoteItem(note))}
+				</>
 				)}
 			</div>
 			<div className="sidebar-footer">
