@@ -10,5 +10,6 @@ export default defineConfig({
 
 	server: {
 		port: 3000,
+		allowedHosts: true, // allow ngrok and other tunnel hosts
 	},
 });

@@ -20,6 +20,7 @@
   --danger: #c44040;
   --danger-subtle: rgba(196, 64, 64, 0.08);
   --table-border: #c3c8ad;
+  --link: #3d6e2c;
 }
 
 /* ── Matcha: popovers & dropdowns ─────────── */
@@ -230,6 +231,7 @@
   --danger: #d14040;
   --danger-subtle: rgba(209, 64, 64, 0.08);
   --table-border: #d5d3cd;
+  --link: #2563a8;
 }
 
 /* ── Light: popovers & dropdowns ─────────── */

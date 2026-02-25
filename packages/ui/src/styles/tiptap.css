@@ -121,6 +121,18 @@
   display: block;
 }
 
+/* Links */
+.ProseMirror a {
+  color: var(--link);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.ProseMirror a:hover {
+  opacity: 0.8;
+}
+
 /* Blockquote */
 .ProseMirror blockquote {
   border-left: 3px solid var(--accent);

@@ -3,6 +3,7 @@
 .app {
   display: flex;
   height: 100vh;
+  height: 100dvh; /* iOS: dynamic viewport, avoids address bar hide/show layout shift */
   overflow: hidden;
 }
 
@@ -12,9 +13,10 @@
   display: none;
 }
 
-/* ─── Mobile layout (≤768px): fullscreen list OR editor ─── */
+/* ─── Mobile layout (≤900px): fullscreen list OR editor ─── */
+/* 900px catches landscape iPhones (~852px); 768px misses them */
 
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .app {
     position: relative;
   }
@@ -25,8 +27,10 @@
     top: 0;
     left: 0;
     width: 100% !important;
+    min-width: 0; /* allow shrinking; overrides flex default */
     height: 100%;
     transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    -webkit-overflow-scrolling: touch; /* smooth scroll on iOS */
   }
 
   /* List view: sidebar visible, editor off-screen right */
@@ -45,7 +49,7 @@
     display: flex;
     align-items: center;
     gap: 7px;
-    padding: 10px 16px;
+    padding: max(10px, env(safe-area-inset-top)) 16px 10px;
     background: none;
     border: none;
     border-bottom: 1px solid var(--border);
