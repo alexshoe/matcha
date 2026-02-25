@@ -302,9 +302,7 @@ export function Sidebar({
 					className="new-note-fab"
 					onClick={onCreateNote}
 					title="New Note"
-					disabled={
-						selectedNoteIsEmpty || isRecentlyDeleted || isSharedFolder
-					}
+					disabled={selectedNoteIsEmpty}
 				>
 					<FontAwesomeIcon icon={faPenToSquare} />
 				</button>

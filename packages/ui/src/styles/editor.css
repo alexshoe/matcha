@@ -564,3 +564,73 @@
   pointer-events: none;
   user-select: none;
 }
+
+/* ─── Toolbar mobile back button (hidden on desktop) ─────── */
+
+.toolbar-mobile-back {
+  display: none;
+}
+
+/* ─── Mobile editor tweaks (≤768px) ─────────────────────── */
+
+@media (max-width: 768px) {
+  /* Single-row toolbar: back on left, 4 buttons perfectly centered, share/del on right */
+  .toolbar {
+    overflow: visible;
+    flex-wrap: nowrap;
+    padding: 16px 8px;
+    gap: 4px;
+    min-height: 48px;
+    position: relative;
+    justify-content: space-between;
+  }
+
+  /* Perfectly center the 4-button group regardless of left/right widths */
+  .toolbar-center-group {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .toolbar-mobile-back {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    background: none;
+    border: none;
+    color: var(--accent);
+    font-size: 16px;
+    cursor: pointer;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+    border-radius: 6px;
+  }
+
+  .toolbar-mobile-back:active {
+    opacity: 0.5;
+  }
+
+  /* Bigger toolbar buttons */
+  .toolbar-btn,
+  .toolbar-btn-danger {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+  }
+
+  /* Bigger Aa button */
+  .aa-label {
+    font-size: 1rem;
+  }
+
+  .find-bar-input {
+    font-size: 16px; /* prevents iOS auto-zoom on focus */
+  }
+
+  .editor-scroll-area {
+    padding-bottom: max(24px, env(safe-area-inset-bottom));
+  }
+}
