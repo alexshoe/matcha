@@ -63,8 +63,8 @@ export function ShareNoteModal({
 			const ownName = ownProfile.data?.display_name;
 
 			const entries: ShareEntry[] = (profilesRes.data ?? [])
-				.filter((p) => p.display_name !== ownName)
-				.map((p) => ({
+				.filter((p: { display_name?: string }) => p.display_name !== ownName)
+				.map((p: { display_name?: string; avatar_num?: number | null }) => ({
 					display_name: p.display_name as string,
 					avatar_num: p.avatar_num as number | null,
 					shared: sharedNames.has(p.display_name as string),

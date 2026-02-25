@@ -150,7 +150,7 @@ export function TodoList({
 					},
 					{ onConflict: "user_id" },
 				)
-				.then(({ error }) => {
+				.then(({ error }: { error: { message: string } | null }) => {
 					if (error) console.warn("Todo sync error:", error.message);
 				});
 		}, 500);
@@ -163,7 +163,7 @@ export function TodoList({
 			.select("long_term_goals, to_do_list")
 			.eq("user_id", userId)
 			.maybeSingle()
-			.then(({ data }) => {
+			.then(({ data }: { data: { long_term_goals?: string; to_do_list?: string } | null }) => {
 				const todayStr = dateKey(new Date());
 				if (data) {
 					const remoteGoals = parseJson<TodoGoal[]>(data.long_term_goals, []);
