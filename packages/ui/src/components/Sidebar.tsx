@@ -10,11 +10,10 @@ import {
 	faXmark,
 	faSquareCheck,
 } from "@fortawesome/free-solid-svg-icons";
-import type { Note } from "../App";
-import type { SharedNoteEntry } from "../types";
-import { extractPreview } from "../utils/noteContent";
-import { getSearchSnippet, highlightText } from "../utils/search";
-import { formatDate } from "../utils/format";
+import type { Note, SharedNoteEntry } from "@matcha/core";
+import { extractPreview } from "@matcha/core";
+import { getSearchSnippet, highlightText } from "@matcha/core";
+import { formatDate } from "@matcha/core";
 
 interface SidebarProps {
 	width: number;

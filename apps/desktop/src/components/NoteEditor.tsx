@@ -3,8 +3,7 @@ import { Extension, mergeAttributes } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
 import { OrderedList } from "@tiptap/extension-ordered-list";
 import { TaskList } from "@tiptap/extension-task-list";
-import { DraggableTaskItem } from "../extensions/DraggableTaskItem";
-import { ResizableImage } from "../extensions/ResizableImage";
+import { DraggableTaskItem, ResizableImage } from "@matcha/ui";
 import { FileAttachment } from "../extensions/FileAttachment";
 import { Table } from "@tiptap/extension-table";
 import { TableRow } from "@tiptap/extension-table-row";
@@ -30,14 +29,14 @@ import {
 	faXmark,
 } from "@fortawesome/free-solid-svg-icons";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Note } from "../types";
+import type { Note } from "@matcha/core";
 import {
 	uploadNoteImage,
 	uploadNoteFile,
 	deleteNoteImages,
 	deleteNoteFiles,
 	extractStorageUrls,
-} from "../lib/storage";
+} from "@matcha/core";
 import { open } from "@tauri-apps/plugin-dialog";
 import { readFile } from "@tauri-apps/plugin-fs";
 

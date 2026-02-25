@@ -6,7 +6,7 @@ import {
 	faXmark,
 } from "@fortawesome/free-solid-svg-icons";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { UserProfile } from "../../types";
+import type { UserProfile } from "@matcha/core";
 
 interface ShareNoteModalProps {
 	noteId: string;

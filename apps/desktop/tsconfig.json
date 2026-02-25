@@ -1,0 +1,13 @@
+{
+	"extends": "../../packages/config/tsconfig.base.json",
+	"compilerOptions": {
+		"paths": {
+			"@matcha/ui": ["../../packages/ui/src/index.ts"],
+			"@matcha/ui/*": ["../../packages/ui/src/*"],
+			"@matcha/core": ["../../packages/core/src/index.ts"],
+			"@matcha/core/*": ["../../packages/core/src/*"]
+		}
+	},
+	"include": ["src"],
+	"references": [{ "path": "./tsconfig.node.json" }]
+}

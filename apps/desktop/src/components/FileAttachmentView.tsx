@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFilePdf, faDownload } from "@fortawesome/free-solid-svg-icons";
 import { save } from "@tauri-apps/plugin-dialog";
 import { writeFile } from "@tauri-apps/plugin-fs";
-import { formatBytes } from "../utils/format";
+import { formatBytes } from "@matcha/core";
 
 export function FileAttachmentView({ node, selected }: NodeViewProps) {
   const { src, fileName, fileSize } = node.attrs;

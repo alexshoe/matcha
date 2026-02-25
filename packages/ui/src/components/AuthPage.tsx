@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { makeSupabaseClient, supabase } from "../lib/supabase";
+import { makeSupabaseClient, supabase } from "@matcha/core";
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 
 type LoginState = "idle" | "loading" | "success" | "exiting";
