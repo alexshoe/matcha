@@ -48,6 +48,11 @@
   gap: 24px;
 }
 
+.todo-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 
 .todo-title {
   font-size: 1.867rem;
@@ -55,6 +60,49 @@
   color: var(--text);
   letter-spacing: -0.5px;
   flex-shrink: 0;
+}
+
+.todo-info-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.todo-info-icon {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  opacity: 0.45;
+  cursor: default;
+  transition: opacity 0.15s;
+  margin-left: 10px;
+}
+
+.todo-info-wrap:hover .todo-info-icon {
+  opacity: 0.75;
+}
+
+.todo-info-tooltip {
+  display: none;
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 6px);
+  transform: translateX(-50%);
+  background: var(--surface-2, var(--sidebar-bg));
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  line-height: 1.4;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 100;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.todo-info-wrap:hover .todo-info-tooltip {
+  display: block;
 }
 
 /* ── Long-term Goals section ─────────── */
@@ -104,13 +152,18 @@
   transition: grid-template-rows 0.25s ease;
 }
 
+/* Both direct children need overflow:hidden for the 0fr collapse to work */
+.todo-goals-body > * {
+  overflow: hidden;
+}
+
 .todo-goals-body.expanded {
   padding-top: 5px;
-  grid-template-rows: 1fr;
+  /* inner gets scrollable space; add-row gets its natural height */
+  grid-template-rows: 1fr auto;
 }
 
 .todo-goals-inner {
-  overflow: hidden;
   padding: 0 20px;
   display: flex;
   flex-direction: column;
@@ -118,9 +171,15 @@
 }
 
 .todo-goals-body.expanded .todo-goals-inner {
-  padding-bottom: 16px;
+  padding-bottom: 8px;
   max-height: min(40vh, 320px);
   overflow-y: auto;
+}
+
+/* When expanded, let the add-row render normally */
+.todo-goals-body.expanded > .todo-add-row {
+  overflow: visible;
+  padding: 0 20px 16px;
 }
 
 .todo-goals-body.expanded .todo-goals-inner::-webkit-scrollbar {
@@ -321,6 +380,13 @@
 
 .todo-check-item.todo-drop-after::after {
   bottom: -2px;
+}
+
+/* ── Top sentinel drop zone ── */
+
+.todo-drop-sentinel {
+  height: 8px;
+  margin-bottom: -4px;
 }
 
 /* ── Add row (input + button) ── */
@@ -547,4 +613,3 @@
   background: var(--scrollbar);
   border-radius: 4px;
 }
-

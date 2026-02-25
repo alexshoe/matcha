@@ -434,10 +434,9 @@
 
 .editor-timestamp {
   flex-shrink: 0;
-  text-align: center;
   font-size: 0.8rem;
   color: var(--text-dim);
-  padding: 10px 40px 0;
+  padding: 15px 40px 0;
   pointer-events: none;
   user-select: none;
 }
@@ -452,4 +451,3 @@
   pointer-events: none;
   user-select: none;
 }
-

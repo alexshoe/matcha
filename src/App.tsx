@@ -7,6 +7,7 @@ import React, {
 	useRef,
 } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { platform } from "@tauri-apps/plugin-os";
 import { NoteEditor } from "./components/NoteEditor";
 import { TodoList } from "./components/TodoList";
 import { AuthPage } from "./components/AuthPage";
@@ -184,6 +185,10 @@ function App() {
 	);
 
 	// ── Effects ──
+
+	useEffect(() => {
+		document.documentElement.classList.add(`os-${platform()}`);
+	}, []);
 
 	// Prevent browser from navigating to dropped files (fullscreen takeover)
 	useEffect(() => {
@@ -504,6 +509,11 @@ function App() {
 					setUser(null);
 					setIsAuthenticated(false);
 					cloudSyncAttempted.current = false;
+					// Clear local notes so the next user doesn't see this account's data
+					setNotes([]);
+					setSelectedId(null);
+					setSelectedNoteIds([]);
+					invoke("set_notes", { notes: [] }).catch(() => {});
 				} else if (session?.user) {
 					setUser(session.user);
 				}

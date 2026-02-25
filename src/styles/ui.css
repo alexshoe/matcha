@@ -25,6 +25,11 @@
   opacity: 0.7;
 }
 
+.note-list-section-label--plain {
+  cursor: default;
+  pointer-events: none;
+}
+
 .section-chevron {
   transition: transform 0.22s ease;
 }

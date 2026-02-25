@@ -81,12 +81,14 @@ const SortTaskItems = Extension.create<{ getEnabled: () => boolean }>({
 							(a, b) => (a.attrs.checked ? 1 : 0) - (b.attrs.checked ? 1 : 0),
 						);
 
-						if (!children.some((c, i) => c !== sorted[i])) return;
-
-						const hasVisibleChange = children.some(
-							(c, i) => c !== sorted[i] && !c.content.eq(sorted[i].content),
+						// Check if order needs to change by checked state or content
+						const needsSort = children.some(
+							(c, i) =>
+								c !== sorted[i] &&
+								(c.attrs.checked !== sorted[i].attrs.checked ||
+									!c.content.eq(sorted[i].content)),
 						);
-						if (!hasVisibleChange) return;
+						if (!needsSort) return;
 
 						replacements.push({
 							from: pos,
@@ -585,6 +587,22 @@ export function NoteEditor({
 			},
 		},
 	});
+
+	// ── Apply remote content updates for the currently-open note ──
+	const lastAppliedVersion = useRef(note.version_num);
+	useEffect(() => {
+		if (!editor) return;
+		if (note.version_num <= lastAppliedVersion.current) return;
+		lastAppliedVersion.current = note.version_num;
+		// Don't clobber in-progress local edits
+		if (saveTimer.current) return;
+		try {
+			const parsed = note.content ? JSON.parse(note.content) : null;
+			if (parsed) editor.commands.setContent(parsed, false);
+		} catch {
+			// ignore malformed content
+		}
+	}, [editor, note.version_num, note.content]);
 
 	useEffect(() => {
 		function handleClickOutside(e: MouseEvent) {

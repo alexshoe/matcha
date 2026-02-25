@@ -1,0 +1,39 @@
+{
+  "file_hashes": {
+    "src-tauri/build.rs": "69ca21b16a83928d9e7dcfde10543ebc181766a2b93b0de6e7c2fc1d0c4531ef",
+    "src-tauri/src/lib.rs": "d373abebf296900507d166d4b1c189fbea635d35ec2f10550a4dd45974f925c9",
+    "src-tauri/src/main.rs": "028032bbf3942c3be9114e4145523dcf1db173a242dd42519bfb359b9d4d8021",
+    "src/App.tsx": "99ae7ea13987091ad69c5cafddf63adfac921990ce42c72fb05009a3f0b674e2",
+    "src/components/AuthPage.tsx": "eb96c6c9742044701fd0dcfadba60f541291099d35227cfdeea402994de35307",
+    "src/components/FileAttachmentView.tsx": "112b98a420cbf7a38a6e54e2a2ab85ef0e69edeadd1c19f2efe9e153f544bf92",
+    "src/components/NoteEditor.tsx": "cfdbc485b1086c7037adbfed7f58acb10fd0ff626bbd14d180f56eac4965f50b",
+    "src/components/ResizableImageView.tsx": "d69d1559ac936bc4efbb4e16bc75220405bc6174bb0aa0e2a177f89f671447ea",
+    "src/components/Sidebar.tsx": "b141902fd43fe9939b7d75b2cb61451fc957f5304d4e365c5ad1e600a805f097",
+    "src/components/TodoList.tsx": "259dd54abdc2b94a8afd1e3072becc7b439e3a6ba0be84e23e7f21869f842c37",
+    "src/components/modals/AboutModal.tsx": "9d0b23fbcc2472ade7f05839740d597e2b689b35d62759a500cc36ef11a42f9e",
+    "src/components/modals/AccountModal.tsx": "2cce120fb661f904cc598c87086c5b0cef3f141962c14d355b64e03a3a30f56a",
+    "src/components/modals/SettingsModal.tsx": "f9c2ea844800f6b7f33e39df6eb02817bf6b42c5942ec9bbb7c93251a0e65634",
+    "src/components/modals/ShareNoteModal.tsx": "c0f24bcaf36eaad9f8f83e654c9afcd492495a11471bfd86cc5e6cb07d58033a",
+    "src/extensions/DraggableTaskItem.ts": "782defdd9298e1eb0171109d5af5b4ecc622ddf08ae93d6400b60bb493b82c93",
+    "src/extensions/FileAttachment.ts": "46ce7cda6361d65ad1eec3a592b04d860c08914f89defb86660b10360cc07729",
+    "src/extensions/ResizableImage.ts": "24878697a1af72d52b16318c2768837a8b13b8c751c8bbefca14a6d7b481fb70",
+    "src/lib/storage.ts": "2edf9a85c841e1850045d6182f97c94dafb7a608d39dac1440d971bc429b5712",
+    "src/lib/supabase.ts": "3f33c336a38e4f3e99d49a43248ee0ed09b558401554763e2a39fdf47f2abb41",
+    "src/main.tsx": "b34a39aa345ae4d9ecbdee662b91989f39ec46c528e95e22911c7ca9f79bedda",
+    "src/types/index.ts": "aaadc6e4b995a2853d77a7e8cfd021560a9e33d997a0463321ae85dc511bfbf3",
+    "src/utils/format.ts": "2b6aaf5aa97dc2d78e49e3eef41dee167a25b2ad2f7858b72c395f8389eb3825",
+    "src/utils/noteContent.ts": "c79f146cff810212a690759ae0f094037d8309838947057f98b8cc691eca6372",
+    "src/utils/search.tsx": "08df61567644902bbbbadf1bc5cebada381bc69cecd89e10ed0f99f4fe355d5e",
+    "src/vite-env.d.ts": "00a29185efbdf41c38089c4164fb1b9415449bcd9eaa57c77623a12b55a50b6f",
+    "vite.config.ts": "4300db9db6b2a2ecde387d81ef473387d993fc59d8240578bffed6307ccaa71c"
+  },
+  "indexed_at_commit": "7d5600d975dcf2e21c5e37befe6ef5061f7b9542",
+  "indexed_at_timestamp": "2026-02-25T01:41:35.385541+00:00",
+  "schema_version": 3,
+  "stats": {
+    "total_edges": 71,
+    "total_files": 26,
+    "total_nodes": 97
+  },
+  "vexp_version": "1.2.11"
+}

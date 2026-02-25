@@ -5,7 +5,6 @@ import {
 	faChevronDown,
 	faGear,
 	faCircleQuestion,
-	faFolder,
 	faCheck,
 	faMagnifyingGlass,
 	faXmark,
@@ -209,25 +208,26 @@ export function Sidebar({
 						<span className="note-item-preview">{preview}</span>
 					) : null}
 				</div>
-				{isSharedFolder && (() => {
-					const shared = sharedNotesMap.get(note.id);
-					if (!shared) return null;
-					const label = shared.is_own
-						? `Shared with ${shared.shared_with_names?.join(", ") ?? "…"}`
-						: `By ${shared.owner_display_name}`;
-					return (
-						<div className="note-item-shared-by">
-							{!shared.is_own && shared.owner_avatar_num && (
-								<img
-									src={`/avatars/avatar_${shared.owner_avatar_num}.png`}
-									alt=""
-									className="note-item-shared-avatar"
-								/>
-							)}
-							{label}
-						</div>
-					);
-				})()}
+				{isSharedFolder &&
+					(() => {
+						const shared = sharedNotesMap.get(note.id);
+						if (!shared) return null;
+						const label = shared.is_own
+							? `Shared with ${shared.shared_with_names?.join(", ") ?? "…"}`
+							: `By ${shared.owner_display_name}`;
+						return (
+							<div className="note-item-shared-by">
+								{!shared.is_own && shared.owner_avatar_num && (
+									<img
+										src={`/avatars/avatar_${shared.owner_avatar_num}.png`}
+										alt=""
+										className="note-item-shared-avatar"
+									/>
+								)}
+								{label}
+							</div>
+						);
+					})()}
 			</button>
 		);
 	}
@@ -309,16 +309,25 @@ export function Sidebar({
 						disabled={syncing}
 						onClick={async () => {
 							setSyncing(true);
-							try { await onManualSync(); } finally { setSyncing(false); }
+							try {
+								await onManualSync();
+							} finally {
+								setSyncing(false);
+							}
 						}}
 					>
-						<FontAwesomeIcon icon={faRotate} className={syncing ? "fa-spin" : ""} />
+						<FontAwesomeIcon
+							icon={faRotate}
+							className={syncing ? "fa-spin" : ""}
+						/>
 					</button>
 					<button
 						className="new-note-fab"
 						onClick={onCreateNote}
 						title="New Note"
-						disabled={selectedNoteIsEmpty || isRecentlyDeleted || isSharedFolder}
+						disabled={
+							selectedNoteIsEmpty || isRecentlyDeleted || isSharedFolder
+						}
 					>
 						<FontAwesomeIcon icon={faPenToSquare} />
 					</button>
@@ -416,6 +425,9 @@ export function Sidebar({
 								<div className="note-list-divider" />
 							</>
 						)}
+						<div className="note-list-section-label note-list-section-label--plain">
+							<span>{activeFolder}</span>
+						</div>
 						{regularNotes.map((note) => renderNoteItem(note))}
 					</>
 				)}
@@ -430,37 +442,35 @@ export function Sidebar({
 						onClick={() => setFolderDropdownOpen((v) => !v)}
 					>
 						<FontAwesomeIcon
-							icon={faFolder}
-							className="sidebar-footer-sort-icon"
-						/>
-						<span className="sidebar-footer-label">{activeFolder}</span>
-						<FontAwesomeIcon
 							icon={faChevronDown}
 							className={`folder-chevron${folderDropdownOpen ? " open" : ""}`}
 						/>
+						<span className="sidebar-footer-label">{activeFolder}</span>
 					</button>
-				{folderDropdownOpen && (
-					<div className="folder-dropdown">
-						{(["My Notes", "Shared Notes", "Recently Deleted"] as const).map((name) => (
-							<button
-								key={name}
-								className={`folder-dropdown-item${activeFolder === name ? " active" : ""}`}
-								onClick={() => {
-									onSetActiveFolder(name);
-									localStorage.setItem("matcha_activeList", name);
-									setFolderDropdownOpen(false);
-								}}
-							>
-								<span className="folder-dropdown-check-col">
-									{activeFolder === name && (
-										<FontAwesomeIcon icon={faCheck} />
-									)}
-								</span>
-								<span className="folder-dropdown-name">{name}</span>
-							</button>
-						))}
-					</div>
-				)}
+					{folderDropdownOpen && (
+						<div className="folder-dropdown">
+							{(["My Notes", "Shared Notes", "Recently Deleted"] as const).map(
+								(name) => (
+									<button
+										key={name}
+										className={`folder-dropdown-item${activeFolder === name ? " active" : ""}`}
+										onClick={() => {
+											onSetActiveFolder(name);
+											localStorage.setItem("matcha_activeList", name);
+											setFolderDropdownOpen(false);
+										}}
+									>
+										<span className="folder-dropdown-check-col">
+											{activeFolder === name && (
+												<FontAwesomeIcon icon={faCheck} />
+											)}
+										</span>
+										<span className="folder-dropdown-name">{name}</span>
+									</button>
+								),
+							)}
+						</div>
+					)}
 				</div>
 				<div className="sidebar-footer-actions">
 					<button

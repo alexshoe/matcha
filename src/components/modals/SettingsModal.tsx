@@ -30,11 +30,7 @@ export function SettingsModal({
 	return (
 		<div className="settings-overlay" onClick={onClose}>
 			<div className="settings-card" onClick={(e) => e.stopPropagation()}>
-				<button
-					className="settings-close"
-					onClick={onClose}
-					aria-label="Close"
-				>
+				<button className="settings-close" onClick={onClose} aria-label="Close">
 					<svg
 						viewBox="0 0 16 16"
 						fill="none"
@@ -95,8 +91,8 @@ export function SettingsModal({
 								Automatically sort checked items
 							</span>
 							<span className="settings-checkbox-desc">
-								Automatically move checklist items to the bottom of the list
-								as they are checked.
+								Automatically move checklist items to the bottom of the list as
+								they are checked.
 							</span>
 						</div>
 						<input

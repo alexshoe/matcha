@@ -330,18 +330,17 @@
   margin-bottom: 0;
 }
 
-/* Hide selection highlight on list structure (gaps, bullets, numbers) */
-/* .ProseMirror ul::selection,
-.ProseMirror ol::selection,
-.ProseMirror li::selection,
-.ProseMirror ul[data-type="taskList"] > li > div::selection {
-  background: transparent;
-} */
-/* TODO: Hide extraneous selection highlight on MacOS but show proper selection on Windows */
-
 /* Strike completed task text */
 .ProseMirror ul[data-type="taskList"] > li[data-checked="true"] > div {
   color: var(--text-dim);
   text-decoration: line-through;
   text-decoration-color: var(--scrollbar);
+}
+
+/* macOS: suppress native list-selection highlight that bleeds outside text */
+.os-macos .ProseMirror ul::selection,
+.os-macos .ProseMirror ol::selection,
+.os-macos .ProseMirror li::selection,
+.os-macos .ProseMirror ul[data-type="taskList"] > li > div::selection {
+  background: transparent;
 }
