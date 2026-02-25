@@ -14,12 +14,6 @@
 		"strict": true,
 		"noUnusedLocals": true,
 		"noUnusedParameters": true,
-		"noFallthroughCasesInSwitch": true,
-		"paths": {
-			"@matcha/ui": ["./packages/ui/src/index.ts"],
-			"@matcha/ui/*": ["./packages/ui/src/*"],
-			"@matcha/core": ["./packages/core/src/index.ts"],
-			"@matcha/core/*": ["./packages/core/src/*"]
-		}
+		"noFallthroughCasesInSwitch": true
 	}
 }

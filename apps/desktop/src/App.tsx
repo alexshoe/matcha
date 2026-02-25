@@ -9,40 +9,27 @@ import React, {
 import { invoke } from "@tauri-apps/api/core";
 import { platform } from "@tauri-apps/plugin-os";
 import { NoteEditor } from "./components/NoteEditor";
-import { TodoList } from "./components/TodoList";
-import { AuthPage } from "./components/AuthPage";
-import { Sidebar } from "./components/Sidebar";
-import { SettingsModal } from "./components/modals/SettingsModal";
 import { AboutModal } from "./components/modals/AboutModal";
-import { AccountModal } from "./components/modals/AccountModal";
-import { ShareNoteModal } from "./components/modals/ShareNoteModal";
-import { supabase } from "./lib/supabase";
-import { deleteAllNoteImages, deleteAllNoteFiles } from "./lib/storage";
-import type { SupabaseClient, User } from "@supabase/supabase-js";
-import type {
-	SortNotesBy,
-	NewNoteStart,
-} from "./components/modals/SettingsModal";
-import type { SharedNoteEntry } from "./types";
-import "./styles/index.css";
 import {
+	TodoList,
+	AuthPage,
+	Sidebar,
+	SettingsModal,
+	AccountModal,
+	ShareNoteModal,
+} from "@matcha/ui";
+import {
+	supabase,
+	deleteAllNoteImages,
+	deleteAllNoteFiles,
 	extractPreview,
 	extractAllText,
 	isNoteEmpty,
-} from "./utils/noteContent";
-import { formatBytes } from "./utils/format";
-
-export interface Note {
-	id: string;
-	content: string;
-	created_at: number;
-	updated_at: number;
-	pinned: boolean;
-	list: string;
-	deleted: boolean;
-	deleted_at: number | null;
-	version_num: number;
-}
+	formatBytes,
+} from "@matcha/core";
+import type { SupabaseClient, User } from "@supabase/supabase-js";
+import type { Note, SortNotesBy, NewNoteStart, SharedNoteEntry } from "@matcha/core";
+import "@matcha/ui/styles";
 
 function App() {
 	// ── Auth state ──

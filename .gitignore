@@ -35,3 +35,11 @@ dist-ssr
 # Tauri/Rust build artifacts
 src-tauri/target/
 src-tauri/build
+apps/desktop/src-tauri/target/
+apps/desktop/src-tauri/build
+
+# Turborepo
+.turbo
+
+# pnpm
+.pnpm-store

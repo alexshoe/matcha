@@ -3,7 +3,7 @@ import { openUrl } from "@tauri-apps/plugin-opener";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBug, faEye, faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import type { SupabaseClient, User } from "@supabase/supabase-js";
-import { isRateLimited } from "../AuthPage";
+import { isRateLimited } from "@matcha/ui";
 
 interface AboutModalProps {
 	userRole: string;
