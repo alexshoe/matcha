@@ -89,13 +89,10 @@
 }
 
 @media (display-mode: standalone) and (max-width: 900px) {
-  .app-root {
-    height: 110%;
-  }
-
   html,
   body,
   #root {
-    height: 110%;
+    height: calc(100vh - 1px);
+    overflow-y: hidden;
   }
 }

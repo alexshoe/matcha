@@ -9,7 +9,7 @@
   padding: 12px 8px 0;
   gap: 4px;
   overflow: hidden;
-  position: fixed !important;
+  position: relative;
 }
 
 .sidebar-footer {
@@ -734,6 +734,10 @@
 /* ─── Mobile sidebar tweaks (≤932px) ────────────────────── */
 
 @media (max-width: 932px) {
+  .sidebar {
+    position: fixed;
+  }
+
   /* ── Sizing ── */
   .note-item {
     min-height: 58px;

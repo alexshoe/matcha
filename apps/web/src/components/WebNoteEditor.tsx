@@ -27,6 +27,7 @@ import {
 	faChevronUp,
 	faChevronDown,
 	faXmark,
+	faEllipsis,
 } from "@fortawesome/free-solid-svg-icons";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Note } from "@matcha/core";
@@ -440,11 +441,13 @@ export function WebNoteEditor({
 	const saveTimer = useRef<ReturnType<typeof setTimeout>>();
 	const [stylePickerOpen, setStylePickerOpen] = useState(false);
 	const [attachMenuOpen, setAttachMenuOpen] = useState(false);
+	const [mobileMoreOpen, setMobileMoreOpen] = useState(false);
 	const [findOpen, setFindOpen] = useState(false);
 	const [findQuery, setFindQuery] = useState("");
 	const [findIndex, setFindIndex] = useState(0);
 	const stylePickerRef = useRef<HTMLDivElement>(null);
 	const attachMenuRef = useRef<HTMLDivElement>(null);
+	const mobileMoreRef = useRef<HTMLDivElement>(null);
 	const editorScrollRef = useRef<HTMLDivElement>(null);
 	const findInputRef = useRef<HTMLInputElement>(null);
 	const imageInputRef = useRef<HTMLInputElement>(null);
@@ -667,6 +670,12 @@ export function WebNoteEditor({
 			) {
 				setAttachMenuOpen(false);
 			}
+			if (
+				mobileMoreRef.current &&
+				!mobileMoreRef.current.contains(e.target as Node)
+			) {
+				setMobileMoreOpen(false);
+			}
 		}
 		document.addEventListener("mousedown", handleClickOutside);
 		return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -847,18 +856,20 @@ export function WebNoteEditor({
 			/>
 
 			<div className="toolbar">
-				{onMobileBack && (
-					<button
-						className="toolbar-mobile-back"
-						onClick={onMobileBack}
-						aria-label="Back to notes"
-					>
-						<svg width="9" height="15" viewBox="0 0 9 15" fill="none" aria-hidden="true">
-							<path d="M8 1L1.5 7.5L8 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-						</svg>
-					</button>
-				)}
-				<div className="toolbar-spacer" />
+				{/* LEFT — back button on mobile, flex:1 spacer on desktop */}
+				<div className="toolbar-left">
+					{onMobileBack && (
+						<button
+							className="toolbar-mobile-back"
+							onClick={onMobileBack}
+							aria-label="Back to notes"
+						>
+							<svg width="9" height="15" viewBox="0 0 9 15" fill="none" aria-hidden="true">
+								<path d="M8 1L1.5 7.5L8 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+							</svg>
+						</button>
+					)}
+				</div>
 
 				{readOnly ? (
 					<div className="toolbar-center-group">
@@ -1045,46 +1056,101 @@ export function WebNoteEditor({
 					</div>
 				)}
 
-				<div className="toolbar-spacer" />
+				{/* RIGHT — share/delete on desktop; "…" on mobile */}
+				<div className="toolbar-right">
+					{onShare && !readOnly && (
+						<button
+							className={`${btn(false)} toolbar-hide-mobile`}
+							onMouseDown={(e) => {
+								e.preventDefault();
+								onShare();
+							}}
+							title="Share Note"
+						>
+							<FontAwesomeIcon icon={faUserPlus} />
+						</button>
+					)}
 
-				{onShare && !readOnly && (
-					<button
-						className={btn(false)}
-						onMouseDown={(e) => {
-							e.preventDefault();
-							onShare();
-						}}
-						title="Share Note"
-					>
-						<FontAwesomeIcon icon={faUserPlus} />
-					</button>
-				)}
+					{onLeaveShared && (
+						<button
+							className={`${btn(false, "toolbar-btn-danger")} toolbar-hide-mobile`}
+							onMouseDown={(e) => {
+								e.preventDefault();
+								onLeaveShared();
+							}}
+							title="Leave Shared Note"
+						>
+							<FontAwesomeIcon icon={faRightFromBracket} />
+						</button>
+					)}
 
-				{onLeaveShared && (
-					<button
-						className={btn(false, "toolbar-btn-danger")}
-						onMouseDown={(e) => {
-							e.preventDefault();
-							onLeaveShared();
-						}}
-						title="Leave Shared Note"
-					>
-						<FontAwesomeIcon icon={faRightFromBracket} />
-					</button>
-				)}
+					{!readOnly && (
+						<button
+							className={`${btn(false, "toolbar-btn-danger")} toolbar-hide-mobile`}
+							onMouseDown={(e) => {
+								e.preventDefault();
+								onDelete();
+							}}
+							title="Delete Note"
+						>
+							<FontAwesomeIcon icon={faTrash} />
+						</button>
+					)}
 
-				{!readOnly && (
-					<button
-						className={btn(false, "toolbar-btn-danger")}
-						onMouseDown={(e) => {
-							e.preventDefault();
-							onDelete();
-						}}
-						title="Delete Note"
-					>
-						<FontAwesomeIcon icon={faTrash} />
-					</button>
-				)}
+					{/* Mobile "…" — collapses share + delete into one tap */}
+					{!readOnly && (
+						<div className="toolbar-more-wrap toolbar-show-mobile" ref={mobileMoreRef}>
+							<button
+								className={btn(mobileMoreOpen)}
+								onClick={() => setMobileMoreOpen((v) => !v)}
+								title="More options"
+							>
+								<FontAwesomeIcon icon={faEllipsis} />
+							</button>
+							{mobileMoreOpen && (
+								<div className="toolbar-more-dropdown">
+									{onShare && (
+										<button
+											className="toolbar-more-option"
+											onMouseDown={(e) => {
+												e.preventDefault();
+												setMobileMoreOpen(false);
+												onShare();
+											}}
+										>
+											<FontAwesomeIcon icon={faUserPlus} />
+											<span>Share Note</span>
+										</button>
+									)}
+									{onLeaveShared && (
+										<button
+											className="toolbar-more-option toolbar-more-option-danger"
+											onMouseDown={(e) => {
+												e.preventDefault();
+												setMobileMoreOpen(false);
+												onLeaveShared();
+											}}
+										>
+											<FontAwesomeIcon icon={faRightFromBracket} />
+											<span>Leave Shared Note</span>
+										</button>
+									)}
+									<button
+										className="toolbar-more-option toolbar-more-option-danger"
+										onMouseDown={(e) => {
+											e.preventDefault();
+											setMobileMoreOpen(false);
+											onDelete();
+										}}
+									>
+										<FontAwesomeIcon icon={faTrash} />
+										<span>Delete Note</span>
+									</button>
+								</div>
+							)}
+						</div>
+					)}
+				</div>
 			</div>
 
 			{findOpen &&
