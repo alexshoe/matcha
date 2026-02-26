@@ -133,6 +133,11 @@ export function AccountModal({
 		}
 	}
 
+	function closeAvatarPicker() {
+		setAvatarPickerOpen(false);
+		setPendingAvatarNum(null);
+	}
+
 	async function saveAvatar(num: number) {
 		setAvatarPickerOpen(false);
 		setPendingAvatarNum(null);
@@ -476,7 +481,29 @@ export function AccountModal({
 				</div>
 
 				<div className="avatar-picker-panel">
-					<span className="avatar-picker-title">Choose Avatar</span>
+					<div className="avatar-picker-header">
+						<span className="avatar-picker-title">Choose Avatar</span>
+						<button
+							className="avatar-picker-close"
+							onClick={handleClose}
+							aria-label="Close"
+						>
+							<svg
+								viewBox="0 0 16 16"
+								fill="none"
+								xmlns="http://www.w3.org/2000/svg"
+								width="14"
+								height="14"
+							>
+								<path
+									d="M2 2l12 12M14 2L2 14"
+									stroke="currentColor"
+									strokeWidth="1.8"
+									strokeLinecap="round"
+								/>
+							</svg>
+						</button>
+					</div>
 					<div className="avatar-picker-grid">
 						{Array.from({ length: TOTAL_AVATARS }, (_, i) => i + 1).map(
 							(num) => (
@@ -493,13 +520,21 @@ export function AccountModal({
 							),
 						)}
 					</div>
-					<button
-						className="avatar-picker-save-btn"
-						disabled={pendingAvatarNum === null}
-						onClick={() => pendingAvatarNum && saveAvatar(pendingAvatarNum)}
-					>
-						Save
-					</button>
+					<div className="avatar-picker-actions">
+						<button
+							className="avatar-picker-cancel-btn"
+							onClick={closeAvatarPicker}
+						>
+							Cancel
+						</button>
+						<button
+							className="avatar-picker-save-btn"
+							disabled={pendingAvatarNum === null}
+							onClick={() => pendingAvatarNum && saveAvatar(pendingAvatarNum)}
+						>
+							Save
+						</button>
+					</div>
 				</div>
 			</div>
 		</div>

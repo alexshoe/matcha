@@ -6,6 +6,7 @@
   flex-direction: column;
   background: var(--main-bg);
   overflow: hidden;
+  position: fixed !important;
 }
 
 .os-windows .main {
@@ -571,14 +572,14 @@
   display: none;
 }
 
-/* ─── Mobile editor tweaks (≤900px) ─────────────────────── */
+/* ─── Mobile editor tweaks (≤932px) ─────────────────────── */
 
-@media (max-width: 900px) {
+@media (max-width: 932px) {
   /* Top toolbar: back on left, share/del on right — push below notch */
   .toolbar {
     overflow: visible;
     flex-wrap: nowrap;
-    padding: max(16px, env(safe-area-inset-top)) 8px 12px;
+    padding: max(16px, env(safe-area-inset-top)) 16px 12px;
     gap: 4px;
     min-height: 48px;
     position: relative;

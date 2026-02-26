@@ -7,7 +7,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: transparent;
+  background: var(--modal-dim);
 }
 
 .about-close {
@@ -452,7 +452,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: transparent;
+  background: var(--modal-dim);
 }
 
 .account-header {
@@ -588,7 +588,9 @@
   color: var(--text-dim);
   cursor: pointer;
   padding: 5px 12px;
-  transition: color 0.15s, border-color 0.15s;
+  transition:
+    color 0.15s,
+    border-color 0.15s;
 }
 
 .account-sync-btn:hover:not(:disabled) {
@@ -606,7 +608,9 @@
 }
 
 @keyframes account-spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .account-signout-row {
@@ -787,13 +791,41 @@
   overflow: hidden;
 }
 
+.avatar-picker-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
 .avatar-picker-title {
   font-size: 0.933rem;
   font-weight: 600;
   color: var(--text);
-  margin-bottom: 14px;
   padding: 0 2px;
   white-space: nowrap;
+}
+
+.avatar-picker-close {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: var(--text-dim);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition:
+    background 0.12s,
+    color 0.12s;
+}
+
+.avatar-picker-close:hover {
+  background: var(--item-hover);
+  color: var(--text);
 }
 
 .avatar-picker-grid {
@@ -849,9 +881,37 @@
   display: block;
 }
 
-.avatar-picker-save-btn {
+.avatar-picker-actions {
+  display: flex;
+  gap: 8px;
   margin-top: 14px;
-  width: 100%;
+}
+
+.avatar-picker-cancel-btn {
+  flex: 1;
+  height: 36px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  color: var(--text);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.867rem;
+  font-weight: 500;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.avatar-picker-cancel-btn:hover {
+  background: var(--item-hover);
+  border-color: var(--text-dim);
+}
+
+.avatar-picker-save-btn {
+  flex: 1;
   height: 36px;
   background: var(--accent);
   border: none;
@@ -971,7 +1031,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: transparent;
+  background: var(--modal-dim);
 }
 
 .settings-card {
@@ -1366,7 +1426,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: transparent;
+  background: var(--modal-dim);
 }
 
 .share-card {
@@ -1701,36 +1761,43 @@
   opacity: 0.88;
 }
 
-/* ─── Mobile modal tweaks (≤900px) ──────────────────────── */
+/* ─── Mobile modal tweaks (≤932px) ──────────────────────── */
 
-@media (max-width: 900px) {
-  /* ── Account overlay: push below notch, allow scrolling ── */
+@media (max-width: 932px) {
+  /* ── Account overlay: center in viewport, card scrolls internally ── */
   .account-overlay {
-    align-items: flex-start;
-    padding: max(16px, env(safe-area-inset-top)) 0 max(16px, env(safe-area-inset-bottom));
-    overflow-y: auto;
+    align-items: center;
+    padding: 0 16px;
   }
 
   .account-card-wrap .account-card {
     width: calc(100vw - 32px);
-    max-height: none;
+    max-height: calc(100svh - 40px);
     overflow-y: auto;
   }
 
-  /* ── Settings overlay: push below notch, allow scrolling ── */
+  /* ── Settings overlay: center in viewport, internal scroll if needed ── */
   .settings-overlay {
-    align-items: flex-start;
-    padding: max(16px, env(safe-area-inset-top)) 0 max(16px, env(safe-area-inset-bottom));
+    align-items: center;
+    padding: max(16px, env(safe-area-inset-top)) 16px
+      max(16px, env(safe-area-inset-bottom));
     overflow-y: auto;
   }
 
   .settings-card {
     width: calc(100vw - 32px);
+    max-height: calc(100dvh - 64px);
+    overflow-y: auto;
   }
 
   /* ── Avatar picker: replace account card with picker only ── */
   .account-card-wrap {
     flex-direction: column;
+  }
+
+  /* Hide collapsed picker so it doesn't contribute height and shift the card */
+  .account-card-wrap:not(.picker-open) .avatar-picker-panel {
+    display: none;
   }
 
   .account-card-wrap.picker-open .account-card {
@@ -1743,6 +1810,7 @@
     overflow: visible !important;
     pointer-events: auto !important;
     padding: 20px 16px !important;
+    margin-left: 0 !important;
   }
 
   /* ── Avatar grid: 4 columns (~30% smaller icons) on mobile ── */
@@ -1751,4 +1819,3 @@
     gap: 8px;
   }
 }
-
