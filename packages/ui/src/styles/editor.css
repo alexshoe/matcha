@@ -359,15 +359,14 @@
   align-items: center;
   gap: 10px;
   width: 100%;
-  padding: 9px 12px;
+  padding: 7px 10px;
   background: transparent;
   border: none;
   border-radius: 7px;
   cursor: pointer;
   text-align: left;
-  font-family: inherit;
-  font-size: 0.933rem;
   color: var(--text);
+  font-size: 0.867rem;
   transition: background 0.1s;
   -webkit-tap-highlight-color: transparent;
 }
@@ -645,4 +644,3 @@
 .toolbar-mobile-back {
   display: none;
 }
-
