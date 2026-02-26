@@ -332,10 +332,13 @@
 /* ── Drag handle ── */
 
 .todo-drag-handle {
-  display: flex;
+  position: absolute;
+  left: 0px;
+  visibility: hidden;
   align-items: center;
   justify-content: center;
-  width: 16px;
+  width: 1.7rem;
+  height: 1.7rem;
   flex-shrink: 0;
   color: var(--text);
   font-size: 0.667rem;
