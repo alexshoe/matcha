@@ -34,6 +34,7 @@ import type {
 	SharedNoteEntry,
 } from "@matcha/core";
 import "@matcha/ui/styles";
+import "@matcha/ui/styles/mobile";
 
 function App() {
 	// ── Auth state ──

@@ -1,0 +1,341 @@
+/* ─── Mobile-only styles (web PWA / small screens only) ──── */
+/* Imported exclusively by apps/web — never by apps/desktop.  */
+
+/* ─── Layout: mobile slide view (≤932px) ────────────────── */
+/* 932px catches all landscape iPhones incl. Pro Max (932px)  */
+
+@media (max-width: 550px) {
+  /* ─── Layout ─────────────────────────────────────────────── */
+
+  .app {
+    position: relative;
+  }
+
+  .sidebar,
+  .main {
+    position: absolute !important;
+    top: 0;
+    left: 0;
+    width: 100% !important;
+    min-width: 0;
+    height: 100%;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Only enable slide transition after first paint — prevents initial flash */
+  .app-ready .sidebar,
+  .app-ready .main {
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* List view: sidebar visible, editor off-screen right */
+  .app[data-mobile-view="list"] .sidebar {
+    transform: translateX(0);
+  }
+  .app[data-mobile-view="list"] .main {
+    transform: translateX(100%);
+  }
+
+  /* Editor view: sidebar off-screen left, editor visible */
+  .app[data-mobile-view="editor"] .sidebar {
+    transform: translateX(-100%);
+  }
+  .app[data-mobile-view="editor"] .main {
+    transform: translateX(0);
+  }
+
+  /* Hide drag-to-resize handle */
+  .sidebar-resize-handle {
+    display: none !important;
+  }
+
+  /* Show mobile back button */
+  .mobile-back-btn {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: max(16px, env(safe-area-inset-top)) 30px 16px;
+    background: none;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    color: var(--accent);
+    font-size: 15px;
+    font-family: inherit;
+    cursor: pointer;
+    flex-shrink: 0;
+    width: 100%;
+    text-align: left;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .mobile-back-btn:active {
+    opacity: 0.5;
+  }
+
+  /* Prevent min-width constraint on Windows class */
+  .os-windows .main {
+    min-width: unset;
+  }
+
+  /* ─── Sidebar ─────────────────────────────────────────────── */
+
+  .sidebar {
+    position: fixed !important;
+  }
+
+  .note-item {
+    min-height: 58px;
+    padding: 11px 14px;
+    gap: 4px;
+  }
+
+  .note-item-title {
+    font-size: 1rem;
+  }
+
+  .note-item-meta {
+    font-size: 0.867rem;
+  }
+
+  .sidebar-search-wrap {
+    height: 44px;
+  }
+
+  .sidebar-search-input {
+    font-size: 16px; /* prevents iOS auto-zoom on focus */
+    height: 44px;
+  }
+
+  .sidebar-header {
+    padding-top: max(12px, env(safe-area-inset-top));
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .sidebar-avatar {
+    width: 40px;
+    height: 40px;
+  }
+
+  .sidebar-avatar svg {
+    width: 26px;
+    height: 26px;
+  }
+
+  .sidebar-display-name {
+    font-size: 1rem;
+  }
+
+  .sidebar-note-count {
+    font-size: 0.8rem;
+  }
+
+  .sidebar-footer {
+    padding-bottom: max(8px, env(safe-area-inset-bottom));
+  }
+
+  .sidebar-footer-btn {
+    min-width: 44px;
+    min-height: 44px;
+    font-size: 1.067rem;
+  }
+
+  .new-note-fab {
+    width: 40px;
+    height: 40px;
+    font-size: 1.067rem;
+  }
+
+  /* No persistent active/selected highlight on mobile */
+  .note-item.active,
+  .note-item.selected,
+  .note-list.sidebar-focused .note-item.active,
+  .note-list.sidebar-focused .note-item.selected {
+    background: none;
+  }
+
+  .note-list.sidebar-focused .note-item.active .note-item-title,
+  .note-list.sidebar-focused .note-item.selected .note-item-title {
+    color: var(--text);
+  }
+
+  .note-list.sidebar-focused .note-item.active .note-item-date,
+  .note-list.sidebar-focused .note-item.active .note-item-preview,
+  .note-list.sidebar-focused .note-item.selected .note-item-date,
+  .note-list.sidebar-focused .note-item.selected .note-item-preview {
+    color: var(--text-dim);
+  }
+
+  /* Tap feedback via CSS :active */
+  .note-item:active {
+    background: var(--accent) !important;
+    opacity: 0.85;
+  }
+
+  .note-item:active .note-item-title {
+    color: var(--on-accent);
+  }
+
+  /* ─── Editor ──────────────────────────────────────────────── */
+  .main {
+    position: fixed !important;
+  }
+
+  /* Toolbar stays in normal flow — push content below the notch */
+  .toolbar {
+    overflow: visible;
+    flex-wrap: nowrap;
+    padding: max(16px, env(safe-area-inset-top)) 12px 12px;
+    gap: 4px;
+    min-height: 48px;
+    position: relative;
+  }
+
+  /* Center group stays in the toolbar (no fixed bottom bar) */
+  .toolbar-center-group {
+    position: static;
+  }
+
+  .toolbar-mobile-back {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    background: none;
+    border: none;
+    color: var(--accent);
+    font-size: 16px;
+    cursor: pointer;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+    border-radius: 6px;
+  }
+
+  .toolbar-mobile-back:active {
+    opacity: 0.5;
+  }
+
+  /* Bigger toolbar buttons */
+  .toolbar-btn,
+  .toolbar-btn-danger {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+  }
+
+  /* Bigger Aa button */
+  .aa-label {
+    font-size: 1rem;
+  }
+
+  .find-bar-input {
+    font-size: 16px; /* prevents iOS auto-zoom on focus */
+  }
+
+  /* Prevent iOS auto-zoom when tapping into the editor */
+  .ProseMirror {
+    font-size: 16px;
+  }
+
+  .ProseMirror p,
+  .ProseMirror li,
+  .ProseMirror blockquote {
+    font-size: 16px;
+  }
+
+  /* Normal scroll — no extra padding needed without the fixed format bar */
+  .editor-scroll-area {
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+  }
+
+  /* Hide desktop-only buttons, show mobile-only elements */
+  .toolbar-hide-mobile {
+    display: none !important;
+  }
+
+  .toolbar-show-mobile {
+    display: flex;
+  }
+
+  /* ─── Modals ──────────────────────────────────────────────── */
+
+  /* Account overlay: center in viewport, card scrolls internally */
+  .account-overlay {
+    align-items: center;
+    padding: 0 16px;
+  }
+
+  .account-card-wrap .account-card {
+    width: calc(100vw - 32px);
+    max-height: calc(100svh - 40px);
+    overflow-y: auto;
+  }
+
+  /* Settings overlay: center in viewport, internal scroll if needed */
+  .settings-overlay {
+    align-items: center;
+    padding: max(16px, env(safe-area-inset-top)) 16px
+      max(16px, env(safe-area-inset-bottom));
+    overflow-y: auto;
+  }
+
+  .settings-card {
+    width: calc(100vw - 32px);
+    max-height: calc(100dvh - 64px);
+    overflow-y: auto;
+  }
+
+  /* Avatar picker: replace account card with picker only */
+  .account-card-wrap {
+    flex-direction: column;
+  }
+
+  /* Hide collapsed picker so it doesn't contribute height and shift the card */
+  .account-card-wrap:not(.picker-open) .avatar-picker-panel {
+    display: none;
+  }
+
+  .account-card-wrap.picker-open .account-card {
+    display: none;
+  }
+
+  .account-card-wrap.picker-open .avatar-picker-panel {
+    width: calc(100vw - 32px) !important;
+    opacity: 1 !important;
+    overflow: visible !important;
+    pointer-events: auto !important;
+    padding: 20px 16px !important;
+    margin-left: 0 !important;
+  }
+
+  /* Avatar grid: 4 columns (~30% smaller icons) on mobile */
+  .account-card-wrap.picker-open .avatar-picker-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+
+  /* ─── Todo ────────────────────────────────────────────────── */
+
+  .sidebar-todo-btn {
+    padding: 12px 12px;
+    font-size: 0.933rem;
+  }
+
+  .todo-goals-body.expanded .todo-goals-inner {
+    max-height: min(28vh, 200px);
+  }
+}
+
+/* ─── PWA standalone: prevent overscroll bounce ─────────── */
+
+@media (display-mode: standalone) {
+  html,
+  body,
+  #root {
+    height: calc(100vh - 1px);
+    background: var(--sidebar-bg) !important;
+    overflow-y: hidden;
+  }
+}

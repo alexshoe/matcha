@@ -20,7 +20,7 @@
   --danger: #c44040;
   --danger-subtle: rgba(196, 64, 64, 0.08);
   --table-border: #c3c8ad;
-  --link: #3d6e2c;
+  --link: #2997ff;
 }
 
 /* ── Matcha: popovers & dropdowns ─────────── */
@@ -28,6 +28,7 @@
 [data-theme="matcha"] .folder-dropdown,
 [data-theme="matcha"] .style-dropdown,
 [data-theme="matcha"] .attach-dropdown,
+[data-theme="matcha"] .toolbar-more-dropdown,
 [data-theme="matcha"] .context-menu,
 [data-theme="matcha"] .table-toolbar {
   background: rgba(236, 238, 224, 0.96);
@@ -41,6 +42,7 @@
 [data-theme="matcha"] .style-inline-btn:hover,
 [data-theme="matcha"] .style-option:hover,
 [data-theme="matcha"] .attach-option:hover,
+[data-theme="matcha"] .toolbar-more-option:hover,
 [data-theme="matcha"] .table-toolbar-btn:hover {
   background: rgba(60, 80, 40, 0.08);
 }
@@ -231,7 +233,7 @@
   --danger: #d14040;
   --danger-subtle: rgba(209, 64, 64, 0.08);
   --table-border: #d5d3cd;
-  --link: #2563a8;
+  --link: #2997ff;
 }
 
 /* ── Light: popovers & dropdowns ─────────── */
@@ -239,6 +241,7 @@
 [data-theme="light"] .folder-dropdown,
 [data-theme="light"] .style-dropdown,
 [data-theme="light"] .attach-dropdown,
+[data-theme="light"] .toolbar-more-dropdown,
 [data-theme="light"] .context-menu,
 [data-theme="light"] .table-toolbar {
   background: rgba(255, 255, 255, 0.94);
@@ -252,6 +255,7 @@
 [data-theme="light"] .style-inline-btn:hover,
 [data-theme="light"] .style-option:hover,
 [data-theme="light"] .attach-option:hover,
+[data-theme="light"] .toolbar-more-option:hover,
 [data-theme="light"] .table-toolbar-btn:hover {
   background: rgba(0, 0, 0, 0.05);
 }
