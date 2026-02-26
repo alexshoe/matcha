@@ -25,7 +25,7 @@
 }
 
 .sidebar-todo-btn.active {
-  background: var(--accent-subtle);
+  background: var(--accent);
 }
 
 .sidebar-todo-btn-icon {
@@ -35,17 +35,6 @@
 
 .sidebar-todo-btn.active .sidebar-todo-btn-icon {
   color: var(--accent);
-}
-
-@media (max-width: 932px) {
-  .sidebar-todo-btn {
-    padding: 12px 12px;
-    font-size: 0.933rem;
-  }
-
-  .todo-goals-body.expanded .todo-goals-inner {
-    max-height: min(28vh, 200px);
-  }
 }
 
 /* ─── Todo List View ─────────────────────────────────────── */

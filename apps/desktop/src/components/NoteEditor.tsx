@@ -3,7 +3,8 @@ import { Extension, mergeAttributes } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
 import { OrderedList } from "@tiptap/extension-ordered-list";
 import { TaskList } from "@tiptap/extension-task-list";
-import { DraggableTaskItem, ResizableImage } from "@matcha/ui";
+import Link from "@tiptap/extension-link";
+import { DraggableTaskItem, ResizableImage, PasteUrlToLink } from "@matcha/ui";
 import { FileAttachment } from "../extensions/FileAttachment";
 import { Table } from "@tiptap/extension-table";
 import { TableRow } from "@tiptap/extension-table-row";
@@ -39,6 +40,7 @@ import {
 } from "@matcha/core";
 import { open } from "@tauri-apps/plugin-dialog";
 import { readFile } from "@tauri-apps/plugin-fs";
+import { open as openUrl } from "@tauri-apps/plugin-opener";
 
 const CounterOrderedList = OrderedList.extend({
 	renderHTML({ HTMLAttributes }) {
@@ -519,6 +521,12 @@ export function NoteEditor({
 			orderedList: false,
 		}),
 		CounterOrderedList,
+		Link.configure({
+			openOnClick: false,
+			autolink: false,
+			linkOnPaste: false,
+		}),
+		PasteUrlToLink,
 		TaskList,
 		DraggableTaskItem.configure({ nested: true }),
 		ResizableImage.configure({ inline: false, allowBase64: true }),
@@ -575,6 +583,16 @@ export function NoteEditor({
 			}, 1000);
 		},
 		editorProps: {
+			handleClick(_view, _pos, event) {
+				const target = event.target as HTMLElement;
+				const anchor = target.closest("a");
+				if (!anchor) return false;
+				const href = anchor.getAttribute("href");
+				if (!href) return false;
+				event.preventDefault();
+				openUrl(href).catch(() => {});
+				return true;
+			},
 			handlePaste(view, event) {
 				const items = event.clipboardData?.items;
 				if (!items) return false;

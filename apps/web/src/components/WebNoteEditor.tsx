@@ -3,7 +3,8 @@ import { Extension, mergeAttributes } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
 import { OrderedList } from "@tiptap/extension-ordered-list";
 import { TaskList } from "@tiptap/extension-task-list";
-import { DraggableTaskItem, ResizableImage } from "@matcha/ui";
+import Link from "@tiptap/extension-link";
+import { DraggableTaskItem, ResizableImage, PasteUrlToLink } from "@matcha/ui";
 import { WebFileAttachment } from "../extensions/WebFileAttachment";
 import { Table } from "@tiptap/extension-table";
 import { TableRow } from "@tiptap/extension-table-row";
@@ -501,6 +502,12 @@ export function WebNoteEditor({
 			orderedList: false,
 		}),
 		CounterOrderedList,
+		Link.configure({
+			openOnClick: false,
+			autolink: false,
+			linkOnPaste: false,
+		}),
+		PasteUrlToLink,
 		TaskList,
 		DraggableTaskItem.configure({ nested: true }),
 		ResizableImage.configure({ inline: false, allowBase64: true }),
@@ -557,6 +564,16 @@ export function WebNoteEditor({
 			}, 1000);
 		},
 		editorProps: {
+			handleClick(_view, _pos, event) {
+				const target = event.target as HTMLElement;
+				const anchor = target.closest("a");
+				if (!anchor) return false;
+				const href = anchor.getAttribute("href");
+				if (!href) return false;
+				event.preventDefault();
+				window.open(href, "_blank", "noopener,noreferrer");
+				return true;
+			},
 			handlePaste(view, event) {
 				const items = event.clipboardData?.items;
 				if (!items) return false;

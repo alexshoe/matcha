@@ -5,7 +5,7 @@
   align-items: center;
   justify-content: center;
   height: 100vh;
-  background: var(--bg);
+  background: var(--bg) !important;
 }
 
 .auth-card {
@@ -402,4 +402,3 @@
     transform: rotate(360deg);
   }
 }
-
