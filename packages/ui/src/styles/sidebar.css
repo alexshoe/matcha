@@ -731,9 +731,13 @@
   opacity: 0.7;
 }
 
-/* ─── Mobile sidebar tweaks (≤900px) ────────────────────── */
+/* ─── Mobile sidebar tweaks (≤932px) ────────────────────── */
 
-@media (max-width: 900px) {
+@media (max-width: 932px) {
+  .sidebar {
+    position: fixed;
+  }
+
   /* ── Sizing ── */
   .note-item {
     min-height: 58px;
@@ -749,15 +753,37 @@
     font-size: 0.867rem;
   }
 
+  .sidebar-search-wrap {
+    height: 44px;
+  }
+
   .sidebar-search-input {
     font-size: 16px; /* prevents iOS auto-zoom on focus */
-    height: 36px;
+    height: 44px;
   }
 
   .sidebar-header {
     padding-top: max(12px, env(safe-area-inset-top));
-    padding-left: 6px;
-    padding-right: 6px;
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .sidebar-avatar {
+    width: 40px;
+    height: 40px;
+  }
+
+  .sidebar-avatar svg {
+    width: 26px;
+    height: 26px;
+  }
+
+  .sidebar-display-name {
+    font-size: 1rem;
+  }
+
+  .sidebar-note-count {
+    font-size: 0.8rem;
   }
 
   .sidebar-footer {
@@ -765,15 +791,15 @@
   }
 
   .sidebar-footer-btn {
-    min-width: 40px;
-    min-height: 40px;
-    font-size: 1rem;
+    min-width: 44px;
+    min-height: 44px;
+    font-size: 1.067rem;
   }
 
   .new-note-fab {
-    width: 36px;
-    height: 36px;
-    font-size: 1rem;
+    width: 40px;
+    height: 40px;
+    font-size: 1.067rem;
   }
 
   /* ── No persistent active/selected highlight on mobile ── */

@@ -28,7 +28,12 @@ import {
 	formatBytes,
 } from "@matcha/core";
 import type { SupabaseClient, User } from "@supabase/supabase-js";
-import type { Note, SortNotesBy, NewNoteStart, SharedNoteEntry } from "@matcha/core";
+import type {
+	Note,
+	SortNotesBy,
+	NewNoteStart,
+	SharedNoteEntry,
+} from "@matcha/core";
 import "@matcha/ui/styles";
 
 function App() {
@@ -309,8 +314,6 @@ function App() {
 		if (!db || !user) return;
 		setSharedNotesLoading(true);
 
-		console.log("[SharedNotes] fetching for user:", user.id);
-
 		const [sharedWithMe, sharedByMe] = await Promise.all([
 			db
 				.from("note_sharing")
@@ -325,21 +328,6 @@ function App() {
 				)
 				.eq("owner_id", user.id),
 		]);
-
-		console.log(
-			"[SharedNotes] sharedWithMe raw:",
-			JSON.stringify(sharedWithMe, null, 2),
-		);
-		console.log(
-			"[SharedNotes] sharedByMe raw:",
-			JSON.stringify(sharedByMe, null, 2),
-		);
-
-		const rawRows = await db.from("note_sharing").select("*");
-		console.log(
-			"[SharedNotes] ALL note_sharing rows visible to me:",
-			JSON.stringify(rawRows, null, 2),
-		);
 
 		const ownDisplayName = displayName;
 		const entries = new Map<string, SharedNoteEntry>();
@@ -402,14 +390,6 @@ function App() {
 
 		const result = [...entries.values()].sort(
 			(a, b) => b.updated_at - a.updated_at,
-		);
-		console.log(
-			"[SharedNotes] final entries:",
-			result.map((r) => ({
-				id: r.id,
-				is_own: r.is_own,
-				owner: r.owner_display_name,
-			})),
 		);
 		setSharedNotes(result);
 		setSharedNotesLoading(false);
@@ -501,10 +481,10 @@ function App() {
 					setSelectedId(null);
 					setSelectedNoteIds([]);
 					invoke("set_notes", { notes: [] }).catch(() => {});
-			} else if (session?.user) {
-				activeSupabase.current = client;
-				setUser(session.user);
-			}
+				} else if (session?.user) {
+					activeSupabase.current = client;
+					setUser(session.user);
+				}
 			});
 
 			return () => subscription.unsubscribe();
@@ -653,9 +633,7 @@ function App() {
 					const noteVersion = (record.version_num as number) ?? 1;
 
 					// Skip our own echoes
-					const lastSent = lastSentVersions.current.get(
-						record.id as string,
-					);
+					const lastSent = lastSentVersions.current.get(record.id as string);
 					if (lastSent !== undefined && noteVersion <= lastSent) return;
 
 					if (payload.eventType === "INSERT") {
@@ -674,10 +652,7 @@ function App() {
 						// Update own notes
 						setNotes((prev) => {
 							const existing = prev.find((n) => n.id === mapped.id);
-							if (
-								!existing ||
-								mapped.version_num <= existing.version_num
-							)
+							if (!existing || mapped.version_num <= existing.version_num)
 								return prev;
 							const next = prev
 								.map((n) => (n.id === mapped.id ? mapped : n))
@@ -700,28 +675,18 @@ function App() {
 
 						// Toast if this is the currently-open note
 						setNotes((prev) => {
-							const current = prev.find(
-								(n) => n.id === mapped.id,
-							);
+							const current = prev.find((n) => n.id === mapped.id);
 							if (current && current.id === selectedId) {
-								showToast(
-									"Note updated on another device",
-									false,
-								);
+								showToast("Note updated on another device", false);
 							}
 							return prev;
 						});
 					} else if (payload.eventType === "DELETE") {
-						const oldRecord = payload.old as Record<
-							string,
-							unknown
-						> | null;
+						const oldRecord = payload.old as Record<string, unknown> | null;
 						const deletedId = (oldRecord?.id as string) ?? null;
 						if (deletedId) {
 							setNotes((prev) => {
-								const next = prev.filter(
-									(n) => n.id !== deletedId,
-								);
+								const next = prev.filter((n) => n.id !== deletedId);
 								invoke("set_notes", { notes: next });
 								return next;
 							});
@@ -755,18 +720,13 @@ function App() {
 					filter: `user_id=eq.${user.id}`,
 				},
 				(payload) => {
-					const record = payload.new as Record<
-						string,
-						unknown
-					> | null;
+					const record = payload.new as Record<string, unknown> | null;
 					if (!record) return;
 					try {
 						const goals = JSON.parse(
 							(record.long_term_goals as string) || "[]",
 						);
-						const tasks = JSON.parse(
-							(record.to_do_list as string) || "{}",
-						);
+						const tasks = JSON.parse((record.to_do_list as string) || "{}");
 						setTodoExternalUpdate({ goals, tasks });
 					} catch {
 						// ignore malformed payloads
@@ -883,27 +843,30 @@ function App() {
 		[user],
 	);
 
-	const saveSharedNote = useCallback(async (id: string, content: string) => {
-		const db = activeSupabase.current;
-		if (!db) return;
-		const now = Math.floor(Date.now() / 1000);
-		const sharedNote = sharedNotes.find((n) => n.id === id);
-		const newVersion = (sharedNote?.version_num ?? 0) + 1;
-		await db
-			.from("notes")
-			.update({ content, updated_at: now, version_num: newVersion })
-			.eq("id", id);
-		setSharedNotes((prev) =>
-			prev
-				.map((n) =>
-					n.id === id
-						? { ...n, content, updated_at: now, version_num: newVersion }
-						: n,
-				)
-				.sort((a, b) => b.updated_at - a.updated_at),
-		);
-		lastSentVersions.current.set(id, newVersion);
-	}, [sharedNotes]);
+	const saveSharedNote = useCallback(
+		async (id: string, content: string) => {
+			const db = activeSupabase.current;
+			if (!db) return;
+			const now = Math.floor(Date.now() / 1000);
+			const sharedNote = sharedNotes.find((n) => n.id === id);
+			const newVersion = (sharedNote?.version_num ?? 0) + 1;
+			await db
+				.from("notes")
+				.update({ content, updated_at: now, version_num: newVersion })
+				.eq("id", id);
+			setSharedNotes((prev) =>
+				prev
+					.map((n) =>
+						n.id === id
+							? { ...n, content, updated_at: now, version_num: newVersion }
+							: n,
+					)
+					.sort((a, b) => b.updated_at - a.updated_at),
+			);
+			lastSentVersions.current.set(id, newVersion);
+		},
+		[sharedNotes],
+	);
 
 	async function leaveSharedNote(noteId: string) {
 		const db = activeSupabase.current;
@@ -1336,7 +1299,7 @@ function App() {
 				onSetSidebarFocused={setSidebarFocused}
 				onRenameNote={renameNote}
 				onContextMenu={setContextMenu}
-			onOpenAccount={() => setAccountOpen(true)}
+				onOpenAccount={() => setAccountOpen(true)}
 				onOpenAbout={() => setAboutOpen(true)}
 				onOpenSettings={() => setSettingsOpen(true)}
 				renamingId={renamingId}

@@ -13,43 +13,58 @@
   display: none;
 }
 
-/* ─── Mobile layout (≤900px): fullscreen list OR editor ─── */
-/* 900px catches landscape iPhones (~852px); 768px misses them */
+/* ─── Mobile layout (≤932px): fullscreen list OR editor ─── */
+/* 932px catches all landscape iPhones incl. Pro Max (932px); 900px misses them */
 
-@media (max-width: 900px) {
+@media (max-width: 932px) {
   .app {
     position: relative;
   }
 
   .sidebar,
   .main {
-    position: absolute;
+    position: absolute !important;
     top: 0;
     left: 0;
     width: 100% !important;
     min-width: 0; /* allow shrinking; overrides flex default */
     height: 100%;
-    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     -webkit-overflow-scrolling: touch; /* smooth scroll on iOS */
   }
 
+  /* Only enable slide transition after first paint — prevents initial flash */
+  .app-ready .sidebar,
+  .app-ready .main {
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
   /* List view: sidebar visible, editor off-screen right */
-  .app[data-mobile-view="list"] .sidebar { transform: translateX(0); }
-  .app[data-mobile-view="list"] .main    { transform: translateX(100%); }
+  .app[data-mobile-view="list"] .sidebar {
+    transform: translateX(0);
+  }
+  .app[data-mobile-view="list"] .main {
+    transform: translateX(100%);
+  }
 
   /* Editor view: sidebar off-screen left, editor visible */
-  .app[data-mobile-view="editor"] .sidebar { transform: translateX(-100%); }
-  .app[data-mobile-view="editor"] .main    { transform: translateX(0); }
+  .app[data-mobile-view="editor"] .sidebar {
+    transform: translateX(-100%);
+  }
+  .app[data-mobile-view="editor"] .main {
+    transform: translateX(0);
+  }
 
   /* Hide drag-to-resize handle */
-  .sidebar-resize-handle { display: none !important; }
+  .sidebar-resize-handle {
+    display: none !important;
+  }
 
   /* Show mobile back button */
   .mobile-back-btn {
     display: flex;
     align-items: center;
     gap: 7px;
-    padding: max(10px, env(safe-area-inset-top)) 16px 10px;
+    padding: max(16px, env(safe-area-inset-top)) 30px 16px;
     background: none;
     border: none;
     border-bottom: 1px solid var(--border);
@@ -73,3 +88,11 @@
   }
 }
 
+@media (display-mode: standalone) and (max-width: 900px) {
+  html,
+  body,
+  #root {
+    height: calc(100vh - 1px);
+    overflow-y: hidden;
+  }
+}

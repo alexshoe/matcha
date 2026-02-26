@@ -9,7 +9,8 @@ export default defineConfig({
 	envDir: "../../",
 
 	server: {
+		host: true, // bind to 0.0.0.0 so ngrok can reach it
 		port: 3000,
-		allowedHosts: true, // allow ngrok and other tunnel hosts
+		allowedHosts: true,
 	},
 });

@@ -27,7 +27,12 @@ import {
 	formatBytes,
 } from "@matcha/core";
 import type { SupabaseClient, User } from "@supabase/supabase-js";
-import type { Note, SortNotesBy, NewNoteStart, SharedNoteEntry } from "@matcha/core";
+import type {
+	Note,
+	SortNotesBy,
+	NewNoteStart,
+	SharedNoteEntry,
+} from "@matcha/core";
 import "@matcha/ui/styles";
 
 function App() {
@@ -52,6 +57,7 @@ function App() {
 	const lastSentVersions = useRef<Map<string, number>>(new Map());
 
 	// ── Sidebar / UI state ──
+	const [appReady, setAppReady] = useState(false);
 	const [mobileView, setMobileView] = useState<"list" | "editor">("list");
 	const [sidebarWidth, setSidebarWidth] = useState(240);
 	const [pinnedExpanded, setPinnedExpanded] = useState(true);
@@ -212,6 +218,20 @@ function App() {
 			return () => window.removeEventListener("keydown", onKey);
 		}
 	}, [aboutOpen, accountOpen, settingsOpen]);
+
+	useLayoutEffect(() => {
+		const mq = window.matchMedia("(max-width: 932px)");
+		console.log("[matcha:layout] useLayoutEffect fired");
+		console.log("[matcha:layout] window.innerWidth:", window.innerWidth);
+		console.log("[matcha:layout] window.innerHeight:", window.innerHeight);
+		console.log("[matcha:layout] devicePixelRatio:", window.devicePixelRatio);
+		console.log(
+			"[matcha:layout] mediaQuery (max-width:932px) matches:",
+			mq.matches,
+		);
+		setAppReady(true);
+		console.log("[matcha:layout] appReady set to true");
+	}, []);
 
 	useEffect(() => {
 		function handleCmdF(e: KeyboardEvent) {
@@ -607,9 +627,7 @@ function App() {
 						const goals = JSON.parse(
 							(record.long_term_goals as string) || "[]",
 						);
-						const tasks = JSON.parse(
-							(record.to_do_list as string) || "{}",
-						);
+						const tasks = JSON.parse((record.to_do_list as string) || "{}");
 						setTodoExternalUpdate({ goals, tasks });
 					} catch {
 						// ignore malformed payloads
@@ -750,27 +768,30 @@ function App() {
 		[user],
 	);
 
-	const saveSharedNote = useCallback(async (id: string, content: string) => {
-		const db = activeSupabase.current;
-		if (!db) return;
-		const now = Math.floor(Date.now() / 1000);
-		const sharedNote = sharedNotes.find((n) => n.id === id);
-		const newVersion = (sharedNote?.version_num ?? 0) + 1;
-		await db
-			.from("notes")
-			.update({ content, updated_at: now, version_num: newVersion })
-			.eq("id", id);
-		setSharedNotes((prev) =>
-			prev
-				.map((n) =>
-					n.id === id
-						? { ...n, content, updated_at: now, version_num: newVersion }
-						: n,
-				)
-				.sort((a, b) => b.updated_at - a.updated_at),
-		);
-		lastSentVersions.current.set(id, newVersion);
-	}, [sharedNotes]);
+	const saveSharedNote = useCallback(
+		async (id: string, content: string) => {
+			const db = activeSupabase.current;
+			if (!db) return;
+			const now = Math.floor(Date.now() / 1000);
+			const sharedNote = sharedNotes.find((n) => n.id === id);
+			const newVersion = (sharedNote?.version_num ?? 0) + 1;
+			await db
+				.from("notes")
+				.update({ content, updated_at: now, version_num: newVersion })
+				.eq("id", id);
+			setSharedNotes((prev) =>
+				prev
+					.map((n) =>
+						n.id === id
+							? { ...n, content, updated_at: now, version_num: newVersion }
+							: n,
+					)
+					.sort((a, b) => b.updated_at - a.updated_at),
+			);
+			lastSentVersions.current.set(id, newVersion);
+		},
+		[sharedNotes],
+	);
 
 	async function leaveSharedNote(noteId: string) {
 		const db = activeSupabase.current;
@@ -1041,9 +1062,7 @@ function App() {
 	}
 
 	async function pinNote(id: string, pinned: boolean) {
-		setNotes((prev) =>
-			prev.map((n) => (n.id === id ? { ...n, pinned } : n)),
-		);
+		setNotes((prev) => prev.map((n) => (n.id === id ? { ...n, pinned } : n)));
 
 		const db = activeSupabase.current;
 		if (db && user) {
@@ -1189,7 +1208,10 @@ function App() {
 	}
 
 	return (
-		<div className="app" data-mobile-view={mobileView}>
+		<div
+			className={`app${appReady ? " app-ready" : ""}`}
+			data-mobile-view={mobileView}
+		>
 			<Sidebar
 				width={sidebarWidth}
 				onResizeStart={onResizeStart}
@@ -1234,7 +1256,10 @@ function App() {
 				}}
 				onDeleteSelectedNotes={deleteSelectedNotes}
 				onCleanupEmptyNote={cleanupEmptyNote}
-				onSetShowTodoList={(show) => { setShowTodoList(show); if (show) setMobileView("editor"); }}
+				onSetShowTodoList={(show) => {
+					setShowTodoList(show);
+					if (show) setMobileView("editor");
+				}}
 				onSetPinnedExpanded={setPinnedExpanded}
 				onSetSearchQuery={setSearchQuery}
 				onSetActiveFolder={setActiveFolder}
@@ -1261,10 +1286,21 @@ function App() {
 						onClick={() => setMobileView("list")}
 						aria-label="Back to notes"
 					>
-						<svg width="9" height="15" viewBox="0 0 9 15" fill="none" aria-hidden="true">
-							<path d="M8 1L1.5 7.5L8 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+						<svg
+							width="9"
+							height="15"
+							viewBox="0 0 9 15"
+							fill="none"
+							aria-hidden="true"
+						>
+							<path
+								d="M8 1L1.5 7.5L8 14"
+								stroke="currentColor"
+								strokeWidth="2"
+								strokeLinecap="round"
+								strokeLinejoin="round"
+							/>
 						</svg>
-						Notes
 					</button>
 				)}
 				{showTodoList ? (
@@ -1338,9 +1374,7 @@ function App() {
 				)}
 			</main>
 
-			{aboutOpen && (
-				<WebAboutModal onClose={() => setAboutOpen(false)} />
-			)}
+			{aboutOpen && <WebAboutModal onClose={() => setAboutOpen(false)} />}
 
 			{accountOpen && (
 				<AccountModal
