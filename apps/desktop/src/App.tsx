@@ -391,6 +391,26 @@ function App() {
 		const result = [...entries.values()].sort(
 			(a, b) => b.updated_at - a.updated_at,
 		);
+
+		// ── New shared note detection ──
+		const notesSharedWithMe = result.filter((n) => !n.is_own);
+		const seenKey = `matcha_seen_shared_note_ids_${user.id}`;
+		const seenRaw = localStorage.getItem(seenKey);
+		if (seenRaw !== null) {
+			const seenIds = new Set(JSON.parse(seenRaw) as string[]);
+			const newNotes = notesSharedWithMe.filter((n) => !seenIds.has(n.id));
+			if (newNotes.length === 1) {
+				setToastIsError(false);
+				setToastMessage(`New shared note from ${newNotes[0].owner_display_name}`);
+				setTimeout(() => setToastMessage(null), 3500);
+			} else if (newNotes.length > 1) {
+				setToastIsError(false);
+				setToastMessage(`${newNotes.length} new shared notes`);
+				setTimeout(() => setToastMessage(null), 3500);
+			}
+		}
+		localStorage.setItem(seenKey, JSON.stringify(notesSharedWithMe.map((n) => n.id)));
+
 		setSharedNotes(result);
 		setSharedNotesLoading(false);
 		return result;

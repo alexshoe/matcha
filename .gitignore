@@ -28,6 +28,8 @@ dist-ssr
 .env
 .agents
 .beads
+.dolt
+.doltcfg
 .cursor
 .claude
 .mcp.json
