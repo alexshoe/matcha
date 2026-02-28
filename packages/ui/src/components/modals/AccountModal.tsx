@@ -39,7 +39,6 @@ export function AccountModal({
 	onDisplayNameSaved,
 	onAvatarSaved,
 	onManualSync,
-	onSignOut,
 	onClose,
 }: AccountModalProps) {
 	const [editingDisplayName, setEditingDisplayName] = useState(false);
