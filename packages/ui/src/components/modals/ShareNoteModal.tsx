@@ -123,7 +123,7 @@ export function ShareNoteModal({
 	const trimmed = searchQuery.trim().toLowerCase();
 	const filtered = trimmed
 		? users.filter((u) => u.display_name.toLowerCase().includes(trimmed))
-		: users;
+		: [];
 
 	return (
 		<div className="share-overlay" onMouseDown={onClose}>
@@ -183,10 +183,10 @@ export function ShareNoteModal({
 				<div className="share-user-list">
 					{loading ? (
 						<p className="share-empty">Loading users…</p>
+					) : !trimmed ? (
+						<p className="share-empty">Type a name to search users</p>
 					) : filtered.length === 0 ? (
-						<p className="share-empty">
-							{trimmed ? "No users found" : "No other users"}
-						</p>
+						<p className="share-empty">No users found</p>
 					) : (
 						filtered.map((u) => (
 							<div key={u.display_name} className="share-user-row">

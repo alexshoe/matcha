@@ -40,7 +40,7 @@ import {
 } from "@matcha/core";
 import { open } from "@tauri-apps/plugin-dialog";
 import { readFile } from "@tauri-apps/plugin-fs";
-import { open as openUrl } from "@tauri-apps/plugin-opener";
+import { openUrl } from "@tauri-apps/plugin-opener";
 
 const CounterOrderedList = OrderedList.extend({
 	renderHTML({ HTMLAttributes }) {
@@ -1117,7 +1117,7 @@ export function NoteEditor({
 					</button>
 				)}
 
-				{!readOnly && (
+				{!readOnly && !onLeaveShared && (
 					<button
 						className={btn(false, "toolbar-btn-danger")}
 						onMouseDown={(e) => {

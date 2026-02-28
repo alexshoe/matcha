@@ -1101,7 +1101,7 @@ export function WebNoteEditor({
 						</button>
 					)}
 
-					{!readOnly && (
+					{!readOnly && !onLeaveShared && (
 						<button
 							className={`${btn(false, "toolbar-btn-danger")} toolbar-hide-mobile`}
 							onMouseDown={(e) => {
@@ -1152,17 +1152,19 @@ export function WebNoteEditor({
 											<span>Leave Shared Note</span>
 										</button>
 									)}
-									<button
-										className="toolbar-more-option toolbar-more-option-danger"
-										onMouseDown={(e) => {
-											e.preventDefault();
-											setMobileMoreOpen(false);
-											onDelete();
-										}}
-									>
-										<FontAwesomeIcon icon={faTrash} />
-										<span>Delete Note</span>
-									</button>
+									{!onLeaveShared && (
+										<button
+											className="toolbar-more-option toolbar-more-option-danger"
+											onMouseDown={(e) => {
+												e.preventDefault();
+												setMobileMoreOpen(false);
+												onDelete();
+											}}
+										>
+											<FontAwesomeIcon icon={faTrash} />
+											<span>Delete Note</span>
+										</button>
+									)}
 								</div>
 							)}
 						</div>

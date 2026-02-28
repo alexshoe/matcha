@@ -30,12 +30,11 @@
 [data-theme="matcha"] .attach-dropdown,
 [data-theme="matcha"] .toolbar-more-dropdown,
 [data-theme="matcha"] .context-menu,
-[data-theme="matcha"] .table-toolbar {
+[data-theme="matcha"] .table-toolbar,
+[data-theme="matcha"] .avatar-dropdown {
   background: rgba(236, 238, 224, 0.96);
   border-color: rgba(60, 80, 40, 0.12);
-  box-shadow:
-    0 8px 32px rgba(50, 60, 30, 0.1),
-    0 2px 8px rgba(50, 60, 30, 0.06);
+  box-shadow: 0 8px 32px rgba(50, 60, 30, 0.1), 0 2px 8px rgba(50, 60, 30, 0.06);
 }
 
 [data-theme="matcha"] .folder-dropdown-item:hover,
@@ -43,7 +42,8 @@
 [data-theme="matcha"] .style-option:hover,
 [data-theme="matcha"] .attach-option:hover,
 [data-theme="matcha"] .toolbar-more-option:hover,
-[data-theme="matcha"] .table-toolbar-btn:hover {
+[data-theme="matcha"] .table-toolbar-btn:hover,
+[data-theme="matcha"] .avatar-dropdown-item:hover {
   background: rgba(60, 80, 40, 0.08);
 }
 
@@ -52,6 +52,10 @@
 }
 
 [data-theme="matcha"] .style-dropdown-divider {
+  background: rgba(60, 80, 40, 0.1);
+}
+
+[data-theme="matcha"] .avatar-dropdown-separator {
   background: rgba(60, 80, 40, 0.1);
 }
 
@@ -80,8 +84,7 @@
 [data-theme="matcha"] .toolbar-btn[data-tooltip]::after {
   background: rgba(236, 238, 224, 0.97);
   border-color: rgba(60, 80, 40, 0.12);
-  box-shadow:
-    0 4px 6px -1px rgba(50, 60, 30, 0.08),
+  box-shadow: 0 4px 6px -1px rgba(50, 60, 30, 0.08),
     0 10px 24px -4px rgba(50, 60, 30, 0.12);
 }
 
@@ -90,8 +93,7 @@
 [data-theme="matcha"] .about-card-wrap .about-card {
   background: rgba(236, 238, 224, 0.97);
   border-color: rgba(60, 80, 40, 0.12);
-  box-shadow:
-    0 24px 60px rgba(50, 60, 30, 0.12),
+  box-shadow: 0 24px 60px rgba(50, 60, 30, 0.12),
     0 4px 16px rgba(50, 60, 30, 0.08);
 }
 
@@ -102,8 +104,7 @@
 [data-theme="matcha"] .manage-lists-card,
 [data-theme="matcha"] .avatar-picker-panel {
   border-color: rgba(60, 80, 40, 0.12);
-  box-shadow:
-    0 24px 60px rgba(50, 60, 30, 0.12),
+  box-shadow: 0 24px 60px rgba(50, 60, 30, 0.12),
     0 4px 16px rgba(50, 60, 30, 0.08);
 }
 
@@ -119,7 +120,7 @@
 
 /* ── Matcha: focus rings ───────────────────── */
 
-[data-theme="matcha"] .sidebar-avatar:hover {
+[data-theme="matcha"] .sidebar-footer-avatar:hover {
   box-shadow: 0 0 0 3px rgba(95, 138, 74, 0.28);
 }
 
@@ -243,12 +244,11 @@
 [data-theme="light"] .attach-dropdown,
 [data-theme="light"] .toolbar-more-dropdown,
 [data-theme="light"] .context-menu,
-[data-theme="light"] .table-toolbar {
+[data-theme="light"] .table-toolbar,
+[data-theme="light"] .avatar-dropdown {
   background: rgba(255, 255, 255, 0.94);
   border-color: rgba(0, 0, 0, 0.1);
-  box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.08),
-    0 2px 8px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 [data-theme="light"] .folder-dropdown-item:hover,
@@ -256,7 +256,8 @@
 [data-theme="light"] .style-option:hover,
 [data-theme="light"] .attach-option:hover,
 [data-theme="light"] .toolbar-more-option:hover,
-[data-theme="light"] .table-toolbar-btn:hover {
+[data-theme="light"] .table-toolbar-btn:hover,
+[data-theme="light"] .avatar-dropdown-item:hover {
   background: rgba(0, 0, 0, 0.05);
 }
 
@@ -265,6 +266,10 @@
 }
 
 [data-theme="light"] .style-dropdown-divider {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .avatar-dropdown-separator {
   background: rgba(0, 0, 0, 0.08);
 }
 
@@ -293,8 +298,7 @@
 [data-theme="light"] .toolbar-btn[data-tooltip]::after {
   background: rgba(255, 255, 255, 0.97);
   border-color: rgba(0, 0, 0, 0.1);
-  box-shadow:
-    0 4px 6px -1px rgba(0, 0, 0, 0.06),
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.06),
     0 10px 24px -4px rgba(0, 0, 0, 0.1);
 }
 
@@ -303,9 +307,7 @@
 [data-theme="light"] .about-card-wrap .about-card {
   background: rgba(255, 255, 255, 0.97);
   border-color: rgba(0, 0, 0, 0.1);
-  box-shadow:
-    0 24px 60px rgba(0, 0, 0, 0.1),
-    0 4px 16px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.06);
 }
 
 [data-theme="light"] .bug-report-panel,
@@ -315,9 +317,7 @@
 [data-theme="light"] .manage-lists-card,
 [data-theme="light"] .avatar-picker-panel {
   border-color: rgba(0, 0, 0, 0.1);
-  box-shadow:
-    0 24px 60px rgba(0, 0, 0, 0.1),
-    0 4px 16px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.06);
 }
 
 /* ── Light: dividers & misc ───────────────── */
@@ -332,7 +332,7 @@
 
 /* ── Light: focus rings ───────────────────── */
 
-[data-theme="light"] .sidebar-avatar:hover {
+[data-theme="light"] .sidebar-footer-avatar:hover {
   box-shadow: 0 0 0 3px rgba(95, 154, 74, 0.25);
 }
 
@@ -422,9 +422,7 @@
   font-weight: 500;
   letter-spacing: 0.01em;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
-  animation:
-    toast-in 0.32s ease-out,
-    toast-out 0.35s 3.1s ease-in forwards;
+  animation: toast-in 0.32s ease-out, toast-out 0.35s 3.1s ease-in forwards;
   white-space: nowrap;
 }
 

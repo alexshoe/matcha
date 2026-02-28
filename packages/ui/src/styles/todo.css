@@ -26,6 +26,7 @@
 
 .sidebar-todo-btn.active {
   background: var(--accent);
+  color: #ffffff;
 }
 
 .sidebar-todo-btn-icon {
@@ -34,7 +35,7 @@
 }
 
 .sidebar-todo-btn.active .sidebar-todo-btn-icon {
-  color: var(--accent);
+  color: #ffffff;
 }
 
 /* ─── Todo List View ─────────────────────────────────────── */
@@ -238,9 +239,7 @@
   border: 2px solid var(--scrollbar);
   flex-shrink: 0;
   position: relative;
-  transition:
-    border-color 0.15s,
-    background 0.15s;
+  transition: border-color 0.15s, background 0.15s;
 }
 
 .todo-check-label:hover .todo-check-circle {
@@ -313,10 +312,7 @@
   font-size: 0.667rem;
   flex-shrink: 0;
   opacity: 0;
-  transition:
-    opacity 0.12s,
-    background 0.12s,
-    color 0.12s;
+  transition: opacity 0.12s, background 0.12s, color 0.12s;
 }
 
 .todo-check-item:hover .todo-remove-btn {
@@ -417,9 +413,7 @@
   font-size: 0.867rem;
   padding: 8px 12px;
   outline: none;
-  transition:
-    border-color 0.15s,
-    box-shadow 0.15s;
+  transition: border-color 0.15s, box-shadow 0.15s;
   -webkit-user-select: text;
   user-select: text;
 }
@@ -447,9 +441,7 @@
   cursor: pointer;
   font-size: 0.8rem;
   flex-shrink: 0;
-  transition:
-    opacity 0.15s,
-    transform 0.1s;
+  transition: opacity 0.15s, transform 0.1s;
 }
 
 .todo-add-btn:hover:not(:disabled) {
@@ -488,10 +480,7 @@
   cursor: pointer;
   font-size: 0.933rem;
   flex-shrink: 0;
-  transition:
-    background 0.12s,
-    border-color 0.12s,
-    color 0.12s;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
 }
 
 .todo-day-nav-btn:hover:not(:disabled) {

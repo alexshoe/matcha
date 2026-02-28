@@ -111,6 +111,7 @@ function App() {
 	// ── Account / profile ──
 	const [displayName, setDisplayName] = useState("User");
 	const [avatarNum, setAvatarNum] = useState<number | null>(null);
+	const [userRole, setUserRole] = useState<string>("User");
 	const [storageUsedLabel, setStorageUsedLabel] = useState("–");
 
 	// ── Folder state ──
@@ -121,6 +122,7 @@ function App() {
 	// ── Toast ──
 	const [toastMessage, setToastMessage] = useState<string | null>(null);
 	const [toastIsError, setToastIsError] = useState(false);
+	const [toastIsShared, setToastIsShared] = useState(false);
 
 	// ── Realtime todo sync ──
 	const [todoExternalUpdate, setTodoExternalUpdate] = useState<{
@@ -221,17 +223,7 @@ function App() {
 	}, [aboutOpen, accountOpen, settingsOpen]);
 
 	useLayoutEffect(() => {
-		const mq = window.matchMedia("(max-width: 932px)");
-		console.log("[matcha:layout] useLayoutEffect fired");
-		console.log("[matcha:layout] window.innerWidth:", window.innerWidth);
-		console.log("[matcha:layout] window.innerHeight:", window.innerHeight);
-		console.log("[matcha:layout] devicePixelRatio:", window.devicePixelRatio);
-		console.log(
-			"[matcha:layout] mediaQuery (max-width:932px) matches:",
-			mq.matches,
-		);
 		setAppReady(true);
-		console.log("[matcha:layout] appReady set to true");
 	}, []);
 
 	useEffect(() => {
@@ -290,6 +282,7 @@ function App() {
 				.maybeSingle()
 				.then(({ data }) => {
 					if (data?.avatar_num) setAvatarNum(data.avatar_num);
+					if (data?.role) setUserRole(data.role);
 				});
 		}
 	}, [user]);
@@ -409,15 +402,22 @@ function App() {
 			const newNotes = notesSharedWithMe.filter((n) => !seenIds.has(n.id));
 			if (newNotes.length === 1) {
 				setToastIsError(false);
-				setToastMessage(`New shared note from ${newNotes[0].owner_display_name}`);
+				setToastIsShared(true);
+				setToastMessage(
+					`New shared note from ${newNotes[0].owner_display_name}`,
+				);
 				setTimeout(() => setToastMessage(null), 3500);
 			} else if (newNotes.length > 1) {
 				setToastIsError(false);
+				setToastIsShared(true);
 				setToastMessage(`${newNotes.length} new shared notes`);
 				setTimeout(() => setToastMessage(null), 3500);
 			}
 		}
-		localStorage.setItem(seenKey, JSON.stringify(notesSharedWithMe.map((n) => n.id)));
+		localStorage.setItem(
+			seenKey,
+			JSON.stringify(notesSharedWithMe.map((n) => n.id)),
+		);
 
 		setSharedNotes(result);
 		setSharedNotesLoading(false);
@@ -570,10 +570,6 @@ function App() {
 					const record = payload.new as Record<string, unknown> | null;
 					if (!record?.id) return;
 
-					const noteVersion = (record.version_num as number) ?? 1;
-					const lastSent = lastSentVersions.current.get(record.id as string);
-					if (lastSent !== undefined && noteVersion <= lastSent) return;
-
 					if (payload.eventType === "INSERT") {
 						const mapped = mapCloudNote(record);
 						setNotes((prev) => {
@@ -602,13 +598,17 @@ function App() {
 								)
 								.sort((a, b) => b.updated_at - a.updated_at),
 						);
-						setNotes((prev) => {
-							const current = prev.find((n) => n.id === mapped.id);
-							if (current && current.id === selectedId) {
-								showToast("Note updated on another device", false);
-							}
-							return prev;
-						});
+						// Only show "updated on another device" toast if this wasn't our own save
+						const lastSent = lastSentVersions.current.get(mapped.id);
+						if (lastSent === undefined || mapped.version_num > lastSent) {
+							setNotes((prev) => {
+								const current = prev.find((n) => n.id === mapped.id);
+								if (current && current.id === selectedId) {
+									showToast("Note updated on another device", false);
+								}
+								return prev;
+							});
+						}
 					} else if (payload.eventType === "DELETE") {
 						const oldRecord = payload.old as Record<string, unknown> | null;
 						const deletedId = (oldRecord?.id as string) ?? null;
@@ -706,6 +706,7 @@ function App() {
 
 	function showToast(message: string, isError: boolean) {
 		setToastIsError(isError);
+		setToastIsShared(false);
 		setToastMessage(message);
 		setTimeout(() => setToastMessage(null), 3500);
 	}
@@ -1395,7 +1396,15 @@ function App() {
 				)}
 			</main>
 
-			{aboutOpen && <WebAboutModal onClose={() => setAboutOpen(false)} />}
+			{aboutOpen && (
+				<WebAboutModal
+					onClose={() => setAboutOpen(false)}
+					userRole={userRole}
+					supabaseClient={activeSupabase.current}
+					user={user}
+					onToast={showToast}
+				/>
+			)}
 
 			{accountOpen && (
 				<AccountModal
@@ -1630,10 +1639,17 @@ function App() {
 			)}
 
 			{toastMessage && (
-				<div className="toast-container">
-					<div className={`toast${toastIsError ? " toast-error" : ""}`}>
-						{toastMessage}
-					</div>
+				<div className={`toast-container${toastIsShared ? " toast-container-shared" : ""}`}>
+					{toastIsShared ? (
+						<div className="toast-shared">
+							<div className="toast-shared-title">Shared Note</div>
+							<div className="toast-shared-msg">{toastMessage}</div>
+						</div>
+					) : (
+						<div className={`toast${toastIsError ? " toast-error" : ""}`}>
+							{toastMessage}
+						</div>
+					)}
 				</div>
 			)}
 		</div>

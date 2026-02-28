@@ -9,6 +9,7 @@ import {
 	faMagnifyingGlass,
 	faXmark,
 	faSquareCheck,
+	faUser,
 } from "@fortawesome/free-solid-svg-icons";
 import type { Note, SharedNoteEntry } from "@matcha/core";
 import { extractPreview } from "@matcha/core";
@@ -78,7 +79,7 @@ const avatarFallback = (
 export function Sidebar({
 	width,
 	onResizeStart,
-	displayName,
+	displayName: _displayName,
 	avatarNum,
 	loading,
 	filteredNotes,
@@ -122,6 +123,8 @@ export function Sidebar({
 }: SidebarProps) {
 	const [folderDropdownOpen, setFolderDropdownOpen] = useState(false);
 	const folderDropdownRef = useRef<HTMLDivElement>(null);
+	const [avatarDropdownOpen, setAvatarDropdownOpen] = useState(false);
+	const avatarDropdownRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
 		if (!folderDropdownOpen) return;
@@ -143,6 +146,27 @@ export function Sidebar({
 			window.removeEventListener("keydown", handleKey);
 		};
 	}, [folderDropdownOpen]);
+
+	useEffect(() => {
+		if (!avatarDropdownOpen) return;
+		function handleClick(e: MouseEvent) {
+			if (
+				avatarDropdownRef.current &&
+				!avatarDropdownRef.current.contains(e.target as Node)
+			) {
+				setAvatarDropdownOpen(false);
+			}
+		}
+		function handleKey(e: KeyboardEvent) {
+			if (e.key === "Escape") setAvatarDropdownOpen(false);
+		}
+		window.addEventListener("mousedown", handleClick);
+		window.addEventListener("keydown", handleKey);
+		return () => {
+			window.removeEventListener("mousedown", handleClick);
+			window.removeEventListener("keydown", handleKey);
+		};
+	}, [avatarDropdownOpen]);
 
 	function renderNoteItem(note: Note) {
 		const { title, preview } = extractPreview(note.content);
@@ -276,37 +300,59 @@ export function Sidebar({
 	return (
 		<aside className="sidebar" style={{ width }}>
 			<div className="sidebar-header">
-				<div className="sidebar-user">
-					<div className="sidebar-avatar" role="button" onClick={onOpenAccount}>
-						{avatarNum ? (
-							<img
-								src={`/avatars/avatar_${avatarNum}.png`}
-								alt="Avatar"
-								className="sidebar-avatar-img"
-							/>
-						) : (
-							avatarFallback
-						)}
-					</div>
-					<div className="sidebar-identity">
-						<span className="sidebar-display-name">{displayName}</span>
-						<span className="sidebar-note-count">
-							{searchQuery.trim()
-								? `Found ${filteredNotes.length} ${filteredNotes.length === 1 ? "note" : "notes"}`
-								: `${filteredNotes.length} ${filteredNotes.length === 1 ? "note" : "notes"}`}
-						</span>
-					</div>
-				</div>
-			<div className="sidebar-header-actions">
-				<button
-					className="new-note-fab"
-					onClick={onCreateNote}
-					title="New Note"
-					disabled={selectedNoteIsEmpty}
+				<div
+					className="sidebar-folder-wrap folder-picker-wrap"
+					ref={folderDropdownRef}
 				>
-					<FontAwesomeIcon icon={faPenToSquare} />
-				</button>
-			</div>
+					<button
+						className="sidebar-folder-btn"
+						onClick={() => setFolderDropdownOpen((v) => !v)}
+					>
+						<div className="sidebar-folder-content">
+							<div className="sidebar-folder-name-row">
+								<span className="sidebar-folder-label">{activeFolder}</span>
+								<FontAwesomeIcon
+									icon={faChevronDown}
+									className={`folder-chevron${folderDropdownOpen ? " open" : ""}`}
+								/>
+							</div>
+						</div>
+					</button>
+					{folderDropdownOpen && (
+						<div className="folder-dropdown folder-dropdown--header">
+							{(["My Notes", "Shared Notes", "Recently Deleted"] as const).map(
+								(name) => (
+									<button
+										key={name}
+										className={`folder-dropdown-item${activeFolder === name ? " active" : ""}`}
+										onClick={() => {
+											onSetActiveFolder(name);
+											localStorage.setItem("matcha_activeList", name);
+											setFolderDropdownOpen(false);
+										}}
+									>
+										<span className="folder-dropdown-check-col">
+											{activeFolder === name && (
+												<FontAwesomeIcon icon={faCheck} />
+											)}
+										</span>
+										<span className="folder-dropdown-name">{name}</span>
+									</button>
+								),
+							)}
+						</div>
+					)}
+				</div>
+				<div className="sidebar-header-actions">
+					<button
+						className="new-note-fab"
+						onClick={onCreateNote}
+						title="New Note"
+						disabled={selectedNoteIsEmpty}
+					>
+						<FontAwesomeIcon icon={faPenToSquare} />
+					</button>
+				</div>
 			</div>
 
 			<div className="sidebar-search-wrap">
@@ -377,94 +423,100 @@ export function Sidebar({
 				) : searchQuery.trim() ? (
 					[...filteredNotes].sort(sortFn).map((note) => renderNoteItem(note))
 				) : (
-				<>
-					{pinnedNotes.length > 0 && !isRecentlyDeleted && (
-						<>
-							<div
-								className="note-list-section-label"
-								onClick={() => onSetPinnedExpanded((v) => !v)}
-							>
-								<span>Pinned</span>
-								<FontAwesomeIcon
-									icon={faChevronDown}
-									className={`section-chevron${pinnedExpanded ? "" : " collapsed"}`}
-								/>
-							</div>
-							<div
-								className={`pinned-accordion${pinnedExpanded ? " expanded" : ""}`}
-							>
-								<div className="pinned-accordion-inner">
-									{pinnedNotes.map((note) => renderNoteItem(note))}
+					<>
+						{pinnedNotes.length > 0 && !isRecentlyDeleted && (
+							<>
+								<div
+									className="note-list-section-label"
+									onClick={() => onSetPinnedExpanded((v) => !v)}
+								>
+									<span>Pinned</span>
+									<FontAwesomeIcon
+										icon={faChevronDown}
+										className={`section-chevron${pinnedExpanded ? "" : " collapsed"}`}
+									/>
 								</div>
-							</div>
-							<div className="note-list-divider" />
-						</>
-					)}
-					<div className="note-list-section-label note-list-section-label--plain">
-						<span>{activeFolder}</span>
-					</div>
-					{(isRecentlyDeleted
-						? [...filteredNotes].sort(sortFn)
-						: regularNotes
-					).map((note) => renderNoteItem(note))}
-				</>
+								<div
+									className={`pinned-accordion${pinnedExpanded ? " expanded" : ""}`}
+								>
+									<div className="pinned-accordion-inner">
+										{pinnedNotes.map((note) => renderNoteItem(note))}
+									</div>
+								</div>
+								<div className="note-list-divider" />
+							</>
+						)}
+						<div className="note-list-section-label note-list-section-label--plain">
+							<span>{activeFolder}</span>
+						</div>
+						{(isRecentlyDeleted
+							? [...filteredNotes].sort(sortFn)
+							: regularNotes
+						).map((note) => renderNoteItem(note))}
+					</>
 				)}
 			</div>
 			<div className="sidebar-footer">
-				<div
-					className="sidebar-footer-left folder-picker-wrap"
-					ref={folderDropdownRef}
-				>
-					<button
-						className="sidebar-footer-folder-btn"
-						onClick={() => setFolderDropdownOpen((v) => !v)}
-					>
-						<FontAwesomeIcon
-							icon={faChevronDown}
-							className={`folder-chevron${folderDropdownOpen ? " open" : ""}`}
-						/>
-						<span className="sidebar-footer-label">{activeFolder}</span>
-					</button>
-					{folderDropdownOpen && (
-						<div className="folder-dropdown">
-							{(["My Notes", "Shared Notes", "Recently Deleted"] as const).map(
-								(name) => (
-									<button
-										key={name}
-										className={`folder-dropdown-item${activeFolder === name ? " active" : ""}`}
-										onClick={() => {
-											onSetActiveFolder(name);
-											localStorage.setItem("matcha_activeList", name);
-											setFolderDropdownOpen(false);
-										}}
-									>
-										<span className="folder-dropdown-check-col">
-											{activeFolder === name && (
-												<FontAwesomeIcon icon={faCheck} />
-											)}
-										</span>
-										<span className="folder-dropdown-name">{name}</span>
-									</button>
-								),
-							)}
+				<div className="sidebar-footer-avatar-wrap" ref={avatarDropdownRef}>
+					{avatarDropdownOpen && (
+						<div className="avatar-dropdown">
+							<button
+								className="avatar-dropdown-item"
+								onClick={() => {
+									onOpenAccount();
+									setAvatarDropdownOpen(false);
+								}}
+							>
+								<FontAwesomeIcon
+									icon={faUser}
+									className="avatar-dropdown-item-icon"
+								/>
+								<span>User Settings</span>
+							</button>
+							<button
+								className="avatar-dropdown-item"
+								onClick={() => {
+									onOpenSettings();
+									setAvatarDropdownOpen(false);
+								}}
+							>
+								<FontAwesomeIcon
+									icon={faGear}
+									className="avatar-dropdown-item-icon"
+								/>
+								<span>Note Settings</span>
+							</button>
+							<div className="avatar-dropdown-separator" />
+							<button
+								className="avatar-dropdown-item"
+								onClick={() => {
+									onOpenAbout();
+									setAvatarDropdownOpen(false);
+								}}
+							>
+								<FontAwesomeIcon
+									icon={faCircleQuestion}
+									className="avatar-dropdown-item-icon"
+								/>
+								<span>About</span>
+							</button>
 						</div>
 					)}
-				</div>
-				<div className="sidebar-footer-actions">
-					<button
-						className="sidebar-footer-btn"
-						title="About"
-						onClick={onOpenAbout}
+					<div
+						className="sidebar-footer-avatar"
+						role="button"
+						onClick={() => setAvatarDropdownOpen((v) => !v)}
 					>
-						<FontAwesomeIcon icon={faCircleQuestion} />
-					</button>
-					<button
-						className="sidebar-footer-btn"
-						title="Settings"
-						onClick={onOpenSettings}
-					>
-						<FontAwesomeIcon icon={faGear} />
-					</button>
+						{avatarNum ? (
+							<img
+								src={`/avatars/avatar_${avatarNum}.png`}
+								alt="Avatar"
+								className="sidebar-footer-avatar-img"
+							/>
+						) : (
+							avatarFallback
+						)}
+					</div>
 				</div>
 			</div>
 			<div className="sidebar-resize-handle" onMouseDown={onResizeStart} />
