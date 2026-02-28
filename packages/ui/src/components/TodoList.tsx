@@ -131,6 +131,7 @@ export function TodoList({
 	const editInputRef = useRef<HTMLInputElement>(null);
 	const loaded = useRef(false);
 	const syncTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+	const pendingToggleIds = useRef<Set<string>>(new Set());
 	const goalsRef = useRef(goals);
 	const tasksRef = useRef(tasks);
 	goalsRef.current = goals;
@@ -426,6 +427,9 @@ export function TodoList({
 	}
 
 	function toggleGoal(id: string) {
+		if (pendingToggleIds.current.has(id)) return;
+		pendingToggleIds.current.add(id);
+		setTimeout(() => pendingToggleIds.current.delete(id), 300);
 		setGoals((prev) => {
 			const toggled = prev.map((g) =>
 				g.id === id ? { ...g, checked: !g.checked } : g,
@@ -463,6 +467,9 @@ export function TodoList({
 	}
 
 	function toggleTask(day: string, id: string) {
+		if (pendingToggleIds.current.has(id)) return;
+		pendingToggleIds.current.add(id);
+		setTimeout(() => pendingToggleIds.current.delete(id), 300);
 		setTasks((prev) => {
 			const toggled = (prev[day] || []).map((t) =>
 				t.id === id ? { ...t, checked: !t.checked } : t,

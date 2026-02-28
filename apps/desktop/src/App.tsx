@@ -63,7 +63,7 @@ function App() {
 	const [sidebarWidth, setSidebarWidth] = useState(240);
 	const [pinnedExpanded, setPinnedExpanded] = useState(true);
 	const [sidebarFocused, setSidebarFocused] = useState(false);
-	const [showTodoList, setShowTodoList] = useState(false);
+	const [showTodoList, setShowTodoList] = useState(true);
 	const [searchQuery, setSearchQuery] = useState("");
 	const searchInputRef = useRef<HTMLInputElement>(null);
 	const noteListRef = useRef<HTMLDivElement>(null);
