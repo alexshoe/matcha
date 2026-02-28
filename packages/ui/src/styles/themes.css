@@ -190,19 +190,6 @@
   color: rgba(255, 255, 255, 0.75);
 }
 
-/* ── Matcha: toasts ──────────────────────── */
-
-[data-theme="matcha"] .toast {
-  background: rgba(236, 238, 224, 0.94);
-  color: #363d2c;
-  box-shadow: 0 4px 24px rgba(50, 60, 30, 0.15);
-}
-
-[data-theme="matcha"] .toast-error {
-  background: rgba(196, 64, 64, 0.92);
-  color: #fff;
-}
-
 /* ── Matcha: modal overlays ──────────────── */
 
 [data-theme="matcha"] .about-overlay,
@@ -400,67 +387,6 @@
   .note-item.selected
   .note-item-preview {
   color: rgba(255, 255, 255, 0.75);
-}
-
-/* ── Toast ── */
-
-.toast-container {
-  position: fixed;
-  bottom: 32px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 10000;
-  pointer-events: none;
-}
-
-.toast {
-  background: rgba(0, 0, 0, 0.82);
-  color: #fff;
-  padding: 10px 20px;
-  border-radius: 10px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  letter-spacing: 0.01em;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
-  animation: toast-in 0.32s ease-out, toast-out 0.35s 3.1s ease-in forwards;
-  white-space: nowrap;
-}
-
-@keyframes toast-in {
-  from {
-    opacity: 0;
-    transform: translateY(12px) scale(0.96);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes toast-out {
-  from {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-  to {
-    opacity: 0;
-    transform: translateY(8px) scale(0.97);
-  }
-}
-
-.toast-error {
-  background: rgba(180, 40, 40, 0.88);
-}
-
-[data-theme="light"] .toast {
-  background: rgba(255, 255, 255, 0.92);
-  color: #1a1a1a;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
-}
-
-[data-theme="light"] .toast-error {
-  background: rgba(200, 50, 50, 0.92);
-  color: #fff;
 }
 
 /* ── Light: modal overlays get subtle scrim ── */

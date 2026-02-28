@@ -11,6 +11,7 @@ import { platform } from "@tauri-apps/plugin-os";
 import { NoteEditor } from "./components/NoteEditor";
 import { AboutModal } from "./components/modals/AboutModal";
 import {
+	Alert,
 	TodoList,
 	AuthPage,
 	Sidebar,
@@ -123,6 +124,7 @@ function App() {
 	const [toastMessage, setToastMessage] = useState<string | null>(null);
 	const [toastIsError, setToastIsError] = useState(false);
 	const [toastIsShared, setToastIsShared] = useState(false);
+	const [toastSharedNoteId, setToastSharedNoteId] = useState<string | null>(null);
 
 	// ── Realtime todo sync ──
 	const [todoExternalUpdate, setTodoExternalUpdate] = useState<{
@@ -403,11 +405,13 @@ function App() {
 			if (newNotes.length === 1) {
 				setToastIsError(false);
 				setToastIsShared(true);
+				setToastSharedNoteId(newNotes[0].id);
 				setToastMessage(`New shared note from ${newNotes[0].owner_display_name}`);
 				setTimeout(() => setToastMessage(null), 3500);
 			} else if (newNotes.length > 1) {
 				setToastIsError(false);
 				setToastIsShared(true);
+				setToastSharedNoteId(null);
 				setToastMessage(`${newNotes.length} new shared notes`);
 				setTimeout(() => setToastMessage(null), 3500);
 			}
@@ -1646,20 +1650,26 @@ function App() {
 				</div>
 			)}
 
-			{toastMessage && (
-				<div className={`toast-container${toastIsShared ? " toast-container-shared" : ""}`}>
-					{toastIsShared ? (
-						<div className="toast-shared">
-							<div className="toast-shared-title">Shared Note</div>
-							<div className="toast-shared-msg">{toastMessage}</div>
-						</div>
-					) : (
-						<div className={`toast${toastIsError ? " toast-error" : ""}`}>
-							{toastMessage}
-						</div>
-					)}
-				</div>
-			)}
+			<Alert
+				message={toastMessage}
+				variant={toastIsShared ? "shared" : toastIsError ? "error" : "default"}
+				title={toastIsShared ? "Shared Note" : undefined}
+				onDismiss={() => setToastMessage(null)}
+				onClick={
+					toastIsShared
+						? () => {
+								setShowTodoList(false);
+								setActiveFolder("Shared Notes");
+								localStorage.setItem("matcha_activeList", "Shared Notes");
+								if (toastSharedNoteId) {
+									setSelectedId(toastSharedNoteId);
+									setSelectedNoteIds([toastSharedNoteId]);
+								}
+								setToastMessage(null);
+							}
+						: undefined
+				}
+			/>
 		</div>
 	);
 }

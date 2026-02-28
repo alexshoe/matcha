@@ -1,0 +1,231 @@
+/* ── Matcha Alert component ─────────────────────────────────────────────── */
+/* Shadcn-inspired alert replacing the old toast system.                     */
+/* pointer-events: none on the container so it never blocks the canvas,      */
+/* but pointer-events: auto on the card itself so dismiss / click work.      */
+
+.matcha-alert-container {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10000;
+  pointer-events: none; /* container is transparent to mouse */
+}
+
+/* ── Positioning by variant ── */
+
+.matcha-alert-container--default,
+.matcha-alert-container--error {
+  bottom: 32px;
+}
+
+.matcha-alert-container--shared {
+  top: 14px;
+  bottom: auto;
+}
+
+/* ── Base card ── */
+
+.matcha-alert {
+  pointer-events: auto; /* the card itself IS clickable */
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+.matcha-alert--clickable {
+  cursor: pointer;
+}
+
+/* ── Body row (message + dismiss button) ── */
+
+.matcha-alert__body {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.matcha-alert__message {
+  flex: 1;
+}
+
+.matcha-alert__dismiss {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0 2px;
+  font-size: 1.1rem;
+  line-height: 1;
+  opacity: 0.55;
+  transition: opacity 0.15s;
+  color: inherit;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+.matcha-alert__dismiss:hover {
+  opacity: 1;
+}
+
+.matcha-alert__title {
+  font-weight: 650;
+  font-size: 14px;
+  line-height: 1.1;
+  margin-bottom: 4px;
+  text-align: center;
+}
+
+/* ── Default variant (info) ── */
+
+.matcha-alert--default {
+  background: rgba(0, 0, 0, 0.82);
+  color: #fff;
+  padding: 10px 12px 10px 20px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
+  animation: alert-in 0.32s ease-out, alert-out 0.35s 3.1s ease-in forwards;
+}
+
+/* ── Error variant ── */
+
+.matcha-alert--error {
+  background: rgba(180, 40, 40, 0.88);
+  color: #fff;
+  padding: 10px 12px 10px 20px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
+  animation: alert-in 0.32s ease-out, alert-out 0.35s 3.1s ease-in forwards;
+}
+
+/* ── Shared-note variant (always dark, theme-independent) ── */
+
+.matcha-alert--shared {
+  background: rgba(20, 20, 22, 0.92);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 12px 10px 12px 14px;
+  border-radius: 12px;
+  opacity: 0;
+  transform: translateY(-18px) scale(0.98);
+  animation:
+    shared-alert-in 420ms cubic-bezier(0.2, 0.9, 0.2, 1) forwards,
+    shared-alert-shake 520ms ease-in-out 660ms,
+    shared-alert-out 0.35s 3.1s ease-in forwards;
+}
+
+/* ── Theme overrides (default + error are theme-aware) ── */
+
+[data-theme="light"] .matcha-alert--default {
+  background: rgba(255, 255, 255, 0.92);
+  color: #1a1a1a;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+}
+
+[data-theme="light"] .matcha-alert--error {
+  background: rgba(200, 50, 50, 0.92);
+  color: #fff;
+}
+
+[data-theme="matcha"] .matcha-alert--default {
+  background: rgba(236, 238, 224, 0.94);
+  color: #363d2c;
+  box-shadow: 0 4px 24px rgba(50, 60, 30, 0.15);
+}
+
+[data-theme="matcha"] .matcha-alert--error {
+  background: rgba(196, 64, 64, 0.92);
+  color: #fff;
+}
+
+/* ── Animations ── */
+
+@keyframes alert-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes alert-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(8px) scale(0.97);
+  }
+}
+
+@keyframes shared-alert-in {
+  0% {
+    opacity: 0;
+    transform: translateY(-18px) scale(0.98);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(2px) scale(1);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes shared-alert-shake {
+  0% {
+    transform: translateY(0) translateX(0);
+  }
+  15% {
+    transform: translateY(0) translateX(-2.5px);
+  }
+  30% {
+    transform: translateY(0) translateX(2.5px);
+  }
+  45% {
+    transform: translateY(0) translateX(-1.5px);
+  }
+  60% {
+    transform: translateY(0) translateX(1.5px);
+  }
+  75% {
+    transform: translateY(0) translateX(-1px);
+  }
+  100% {
+    transform: translateY(0) translateX(0);
+  }
+}
+
+@keyframes shared-alert-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.99);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .matcha-alert--default,
+  .matcha-alert--error {
+    animation: none !important;
+  }
+
+  .matcha-alert--shared {
+    animation: none !important;
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
