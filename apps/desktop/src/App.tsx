@@ -1324,9 +1324,18 @@ function App() {
 				onSetSidebarFocused={setSidebarFocused}
 				onRenameNote={renameNote}
 				onContextMenu={setContextMenu}
+				email={user?.email ?? ""}
 				onOpenAccount={() => setAccountOpen(true)}
 				onOpenAbout={() => setAboutOpen(true)}
 				onOpenSettings={() => setSettingsOpen(true)}
+				onLogOut={async () => {
+					if (activeSupabase.current) {
+						await activeSupabase.current.auth.signOut();
+					}
+					activeSupabase.current = null;
+					setUser(null);
+					setIsAuthenticated(false);
+				}}
 				renamingId={renamingId}
 				renameValue={renameValue}
 				onSetRenamingId={setRenamingId}

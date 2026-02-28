@@ -1701,3 +1701,6 @@
   opacity: 0.88;
 }
 
+.upgrade-modal-body {
+  padding: 20px;
+}

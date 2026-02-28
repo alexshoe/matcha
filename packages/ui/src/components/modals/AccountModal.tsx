@@ -285,8 +285,7 @@ export function AccountModal({
 									value={displayNameValue}
 									onChange={(e) => setDisplayNameValue(e.target.value)}
 									onKeyDown={(e) => {
-										if (e.key === "Enter")
-											saveDisplayName(displayNameValue);
+										if (e.key === "Enter") saveDisplayName(displayNameValue);
 										else if (e.key === "Escape") {
 											setDisplayNameValue(displayName);
 											setEditingDisplayName(false);
@@ -327,9 +326,7 @@ export function AccountModal({
 						)}
 						<div className="account-row">
 							<span className="account-row-label">Email</span>
-							<span className="account-row-value">
-								{user?.email ?? "—"}
-							</span>
+							<span className="account-row-value">{user?.email ?? "—"}</span>
 						</div>
 						<div className="account-row">
 							<span className="account-row-label">Password</span>
@@ -349,9 +346,7 @@ export function AccountModal({
 											setNewPassword(e.target.value);
 											setPasswordError(null);
 										}}
-										onKeyDown={(e) =>
-											e.key === "Enter" && handlePasswordSave()
-										}
+										onKeyDown={(e) => e.key === "Enter" && handlePasswordSave()}
 										disabled={passwordSaving}
 										autoFocus
 									/>
@@ -371,9 +366,7 @@ export function AccountModal({
 											setConfirmPassword(e.target.value);
 											setPasswordError(null);
 										}}
-										onKeyDown={(e) =>
-											e.key === "Enter" && handlePasswordSave()
-										}
+										onKeyDown={(e) => e.key === "Enter" && handlePasswordSave()}
 										disabled={passwordSaving}
 									/>
 									<PasswordToggle
@@ -425,10 +418,10 @@ export function AccountModal({
 							<span className="account-row-label">Storage used</span>
 							<span className="account-row-value">{storageUsedLabel}</span>
 						</div>
-					<div className="account-row account-row-center">
-						<button
-							className="account-sync-btn"
-							disabled={syncing}
+						<div className="account-row account-row-center">
+							<button
+								className="account-sync-btn"
+								disabled={syncing}
 								onClick={async () => {
 									setSyncing(true);
 									setSyncDone(false);
@@ -443,38 +436,72 @@ export function AccountModal({
 							>
 								{syncing ? (
 									<>
-										<svg className="account-sync-spinner" viewBox="0 0 16 16" width="13" height="13">
-											<circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="2" fill="none" strokeDasharray="28" strokeDashoffset="8" strokeLinecap="round" />
+										<svg
+											className="account-sync-spinner"
+											viewBox="0 0 16 16"
+											width="13"
+											height="13"
+										>
+											<circle
+												cx="8"
+												cy="8"
+												r="6"
+												stroke="currentColor"
+												strokeWidth="2"
+												fill="none"
+												strokeDasharray="28"
+												strokeDashoffset="8"
+												strokeLinecap="round"
+											/>
 										</svg>
 										Syncing…
 									</>
 								) : syncDone ? (
 									<>
 										<svg viewBox="0 0 16 16" width="13" height="13" fill="none">
-											<path d="M3 8.5l3.5 3.5 6.5-7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+											<path
+												d="M3 8.5l3.5 3.5 6.5-7"
+												stroke="currentColor"
+												strokeWidth="1.8"
+												strokeLinecap="round"
+												strokeLinejoin="round"
+											/>
 										</svg>
 										Synced
 									</>
 								) : (
 									<>
 										<svg viewBox="0 0 16 16" width="13" height="13" fill="none">
-											<path d="M2.5 8a5.5 5.5 0 0 1 9.3-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-											<path d="M13.5 8a5.5 5.5 0 0 1-9.3 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-											<path d="M11 2.5l1 1.7 1.7-.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
-											<path d="M5 13.5l-1-1.7-1.7.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+											<path
+												d="M2.5 8a5.5 5.5 0 0 1 9.3-4"
+												stroke="currentColor"
+												strokeWidth="1.5"
+												strokeLinecap="round"
+											/>
+											<path
+												d="M13.5 8a5.5 5.5 0 0 1-9.3 4"
+												stroke="currentColor"
+												strokeWidth="1.5"
+												strokeLinecap="round"
+											/>
+											<path
+												d="M11 2.5l1 1.7 1.7-.5"
+												stroke="currentColor"
+												strokeWidth="1.3"
+												strokeLinecap="round"
+												strokeLinejoin="round"
+											/>
+											<path
+												d="M5 13.5l-1-1.7-1.7.5"
+												stroke="currentColor"
+												strokeWidth="1.3"
+												strokeLinecap="round"
+												strokeLinejoin="round"
+											/>
 										</svg>
 										Sync now
 									</>
 								)}
-							</button>
-						</div>
-						<div className="account-divider" />
-						<div className="account-signout-row">
-							<button
-								className="account-signout-btn"
-								onClick={onSignOut}
-							>
-								Sign out
 							</button>
 						</div>
 					</div>

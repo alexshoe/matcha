@@ -8,8 +8,10 @@ import {
 	faCheck,
 	faMagnifyingGlass,
 	faXmark,
-	faSquareCheck,
+	faListCheck,
 	faUser,
+	faRightFromBracket,
+	faWandMagicSparkles,
 } from "@fortawesome/free-solid-svg-icons";
 import type { Note, SharedNoteEntry } from "@matcha/core";
 import { extractPreview } from "@matcha/core";
@@ -52,9 +54,11 @@ interface SidebarProps {
 	onContextMenu: (
 		menu: { x: number; y: number; noteId: string } | null,
 	) => void;
+	email: string;
 	onOpenAccount: () => void;
 	onOpenAbout: () => void;
 	onOpenSettings: () => void;
+	onLogOut: () => void;
 	renamingId: string | null;
 	renameValue: string;
 	onSetRenamingId: (id: string | null) => void;
@@ -79,7 +83,7 @@ const avatarFallback = (
 export function Sidebar({
 	width,
 	onResizeStart,
-	displayName: _displayName,
+	displayName,
 	avatarNum,
 	loading,
 	filteredNotes,
@@ -109,9 +113,11 @@ export function Sidebar({
 	onSetSidebarFocused,
 	onRenameNote,
 	onContextMenu,
+	email,
 	onOpenAccount,
 	onOpenAbout,
 	onOpenSettings,
+	onLogOut,
 	renamingId,
 	renameValue,
 	onSetRenamingId,
@@ -125,6 +131,7 @@ export function Sidebar({
 	const folderDropdownRef = useRef<HTMLDivElement>(null);
 	const [avatarDropdownOpen, setAvatarDropdownOpen] = useState(false);
 	const avatarDropdownRef = useRef<HTMLDivElement>(null);
+	const [upgradeOpen, setUpgradeOpen] = useState(false);
 
 	useEffect(() => {
 		if (!folderDropdownOpen) return;
@@ -364,7 +371,7 @@ export function Sidebar({
 					ref={searchInputRef}
 					className="sidebar-search-input"
 					type="text"
-					placeholder="Search"
+					placeholder="Search notes..."
 					value={searchQuery}
 					onChange={(e) => onSetSearchQuery(e.target.value)}
 					onKeyDown={(e) => {
@@ -396,10 +403,7 @@ export function Sidebar({
 					onSetShowTodoList(true);
 				}}
 			>
-				<FontAwesomeIcon
-					icon={faSquareCheck}
-					className="sidebar-todo-btn-icon"
-				/>
+				<FontAwesomeIcon icon={faListCheck} className="sidebar-todo-btn-icon" />
 				<span>To-do List</span>
 			</button>
 
@@ -461,6 +465,20 @@ export function Sidebar({
 					{avatarDropdownOpen && (
 						<div className="avatar-dropdown">
 							<button
+								className="avatar-dropdown-item avatar-dropdown-item--upgrade"
+								onClick={() => {
+									setUpgradeOpen(true);
+									setAvatarDropdownOpen(false);
+								}}
+							>
+								<FontAwesomeIcon
+									icon={faWandMagicSparkles}
+									className="avatar-dropdown-item-icon"
+								/>
+								<span>Upgrade to Pro</span>
+							</button>
+							<div className="avatar-dropdown-separator" />
+							<button
 								className="avatar-dropdown-item"
 								onClick={() => {
 									onOpenAccount();
@@ -486,7 +504,6 @@ export function Sidebar({
 								/>
 								<span>Note Settings</span>
 							</button>
-							<div className="avatar-dropdown-separator" />
 							<button
 								className="avatar-dropdown-item"
 								onClick={() => {
@@ -500,26 +517,65 @@ export function Sidebar({
 								/>
 								<span>About</span>
 							</button>
+							<div className="avatar-dropdown-separator" />
+							<button
+								className="avatar-dropdown-item avatar-dropdown-item--danger"
+								onClick={() => {
+									onLogOut();
+									setAvatarDropdownOpen(false);
+								}}
+							>
+								<FontAwesomeIcon
+									icon={faRightFromBracket}
+									className="avatar-dropdown-item-icon"
+								/>
+								<span>Log out</span>
+							</button>
 						</div>
 					)}
-					<div
-						className="sidebar-footer-avatar"
-						role="button"
+					<button
+						className={`sidebar-footer-user-btn${avatarDropdownOpen ? " open" : ""}`}
 						onClick={() => setAvatarDropdownOpen((v) => !v)}
 					>
-						{avatarNum ? (
-							<img
-								src={`/avatars/avatar_${avatarNum}.png`}
-								alt="Avatar"
-								className="sidebar-footer-avatar-img"
-							/>
-						) : (
-							avatarFallback
-						)}
-					</div>
+						<div className="sidebar-footer-user-avatar">
+							{avatarNum ? (
+								<img
+									src={`/avatars/avatar_${avatarNum}.png`}
+									alt="Avatar"
+									className="sidebar-footer-avatar-img"
+								/>
+							) : (
+								avatarFallback
+							)}
+						</div>
+						<div className="sidebar-footer-user-info">
+							<span className="sidebar-footer-user-name">{displayName}</span>
+							<span className="sidebar-footer-user-email">{email}</span>
+						</div>
+						<FontAwesomeIcon
+							icon={faChevronDown}
+							className={`sidebar-footer-user-caret${avatarDropdownOpen ? " open" : ""}`}
+						/>
+					</button>
 				</div>
 			</div>
 			<div className="sidebar-resize-handle" onMouseDown={onResizeStart} />
+			{upgradeOpen && (
+				<div className="settings-overlay" onClick={() => setUpgradeOpen(false)}>
+					<div className="settings-card upgrade-modal-card" onClick={(e) => e.stopPropagation()}>
+						<button className="settings-close" onClick={() => setUpgradeOpen(false)} aria-label="Close">
+							<FontAwesomeIcon icon={faXmark} />
+						</button>
+						<div className="settings-header">
+							<FontAwesomeIcon icon={faWandMagicSparkles} className="settings-header-icon" />
+							<span className="settings-header-title">Upgrade to Pro</span>
+						</div>
+						<div className="upgrade-modal-body">
+							<p className="upgrade-modal-text">jk lol</p>
+						</div>
+					</div>
+				</div>
+			)}
 		</aside>
 	);
 }

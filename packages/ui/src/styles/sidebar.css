@@ -15,8 +15,8 @@
 .sidebar-footer {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  padding: 8px 10px 12px;
+  justify-content: flex-start;
+  padding: 6px 8px 10px;
   flex-shrink: 0;
   margin-top: 4px;
 }
@@ -416,12 +416,90 @@
 
 .sidebar-footer-avatar-wrap {
   position: relative;
+  width: 100%;
 }
 
+/* ── Footer user button ──────────────── */
+
+.sidebar-footer-user-btn {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 6px 8px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s;
+}
+
+.sidebar-footer-user-btn:hover,
+.sidebar-footer-user-btn.open {
+  background: var(--item-hover);
+}
+
+.sidebar-footer-user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+  color: var(--text-dim);
+}
+
+.sidebar-footer-user-avatar svg {
+  width: 18px;
+  height: 18px;
+}
+
+.sidebar-footer-user-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.sidebar-footer-user-name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+}
+
+.sidebar-footer-user-email {
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+}
+
+.sidebar-footer-user-caret {
+  font-size: 0.6rem;
+  color: var(--text-dim);
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.sidebar-footer-user-caret.open {
+  transform: rotate(180deg);
+}
+
+/* Legacy – keep for avatar image reuse */
 .sidebar-footer-avatar {
   width: 40px;
   height: 40px;
-  border-radius: 50%;
+  border-radius: 12px;
   background: var(--item-hover);
   border: 3px solid var(--border);
   display: flex;
@@ -447,6 +525,7 @@
 .avatar-dropdown {
   position: absolute;
   bottom: calc(100% + 8px);
+  left: 0;
   right: 0;
   background: rgba(28, 28, 30, 0.96);
   backdrop-filter: blur(20px);
@@ -455,9 +534,70 @@
   border-radius: 10px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 2px 8px rgba(0, 0, 0, 0.3);
   padding: 4px;
-  min-width: 170px;
+  min-width: 200px;
   z-index: 200;
 }
+
+/* ── Dropdown user header ──────────── */
+
+.avatar-dropdown-user-header {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 10px 9px;
+}
+
+.avatar-dropdown-user-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+  color: var(--text-dim);
+}
+
+.avatar-dropdown-user-avatar svg {
+  width: 20px;
+  height: 20px;
+}
+
+.avatar-dropdown-user-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatar-dropdown-user-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.avatar-dropdown-user-name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+}
+
+.avatar-dropdown-user-email {
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+}
+
+/* ── Dropdown items ────────────────── */
 
 .avatar-dropdown-item {
   display: flex;
@@ -478,6 +618,85 @@
 
 .avatar-dropdown-item:hover {
   background: rgba(255, 255, 255, 0.08);
+}
+
+.avatar-dropdown-item--danger {
+  color: var(--danger, #ff6b6b);
+}
+
+.avatar-dropdown-item--danger .avatar-dropdown-item-icon {
+  color: var(--danger, #ff6b6b);
+}
+
+.avatar-dropdown-item--danger:hover {
+  background: rgba(255, 107, 107, 0.1);
+}
+
+.avatar-dropdown-item--upgrade {
+  color: var(--accent);
+}
+
+.avatar-dropdown-item--upgrade .avatar-dropdown-item-icon {
+  color: var(--accent);
+}
+
+.avatar-dropdown-item--upgrade:hover {
+  background: var(--accent-subtle);
+}
+
+/* ── Upgrade panel ─────────────────── */
+
+.upgrade-panel-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: inherit;
+}
+
+.upgrade-panel {
+  position: relative;
+  background: var(--sidebar-bg);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  padding: 32px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 160px;
+}
+
+.upgrade-panel-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: background 0.12s, color 0.12s;
+}
+
+.upgrade-panel-close:hover {
+  background: var(--item-hover);
+  color: var(--text);
+}
+
+.upgrade-panel-text {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0;
 }
 
 .avatar-dropdown-item-icon {
