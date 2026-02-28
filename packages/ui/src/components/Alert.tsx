@@ -1,5 +1,3 @@
-import React from "react";
-
 export type AlertVariant = "default" | "error" | "shared";
 
 interface AlertProps {
