@@ -125,9 +125,14 @@ function App() {
 	const [storageUsedLabel, setStorageUsedLabel] = useState("–");
 
 	// ── Folder state ──
-	const [activeFolder, setActiveFolder] = useState<string>(
-		() => localStorage.getItem("matcha_activeList") || "My Notes",
-	);
+	const [activeFolder, setActiveFolder] = useState<string>(() => {
+		const saved = localStorage.getItem("matcha_activeList") || "My Notes";
+		if (saved === "Recently Deleted") {
+			localStorage.setItem("matcha_activeList", "Deleted");
+			return "Deleted";
+		}
+		return saved;
+	});
 	const prevActiveFolder = useRef(activeFolder);
 
 	// ── Toast ──
@@ -269,7 +274,7 @@ function App() {
 		cleanupEmptyNote(selectedId);
 		setSearchQuery("");
 		const listNotes =
-			activeFolder === "Recently Deleted"
+			activeFolder === "Deleted"
 				? notes.filter((n) => n.deleted)
 				: notes.filter((n) => n.list === activeFolder && !n.deleted);
 		if (listNotes.length > 0) {
@@ -337,10 +342,10 @@ function App() {
 		});
 	}, [accountOpen, user, notes]);
 
-	const fetchSharedNotes = useCallback(async () => {
+	const fetchSharedNotes = useCallback(async (silent = false) => {
 		const db = activeSupabase.current;
 		if (!db || !user) return;
-		setSharedNotesLoading(true);
+		if (!silent) setSharedNotesLoading(true);
 
 		const [sharedWithMe, sharedByMe] = await Promise.all([
 			db
@@ -489,7 +494,7 @@ function App() {
 				const folder =
 					localStorage.getItem("matcha_activeList") || activeFolder;
 				const inList =
-					folder === "Recently Deleted"
+					folder === "Deleted"
 						? sorted.filter((n) => n.deleted)
 						: sorted.filter((n) => n.list === folder && !n.deleted);
 				setSelectedId((prev) => {
@@ -540,7 +545,9 @@ function App() {
 					invoke("set_notes", { notes: [] }).catch(() => {});
 				} else if (session?.user) {
 					activeSupabase.current = client;
-					setUser(session.user);
+					setUser((prev) =>
+						prev?.id === session.user.id ? prev : session.user,
+					);
 				}
 			});
 
@@ -644,7 +651,7 @@ function App() {
 			);
 		}
 
-		fetchSharedNotes();
+		fetchSharedNotes(true);
 	}, [user, fetchSharedNotes]);
 
 	const handleSync = useCallback(async () => {
@@ -757,7 +764,7 @@ function App() {
 				"postgres_changes",
 				{ event: "*", schema: "public", table: "note_sharing" },
 				() => {
-					fetchSharedNotes();
+					fetchSharedNotes(true);
 				},
 			)
 			.subscribe();
@@ -992,7 +999,7 @@ function App() {
 			const remaining = prev.filter((n) => n.id !== id);
 			if (selectedId === id) {
 				const inFolder = remaining.filter((n) =>
-					activeFolder === "Recently Deleted"
+					activeFolder === "Deleted"
 						? n.deleted
 						: n.list === activeFolder,
 				);
@@ -1049,7 +1056,7 @@ function App() {
 					: [];
 		if (idsToDelete.length === 0) return;
 
-		const isPermanent = activeFolder === "Recently Deleted";
+		const isPermanent = activeFolder === "Deleted";
 
 		if (isPermanent) {
 			for (const id of idsToDelete) {
@@ -1198,7 +1205,7 @@ function App() {
 		[sortNotesBy],
 	);
 
-	const isRecentlyDeleted = activeFolder === "Recently Deleted";
+	const isRecentlyDeleted = activeFolder === "Deleted";
 	const isSharedFolder = activeFolder === "Shared Notes";
 	const filteredNotes = useMemo(() => {
 		if (isSharedFolder) {
