@@ -54,7 +54,6 @@ interface SidebarProps {
 	onContextMenu: (
 		menu: { x: number; y: number; noteId: string } | null,
 	) => void;
-	email: string;
 	onOpenAccount: () => void;
 	onOpenAbout: () => void;
 	onOpenSettings: () => void;
@@ -113,7 +112,6 @@ export function Sidebar({
 	onSetSidebarFocused,
 	onRenameNote,
 	onContextMenu,
-	email,
 	onOpenAccount,
 	onOpenAbout,
 	onOpenSettings,

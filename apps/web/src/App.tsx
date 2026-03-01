@@ -46,9 +46,14 @@ function App() {
 
 	// ── Notes state ──
 	const [notes, setNotes] = useState<Note[]>([]);
-	const [selectedId, setSelectedId] = useState<string | null>(null);
+	const [selectedId, setSelectedId] = useState<string | null>(
+		() => sessionStorage.getItem("matcha_session_selectedId") || null,
+	);
 	const [loading, setLoading] = useState(true);
-	const [selectedNoteIds, setSelectedNoteIds] = useState<string[]>([]);
+	const [selectedNoteIds, setSelectedNoteIds] = useState<string[]>(() => {
+		const saved = sessionStorage.getItem("matcha_session_selectedId");
+		return saved ? [saved] : [];
+	});
 	const selectionAnchorId = useRef<string | null>(null);
 	const shouldAutoFocusEditor = useRef(true);
 	const pendingNoteIds = useRef(new Set<string>());
@@ -60,11 +65,18 @@ function App() {
 
 	// ── Sidebar / UI state ──
 	const [appReady, setAppReady] = useState(false);
-	const [mobileView, setMobileView] = useState<"list" | "editor">("list");
+	const [mobileView, setMobileView] = useState<"list" | "editor">(() => {
+		const saved = sessionStorage.getItem("matcha_session_mobileView");
+		return saved === "editor" ? "editor" : "list";
+	});
 	const [sidebarWidth, setSidebarWidth] = useState(240);
 	const [pinnedExpanded, setPinnedExpanded] = useState(true);
 	const [sidebarFocused, setSidebarFocused] = useState(false);
-	const [showTodoList, setShowTodoList] = useState(() => window.innerWidth > 550);
+	const [showTodoList, setShowTodoList] = useState(() => {
+		const saved = sessionStorage.getItem("matcha_session_showTodoList");
+		if (saved !== null) return saved === "true";
+		return window.innerWidth > 550;
+	});
 	const [searchQuery, setSearchQuery] = useState("");
 	const searchInputRef = useRef<HTMLInputElement>(null);
 	const noteListRef = useRef<HTMLDivElement>(null);
@@ -119,6 +131,7 @@ function App() {
 	const [activeFolder, setActiveFolder] = useState<string>(
 		() => localStorage.getItem("matcha_activeList") || "My Notes",
 	);
+	const prevActiveFolder = useRef(activeFolder);
 
 	// ── Toast ──
 	const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -181,6 +194,23 @@ function App() {
 
 	// ── Effects ──
 
+	// Persist navigation state to sessionStorage (survives refresh, cleared on new tab)
+	useEffect(() => {
+		sessionStorage.setItem("matcha_session_showTodoList", String(showTodoList));
+	}, [showTodoList]);
+
+	useEffect(() => {
+		if (selectedId) {
+			sessionStorage.setItem("matcha_session_selectedId", selectedId);
+		} else {
+			sessionStorage.removeItem("matcha_session_selectedId");
+		}
+	}, [selectedId]);
+
+	useEffect(() => {
+		sessionStorage.setItem("matcha_session_mobileView", mobileView);
+	}, [mobileView]);
+
 	// Prevent browser from navigating to dropped files
 	useEffect(() => {
 		const preventDrag = (e: DragEvent) => e.preventDefault();
@@ -241,6 +271,8 @@ function App() {
 	}, []);
 
 	useEffect(() => {
+		if (prevActiveFolder.current === activeFolder) return;
+		prevActiveFolder.current = activeFolder;
 		cleanupEmptyNote(selectedId);
 		setSearchQuery("");
 		const listNotes =

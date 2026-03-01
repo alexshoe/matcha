@@ -46,9 +46,14 @@ function App() {
 
 	// ── Notes state ──
 	const [notes, setNotes] = useState<Note[]>([]);
-	const [selectedId, setSelectedId] = useState<string | null>(null);
+	const [selectedId, setSelectedId] = useState<string | null>(
+		() => sessionStorage.getItem("matcha_session_selectedId") || null,
+	);
 	const [loading, setLoading] = useState(true);
-	const [selectedNoteIds, setSelectedNoteIds] = useState<string[]>([]);
+	const [selectedNoteIds, setSelectedNoteIds] = useState<string[]>(() => {
+		const saved = sessionStorage.getItem("matcha_session_selectedId");
+		return saved ? [saved] : [];
+	});
 	const selectionAnchorId = useRef<string | null>(null);
 	const shouldAutoFocusEditor = useRef(true);
 	const pendingNoteIds = useRef(new Set<string>());
@@ -64,7 +69,11 @@ function App() {
 	const [sidebarWidth, setSidebarWidth] = useState(240);
 	const [pinnedExpanded, setPinnedExpanded] = useState(true);
 	const [sidebarFocused, setSidebarFocused] = useState(false);
-	const [showTodoList, setShowTodoList] = useState(true);
+	const [showTodoList, setShowTodoList] = useState(() => {
+		const saved = sessionStorage.getItem("matcha_session_showTodoList");
+		if (saved !== null) return saved === "true";
+		return true;
+	});
 	const [searchQuery, setSearchQuery] = useState("");
 	const searchInputRef = useRef<HTMLInputElement>(null);
 	const noteListRef = useRef<HTMLDivElement>(null);
@@ -119,6 +128,7 @@ function App() {
 	const [activeFolder, setActiveFolder] = useState<string>(
 		() => localStorage.getItem("matcha_activeList") || "My Notes",
 	);
+	const prevActiveFolder = useRef(activeFolder);
 
 	// ── Toast ──
 	const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -181,6 +191,19 @@ function App() {
 
 	// ── Effects ──
 
+	// Persist navigation state to sessionStorage (survives refresh, cleared on new window)
+	useEffect(() => {
+		sessionStorage.setItem("matcha_session_showTodoList", String(showTodoList));
+	}, [showTodoList]);
+
+	useEffect(() => {
+		if (selectedId) {
+			sessionStorage.setItem("matcha_session_selectedId", selectedId);
+		} else {
+			sessionStorage.removeItem("matcha_session_selectedId");
+		}
+	}, [selectedId]);
+
 	useEffect(() => {
 		document.documentElement.classList.add(`os-${platform()}`);
 	}, []);
@@ -241,6 +264,8 @@ function App() {
 	}, []);
 
 	useEffect(() => {
+		if (prevActiveFolder.current === activeFolder) return;
+		prevActiveFolder.current = activeFolder;
 		cleanupEmptyNote(selectedId);
 		setSearchQuery("");
 		const listNotes =
@@ -467,10 +492,15 @@ function App() {
 					folder === "Recently Deleted"
 						? sorted.filter((n) => n.deleted)
 						: sorted.filter((n) => n.list === folder && !n.deleted);
-				if (inList.length > 0) {
-					setSelectedId(inList[0].id);
-					setSelectedNoteIds([inList[0].id]);
-				}
+				setSelectedId((prev) => {
+					if (prev) return prev;
+					if (inList.length > 0) {
+						setSelectedNoteIds([inList[0].id]);
+						selectionAnchorId.current = inList[0].id;
+						return inList[0].id;
+					}
+					return null;
+				});
 			})
 			.finally(() => setLoading(false));
 
