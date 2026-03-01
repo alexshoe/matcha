@@ -142,7 +142,9 @@ function App() {
 	const [toastMessage, setToastMessage] = useState<string | null>(null);
 	const [toastIsError, setToastIsError] = useState(false);
 	const [toastIsShared, setToastIsShared] = useState(false);
-	const [toastSharedNoteId, setToastSharedNoteId] = useState<string | null>(null);
+	const [toastSharedNoteId, setToastSharedNoteId] = useState<string | null>(
+		null,
+	);
 
 	// ── Realtime todo sync ──
 	const [todoExternalUpdate, setTodoExternalUpdate] = useState<{
@@ -349,121 +351,127 @@ function App() {
 		});
 	}, [accountOpen, user, notes]);
 
-	const fetchSharedNotes = useCallback(async (silent = false) => {
-		const db = activeSupabase.current;
-		if (!db || !user) return;
-		if (!silent) setSharedNotesLoading(true);
+	const fetchSharedNotes = useCallback(
+		async (silent = false) => {
+			const db = activeSupabase.current;
+			if (!db || !user) return;
+			if (!silent) setSharedNotesLoading(true);
 
-		const [sharedWithMe, sharedByMe] = await Promise.all([
-			db
-				.from("note_sharing")
-				.select(
-					"note_id, notes(*), users!note_sharing_owner_id_fkey(display_name, avatar_num)",
-				)
-				.eq("shared_with_id", user.id),
-			db
-				.from("note_sharing")
-				.select(
-					"note_id, shared_with_id, users!note_sharing_shared_with_id_fkey(display_name)",
-				)
-				.eq("owner_id", user.id),
-		]);
+			const [sharedWithMe, sharedByMe] = await Promise.all([
+				db
+					.from("note_sharing")
+					.select(
+						"note_id, notes(*), users!note_sharing_owner_id_fkey(display_name, avatar_num)",
+					)
+					.eq("shared_with_id", user.id),
+				db
+					.from("note_sharing")
+					.select(
+						"note_id, shared_with_id, users!note_sharing_shared_with_id_fkey(display_name)",
+					)
+					.eq("owner_id", user.id),
+			]);
 
-		const ownDisplayName = displayName;
-		const entries = new Map<string, SharedNoteEntry>();
+			const ownDisplayName = displayName;
+			const entries = new Map<string, SharedNoteEntry>();
 
-		for (const row of sharedWithMe.data ?? []) {
-			const note = row.notes as unknown as Record<string, unknown> | null;
-			if (!note || note.deleted) continue;
-			const owner = row.users as unknown as Record<string, unknown> | null;
-			entries.set(note.id as string, {
-				id: note.id as string,
-				content: note.content as string,
-				created_at: note.created_at as number,
-				updated_at: note.updated_at as number,
-				pinned: note.pinned as boolean,
-				list: note.list as string,
-				deleted: note.deleted as boolean,
-				deleted_at: (note.deleted_at as number | null) ?? null,
-				version_num: (note.version_num as number) ?? 1,
-				owner_display_name: (owner?.display_name as string) ?? "Unknown",
-				owner_avatar_num: (owner?.avatar_num as number | null) ?? null,
-				is_own: false,
-			});
-		}
+			for (const row of sharedWithMe.data ?? []) {
+				const note = row.notes as unknown as Record<string, unknown> | null;
+				if (!note || note.deleted) continue;
+				const owner = row.users as unknown as Record<string, unknown> | null;
+				entries.set(note.id as string, {
+					id: note.id as string,
+					content: note.content as string,
+					created_at: note.created_at as number,
+					updated_at: note.updated_at as number,
+					pinned: note.pinned as boolean,
+					list: note.list as string,
+					deleted: note.deleted as boolean,
+					deleted_at: (note.deleted_at as number | null) ?? null,
+					version_num: (note.version_num as number) ?? 1,
+					owner_display_name: (owner?.display_name as string) ?? "Unknown",
+					owner_avatar_num: (owner?.avatar_num as number | null) ?? null,
+					is_own: false,
+				});
+			}
 
-		const mySharedNoteIds = new Map<string, string[]>();
-		for (const row of sharedByMe.data ?? []) {
-			const recipient = row.users as unknown as Record<string, unknown> | null;
-			if (!recipient?.display_name) continue;
-			const names = mySharedNoteIds.get(row.note_id) ?? [];
-			names.push(recipient.display_name as string);
-			mySharedNoteIds.set(row.note_id, names);
-		}
+			const mySharedNoteIds = new Map<string, string[]>();
+			for (const row of sharedByMe.data ?? []) {
+				const recipient = row.users as unknown as Record<
+					string,
+					unknown
+				> | null;
+				if (!recipient?.display_name) continue;
+				const names = mySharedNoteIds.get(row.note_id) ?? [];
+				names.push(recipient.display_name as string);
+				mySharedNoteIds.set(row.note_id, names);
+			}
 
-		if (mySharedNoteIds.size > 0) {
-			const noteIds = [...mySharedNoteIds.keys()];
-			const { data: myNotes } = await db
-				.from("notes")
-				.select("*")
-				.in("id", noteIds)
-				.eq("deleted", false);
+			if (mySharedNoteIds.size > 0) {
+				const noteIds = [...mySharedNoteIds.keys()];
+				const { data: myNotes } = await db
+					.from("notes")
+					.select("*")
+					.in("id", noteIds)
+					.eq("deleted", false);
 
-			for (const note of myNotes ?? []) {
-				if (!entries.has(note.id)) {
-					entries.set(note.id, {
-						...note,
-						owner_display_name: ownDisplayName,
-						owner_avatar_num: null,
-						is_own: true,
-						shared_with_names: mySharedNoteIds.get(note.id),
-					});
-				} else {
-					const existing = entries.get(note.id);
-					if (existing) {
-						existing.is_own = true;
-						existing.shared_with_names = mySharedNoteIds.get(note.id);
+				for (const note of myNotes ?? []) {
+					if (!entries.has(note.id)) {
+						entries.set(note.id, {
+							...note,
+							owner_display_name: ownDisplayName,
+							owner_avatar_num: null,
+							is_own: true,
+							shared_with_names: mySharedNoteIds.get(note.id),
+						});
+					} else {
+						const existing = entries.get(note.id);
+						if (existing) {
+							existing.is_own = true;
+							existing.shared_with_names = mySharedNoteIds.get(note.id);
+						}
 					}
 				}
 			}
-		}
 
-		const result = [...entries.values()].sort(
-			(a, b) => b.updated_at - a.updated_at,
-		);
+			const result = [...entries.values()].sort(
+				(a, b) => b.updated_at - a.updated_at,
+			);
 
-		// ── New shared note detection ──
-		const notesSharedWithMe = result.filter((n) => !n.is_own);
-		const seenKey = `matcha_seen_shared_note_ids_${user.id}`;
-		const seenRaw = localStorage.getItem(seenKey);
-		if (seenRaw !== null) {
-			const seenIds = new Set(JSON.parse(seenRaw) as string[]);
-			const newNotes = notesSharedWithMe.filter((n) => !seenIds.has(n.id));
-			if (newNotes.length === 1) {
-				setToastIsError(false);
-				setToastIsShared(true);
-				setToastSharedNoteId(newNotes[0].id);
-				setToastMessage(
-					`New shared note from ${newNotes[0].owner_display_name}`,
-				);
-				setTimeout(() => setToastMessage(null), 3500);
-			} else if (newNotes.length > 1) {
-				setToastIsError(false);
-				setToastIsShared(true);
-				setToastSharedNoteId(null);
-				setToastMessage(`${newNotes.length} new shared notes`);
-				setTimeout(() => setToastMessage(null), 3500);
+			// ── New shared note detection ──
+			const notesSharedWithMe = result.filter((n) => !n.is_own);
+			const seenKey = `matcha_seen_shared_note_ids_${user.id}`;
+			const seenRaw = localStorage.getItem(seenKey);
+			if (seenRaw !== null) {
+				const seenIds = new Set(JSON.parse(seenRaw) as string[]);
+				const newNotes = notesSharedWithMe.filter((n) => !seenIds.has(n.id));
+				if (newNotes.length === 1) {
+					setToastIsError(false);
+					setToastIsShared(true);
+					setToastSharedNoteId(newNotes[0].id);
+					setToastMessage(
+						`New shared note from ${newNotes[0].owner_display_name}`,
+					);
+					setTimeout(() => setToastMessage(null), 3500);
+				} else if (newNotes.length > 1) {
+					setToastIsError(false);
+					setToastIsShared(true);
+					setToastSharedNoteId(null);
+					setToastMessage(`${newNotes.length} new shared notes`);
+					setTimeout(() => setToastMessage(null), 3500);
+				}
 			}
-		}
-		localStorage.setItem(
-			seenKey,
-			JSON.stringify(notesSharedWithMe.map((n) => n.id)),
-		);
+			localStorage.setItem(
+				seenKey,
+				JSON.stringify(notesSharedWithMe.map((n) => n.id)),
+			);
 
-		setSharedNotes(result);
-		setSharedNotesLoading(false);
-		return result;
-	}, [user, displayName]);
+			setSharedNotes(result);
+			setSharedNotesLoading(false);
+			return result;
+		},
+		[user, displayName],
+	);
 
 	useEffect(() => {
 		if (activeFolder === "Shared Notes") {
@@ -523,9 +531,7 @@ function App() {
 				setSelectedNoteIds([]);
 			} else if (session?.user) {
 				activeSupabase.current = client;
-				setUser((prev) =>
-					prev?.id === session.user.id ? prev : session.user,
-				);
+				setUser((prev) => (prev?.id === session.user.id ? prev : session.user));
 			}
 		});
 
@@ -928,9 +934,7 @@ function App() {
 			const remaining = prev.filter((n) => n.id !== id);
 			if (selectedId === id) {
 				const inFolder = remaining.filter((n) =>
-					activeFolder === "Deleted"
-						? n.deleted
-						: n.list === activeFolder,
+					activeFolder === "Deleted" ? n.deleted : n.list === activeFolder,
 				);
 				setSelectedId(inFolder[0]?.id ?? null);
 				setSelectedNoteIds(inFolder[0] ? [inFolder[0].id] : []);
@@ -1331,7 +1335,6 @@ function App() {
 				onSetSidebarFocused={setSidebarFocused}
 				onRenameNote={renameNote}
 				onContextMenu={setContextMenu}
-				email={user?.email ?? ""}
 				onOpenAccount={() => setAccountOpen(true)}
 				onOpenAbout={() => setAboutOpen(true)}
 				onOpenSettings={() => setSettingsOpen(true)}
@@ -1357,7 +1360,10 @@ function App() {
 				{showTodoList && (
 					<button
 						className="mobile-back-btn"
-						onClick={() => { setMobileView("list"); setShowTodoList(false); }}
+						onClick={() => {
+							setMobileView("list");
+							setShowTodoList(false);
+						}}
 						aria-label="Back to notes"
 					>
 						<svg
