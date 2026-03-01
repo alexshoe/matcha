@@ -465,7 +465,7 @@
   gap: 1px;
 }
 
-.sidebar-footer-user-name {
+.sidebar-display-name {
   font-size: 0.8rem;
   font-weight: 600;
   color: var(--text);
@@ -489,6 +489,7 @@
   color: var(--text-dim);
   flex-shrink: 0;
   transition: transform 0.2s ease;
+  margin-left: auto;
 }
 
 .sidebar-footer-user-caret.open {
@@ -644,55 +645,20 @@
   background: var(--accent-subtle);
 }
 
-/* ── Upgrade panel ─────────────────── */
+/* ── Upgrade modal ─────────────────── */
 
-.upgrade-panel-overlay {
-  position: absolute;
-  inset: 0;
-  z-index: 300;
+.upgrade-modal-card {
+  width: 320px;
+}
+
+.upgrade-modal-body {
+  padding: 40px 24px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: inherit;
 }
 
-.upgrade-panel {
-  position: relative;
-  background: var(--sidebar-bg);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 14px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-  padding: 32px 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 160px;
-}
-
-.upgrade-panel-close {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  border: none;
-  border-radius: 6px;
-  color: var(--text-dim);
-  cursor: pointer;
-  font-size: 0.8rem;
-  transition: background 0.12s, color 0.12s;
-}
-
-.upgrade-panel-close:hover {
-  background: var(--item-hover);
-  color: var(--text);
-}
-
-.upgrade-panel-text {
+.upgrade-modal-text {
   font-size: 1.1rem;
   font-weight: 600;
   color: var(--text);

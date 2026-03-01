@@ -137,6 +137,10 @@
     height: 26px;
   }
 
+  .avatar-dropdown-item {
+    font-size: 15px;
+  }
+
   .sidebar-display-name {
     font-size: 1rem;
   }
@@ -331,6 +335,10 @@
   .account-card-wrap.picker-open .avatar-picker-grid {
     grid-template-columns: repeat(4, 1fr);
     gap: 8px;
+  }
+
+  .avatar-picker-close {
+    display: none;
   }
 
   /* ─── Todo ────────────────────────────────────────────────── */

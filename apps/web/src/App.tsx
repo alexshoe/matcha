@@ -64,7 +64,7 @@ function App() {
 	const [sidebarWidth, setSidebarWidth] = useState(240);
 	const [pinnedExpanded, setPinnedExpanded] = useState(true);
 	const [sidebarFocused, setSidebarFocused] = useState(false);
-	const [showTodoList, setShowTodoList] = useState(true);
+	const [showTodoList, setShowTodoList] = useState(() => window.innerWidth > 550);
 	const [searchQuery, setSearchQuery] = useState("");
 	const searchInputRef = useRef<HTMLInputElement>(null);
 	const noteListRef = useRef<HTMLDivElement>(null);
@@ -1318,7 +1318,7 @@ function App() {
 				{showTodoList && (
 					<button
 						className="mobile-back-btn"
-						onClick={() => setMobileView("list")}
+						onClick={() => { setMobileView("list"); setShowTodoList(false); }}
 						aria-label="Back to notes"
 					>
 						<svg

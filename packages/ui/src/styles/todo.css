@@ -111,12 +111,13 @@
 
 /* ── Long-term Goals section ─────────── */
 
-.todo-goals-section {
+.todo-goals-card {
   background: var(--sidebar-bg);
   border: 1px solid var(--border);
   border-radius: 12px;
   overflow: hidden;
   flex-shrink: 0;
+  min-width: 220px;
 }
 
 .todo-goals-header {

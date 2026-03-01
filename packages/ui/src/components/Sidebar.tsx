@@ -548,10 +548,7 @@ export function Sidebar({
 								avatarFallback
 							)}
 						</div>
-						<div className="sidebar-footer-user-info">
-							<span className="sidebar-footer-user-name">{displayName}</span>
-							<span className="sidebar-footer-user-email">{email}</span>
-						</div>
+						<span className="sidebar-display-name">{displayName}</span>
 						<FontAwesomeIcon
 							icon={faChevronDown}
 							className={`sidebar-footer-user-caret${avatarDropdownOpen ? " open" : ""}`}
@@ -562,12 +559,22 @@ export function Sidebar({
 			<div className="sidebar-resize-handle" onMouseDown={onResizeStart} />
 			{upgradeOpen && (
 				<div className="settings-overlay" onClick={() => setUpgradeOpen(false)}>
-					<div className="settings-card upgrade-modal-card" onClick={(e) => e.stopPropagation()}>
-						<button className="settings-close" onClick={() => setUpgradeOpen(false)} aria-label="Close">
+					<div
+						className="settings-card upgrade-modal-card"
+						onClick={(e) => e.stopPropagation()}
+					>
+						<button
+							className="settings-close"
+							onClick={() => setUpgradeOpen(false)}
+							aria-label="Close"
+						>
 							<FontAwesomeIcon icon={faXmark} />
 						</button>
 						<div className="settings-header">
-							<FontAwesomeIcon icon={faWandMagicSparkles} className="settings-header-icon" />
+							<FontAwesomeIcon
+								icon={faWandMagicSparkles}
+								className="settings-header-icon"
+							/>
 							<span className="settings-header-title">Upgrade to Pro</span>
 						</div>
 						<div className="upgrade-modal-body">

@@ -164,37 +164,43 @@ export function TodoList({
 			.select("long_term_goals, to_do_list")
 			.eq("user_id", userId)
 			.maybeSingle()
-			.then(({ data }: { data: { long_term_goals?: string; to_do_list?: string } | null }) => {
-				const todayStr = dateKey(new Date());
-				if (data) {
-					const remoteGoals = parseJson<TodoGoal[]>(data.long_term_goals, []);
-					let remoteTasks = parseJson<Record<string, TodoTask[]>>(
-						data.to_do_list,
-						{},
-					);
-					if (needsRollover(remoteTasks, todayStr)) {
-						remoteTasks = rolloverPastTasks(remoteTasks, todayStr);
+			.then(
+				({
+					data,
+				}: {
+					data: { long_term_goals?: string; to_do_list?: string } | null;
+				}) => {
+					const todayStr = dateKey(new Date());
+					if (data) {
+						const remoteGoals = parseJson<TodoGoal[]>(data.long_term_goals, []);
+						let remoteTasks = parseJson<Record<string, TodoTask[]>>(
+							data.to_do_list,
+							{},
+						);
+						if (needsRollover(remoteTasks, todayStr)) {
+							remoteTasks = rolloverPastTasks(remoteTasks, todayStr);
+						}
+						setGoals(remoteGoals);
+						setTasks(remoteTasks);
+						localStorage.setItem(
+							"matcha_todo_goals",
+							JSON.stringify(remoteGoals),
+						);
+						localStorage.setItem(
+							"matcha_todo_tasks",
+							JSON.stringify(remoteTasks),
+						);
+					} else {
+						// No remote data — rollover whatever was loaded from localStorage
+						setTasks((prev) =>
+							needsRollover(prev, todayStr)
+								? rolloverPastTasks(prev, todayStr)
+								: prev,
+						);
 					}
-					setGoals(remoteGoals);
-					setTasks(remoteTasks);
-					localStorage.setItem(
-						"matcha_todo_goals",
-						JSON.stringify(remoteGoals),
-					);
-					localStorage.setItem(
-						"matcha_todo_tasks",
-						JSON.stringify(remoteTasks),
-					);
-				} else {
-					// No remote data — rollover whatever was loaded from localStorage
-					setTasks((prev) =>
-						needsRollover(prev, todayStr)
-							? rolloverPastTasks(prev, todayStr)
-							: prev,
-					);
-				}
-				loaded.current = true;
-			});
+					loaded.current = true;
+				},
+			);
 	}, [supabaseClient, userId]);
 
 	const isRemoteUpdate = useRef(false);
@@ -529,7 +535,7 @@ export function TodoList({
 				</div>
 			</div>
 
-			<div className="todo-goals-section">
+			<div className="todo-goals-card">
 				<div
 					className="todo-goals-header"
 					role="button"
@@ -559,54 +565,54 @@ export function TodoList({
 				<div className={`todo-goals-body${goalsExpanded ? " expanded" : ""}`}>
 					<div className="todo-goals-collapse-wrapper">
 						<div className="todo-goals-inner">
-						{goals.map((goal) => (
-							<div
-								key={goal.id}
-								className={`todo-check-item${goal.checked ? " checked" : ""}`}
-							>
-								<label className="todo-check-toggle">
-									<input
-										type="checkbox"
-										checked={goal.checked}
-										onChange={() => toggleGoal(goal.id)}
-									/>
-									<span className="todo-check-circle" />
-								</label>
-								{editingId === goal.id ? (
-									<input
-										ref={editInputRef}
-										className="todo-edit-input"
-										value={editValue}
-										onChange={(e) => setEditValue(e.target.value)}
-										onKeyDown={(e) => {
-											if (e.key === "Enter") commitGoalEdit(goal.id);
-											else if (e.key === "Escape") setEditingId(null);
-										}}
-										onBlur={() => commitGoalEdit(goal.id)}
-									/>
-								) : (
-									<span
-										className="todo-check-text"
-										role="textbox"
-										tabIndex={0}
-										onClick={() => startEditing(goal.id, goal.text)}
-										onKeyDown={(e) => {
-											if (e.key === "Enter") startEditing(goal.id, goal.text);
-										}}
-									>
-										{goal.text}
-									</span>
-								)}
-								<button
-									type="button"
-									className="todo-remove-btn"
-									onClick={() => removeGoal(goal.id)}
-									aria-label="Remove goal"
+							{goals.map((goal) => (
+								<div
+									key={goal.id}
+									className={`todo-check-item${goal.checked ? " checked" : ""}`}
 								>
-									<FontAwesomeIcon icon={faXmark} />
-								</button>
-							</div>
-						))}
+									<label className="todo-check-toggle">
+										<input
+											type="checkbox"
+											checked={goal.checked}
+											onChange={() => toggleGoal(goal.id)}
+										/>
+										<span className="todo-check-circle" />
+									</label>
+									{editingId === goal.id ? (
+										<input
+											ref={editInputRef}
+											className="todo-edit-input"
+											value={editValue}
+											onChange={(e) => setEditValue(e.target.value)}
+											onKeyDown={(e) => {
+												if (e.key === "Enter") commitGoalEdit(goal.id);
+												else if (e.key === "Escape") setEditingId(null);
+											}}
+											onBlur={() => commitGoalEdit(goal.id)}
+										/>
+									) : (
+										<span
+											className="todo-check-text"
+											role="textbox"
+											tabIndex={0}
+											onClick={() => startEditing(goal.id, goal.text)}
+											onKeyDown={(e) => {
+												if (e.key === "Enter") startEditing(goal.id, goal.text);
+											}}
+										>
+											{goal.text}
+										</span>
+									)}
+									<button
+										type="button"
+										className="todo-remove-btn"
+										onClick={() => removeGoal(goal.id)}
+										aria-label="Remove goal"
+									>
+										<FontAwesomeIcon icon={faXmark} />
+									</button>
+								</div>
+							))}
 						</div>
 						<div className="todo-add-row">
 							<input
