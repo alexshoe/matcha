@@ -17,6 +17,7 @@
 		"@fortawesome/react-fontawesome": "^3.2.0",
 		"@matcha/core": "workspace:*",
 		"@matcha/ui": "workspace:*",
+		"@supabase/supabase-js": "^2.97.0",
 		"@tauri-apps/api": "^2",
 		"@tauri-apps/plugin-dialog": "^2.6.0",
 		"@tauri-apps/plugin-fs": "^2.4.5",

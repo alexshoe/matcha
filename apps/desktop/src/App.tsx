@@ -95,6 +95,7 @@ function App() {
 
 	// ── Modal open flags ──
 	const [aboutOpen, setAboutOpen] = useState(false);
+	const [aboutInitialView, setAboutInitialView] = useState<"about" | "bugReport" | "viewBugs">("about");
 	const [accountOpen, setAccountOpen] = useState(false);
 	const [settingsOpen, setSettingsOpen] = useState(false);
 
@@ -1361,10 +1362,12 @@ function App() {
 				onSetSidebarFocused={setSidebarFocused}
 				onRenameNote={renameNote}
 				onContextMenu={setContextMenu}
-				email={user?.email ?? ""}
+				userRole={userRole}
 				onOpenAccount={() => setAccountOpen(true)}
-				onOpenAbout={() => setAboutOpen(true)}
+				onOpenAbout={() => { setAboutInitialView("about"); setAboutOpen(true); }}
 				onOpenSettings={() => setSettingsOpen(true)}
+				onReportBug={() => { setAboutInitialView("bugReport"); setAboutOpen(true); }}
+				onViewBugReports={() => { setAboutInitialView("viewBugs"); setAboutOpen(true); }}
 				onLogOut={async () => {
 					if (activeSupabase.current) {
 						await activeSupabase.current.auth.signOut();
@@ -1456,11 +1459,11 @@ function App() {
 
 			{aboutOpen && (
 				<AboutModal
-					userRole={userRole}
 					supabaseClient={activeSupabase.current}
 					user={user}
 					onClose={() => setAboutOpen(false)}
 					onToast={showToast}
+					initialView={aboutInitialView}
 				/>
 			)}
 

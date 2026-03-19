@@ -12,6 +12,8 @@ import {
 	faUser,
 	faRightFromBracket,
 	faWandMagicSparkles,
+	faBug,
+	faEye,
 } from "@fortawesome/free-solid-svg-icons";
 import type { Note, SharedNoteEntry } from "@matcha/core";
 import { extractPreview } from "@matcha/core";
@@ -54,9 +56,12 @@ interface SidebarProps {
 	onContextMenu: (
 		menu: { x: number; y: number; noteId: string } | null,
 	) => void;
+	userRole: string;
 	onOpenAccount: () => void;
 	onOpenAbout: () => void;
 	onOpenSettings: () => void;
+	onReportBug: () => void;
+	onViewBugReports: () => void;
 	onLogOut: () => void;
 	renamingId: string | null;
 	renameValue: string;
@@ -112,9 +117,12 @@ export function Sidebar({
 	onSetSidebarFocused,
 	onRenameNote,
 	onContextMenu,
+	userRole,
 	onOpenAccount,
 	onOpenAbout,
 	onOpenSettings,
+	onReportBug,
+	onViewBugReports,
 	onLogOut,
 	renamingId,
 	renameValue,
@@ -515,6 +523,34 @@ export function Sidebar({
 								/>
 								<span>About</span>
 							</button>
+							<button
+								className="avatar-dropdown-item"
+								onClick={() => {
+									onReportBug();
+									setAvatarDropdownOpen(false);
+								}}
+							>
+								<FontAwesomeIcon
+									icon={faBug}
+									className="avatar-dropdown-item-icon"
+								/>
+								<span>Report a Bug</span>
+							</button>
+							{userRole === "Admin" && (
+								<button
+									className="avatar-dropdown-item"
+									onClick={() => {
+										onViewBugReports();
+										setAvatarDropdownOpen(false);
+									}}
+								>
+									<FontAwesomeIcon
+										icon={faEye}
+										className="avatar-dropdown-item-icon"
+									/>
+									<span>View Bug Reports</span>
+								</button>
+							)}
 							<div className="avatar-dropdown-separator" />
 							<button
 								className="avatar-dropdown-item avatar-dropdown-item--danger"
