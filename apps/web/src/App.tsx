@@ -22,6 +22,7 @@ import {
 	supabase,
 	deleteAllNoteImages,
 	deleteAllNoteFiles,
+	deleteAllNoteAttachments,
 	extractPreview,
 	extractAllText,
 	isNoteEmpty,
@@ -945,16 +946,21 @@ function App() {
 
 		const db = activeSupabase.current;
 		if (db) {
+			// Delete storage objects before the note row so ON DELETE CASCADE
+			// doesn't remove attachment rows before we can query them.
+			await deleteAllNoteAttachments(db, id);
+			if (user) {
+				// Fallback: also clean up via storage.list in case any files
+				// were uploaded before the attachments table existed.
+				deleteAllNoteImages(db, user.id, id);
+				deleteAllNoteFiles(db, user.id, id);
+			}
 			db.from("notes")
 				.delete()
 				.eq("id", id)
 				.then(({ error }) => {
 					if (error) console.warn("Supabase delete error:", error.message);
 				});
-			if (user) {
-				deleteAllNoteImages(db, user.id, id);
-				deleteAllNoteFiles(db, user.id, id);
-			}
 		}
 	}
 
@@ -1054,16 +1060,17 @@ function App() {
 		if (!isPending) {
 			const db = activeSupabase.current;
 			if (db) {
+				await deleteAllNoteAttachments(db, prevId);
+				if (user) {
+					deleteAllNoteImages(db, user.id, prevId);
+					deleteAllNoteFiles(db, user.id, prevId);
+				}
 				db.from("notes")
 					.delete()
 					.eq("id", prevId)
 					.then(({ error }) => {
 						if (error) console.warn("Supabase delete error:", error.message);
 					});
-				if (user) {
-					deleteAllNoteImages(db, user.id, prevId);
-					deleteAllNoteFiles(db, user.id, prevId);
-				}
 			}
 		}
 	}

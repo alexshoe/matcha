@@ -16,6 +16,15 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as
 //     created_at  bigint  not null,
 //     updated_at  bigint  not null
 //   );
+//   create table attachments (
+//     id              uuid        primary key default gen_random_uuid(),
+//     note_id         text        not null references notes(id) on delete cascade,
+//     user_id         uuid        not null references auth.users(id) on delete cascade,
+//     storage_bucket  text        not null,
+//     storage_path    text        not null,
+//     url             text        not null,
+//     created_at      timestamptz not null default now()
+//   );
 export const supabase =
   supabaseUrl && supabaseAnonKey
     ? createClient(supabaseUrl, supabaseAnonKey)
